@@ -1,0 +1,317 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<style>
+    .layui-table td.tdscore {
+        width: 60px;
+        padding-left: 0px;
+        padding-right: 0px;
+        text-align: center;
+        padding: 0px;
+    }
+
+        .layui-table td.tdscore input {
+            border: 1px solid #fff;
+            text-align: center;
+            padding-left: 0px;
+        }
+</style>
+
+<form class="layui-form layui-form-pane" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">运输月度考核内容</div>
+        <div class="layui-card-body">
+            <input type="hidden" id="hdAdjunctList" name="AdjunctList" />
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">项目</th>
+                            <th>考核指标</th>
+                            <th>权重</th>
+                            <th>考核依据及评分标准</th>
+                            <th>异常状态</th>
+                            <th>得分</th>
+                        </tr>
+                    </thead>
+                    <tbody id="CompnentList" style="min-height:400px;"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" style="text-align:right;">
+                                得分总计：<span id="hdtotalscore">0</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr class="comscores">
+                        <td>{{c.ProjectName}}</td>
+                        <td>{{c.CheckIndex}}</td>
+                        <td>{{c.Weight}}</td>
+                        <td>{{c.CheckStandard}}</td>
+                        <td><input data-checkcomponentid="{{c.CheckComponentId}}" type="checkbox" lay-skin="switch" lay-filter="normstate" class="txtNormState" lay-text="有|无"><input type="hidden" value="0" /></td>
+                        <td class="tdscore"><input data-checkcomponentid="{{c.CheckComponentId}}" data-project="{{c.Project}}" class="layui-input iScore" lay-verify="required" value="" /></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <input type="hidden" id="hdTemAdjunctList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>附件名称</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="FileList"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.FileName}}</td>
+                        <td>{{c.FileUrl}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delFileList('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<input id="hdCheckFromId" type="hidden" value="@ViewBag.CheckFromId" />
+<input id="hdCheckId" type="hidden" value="@ViewBag.CheckId" />
+@*<input id="hdUrl" type="hidden" value="@ViewBag.url" />*@
+
+@section scripts{
+    <script>
+        // 附件List
+        var fileList = [];
+
+        // 附件上传
+        function uploadFiles() {
+            $("#FileList").html(template('temfilelist', { list: fileList }));
+            $("#hdTemAdjunctList").val(JSON.stringify(fileList));
+        }
+
+        // 附件删除
+        function delFileList(ids) {
+            var tem = [];
+            for (var i in fileList) {
+                if (fileList[i].id != ids) {
+                    tem.push(fileList[i]);
+                }
+            }
+
+            fileList = tem;
+
+            // 附件上传
+            uploadFiles();
+        }
+
+        // 附件名称编辑
+        function setAdjunctName(ids, names) {
+            for (var i in fileList) {
+                if (fileList[i].id == ids) {
+                    fileList[i].FileName = names;
+                }
+            }
+            $("#hdTemAdjunctList").val(JSON.stringify(fileList));
+        }
+
+        // 附件下载
+        function downFile(ids) {
+            for (var i in fileList) {
+                if (fileList[i].id == ids) {
+                    location.href = '/index/down?url=' + fileList[i].FileUrl + "&name=" + fileList[i].FileName + "&ext=" + fileList[i].ext; 
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开关
+            form.on('switch(normstate)', function (data) {
+                var checkIfKey = data.othis;
+                var parentTd = checkIfKey.parents("td");
+                parentTd.find(('input:eq(1)')).val(this.checked ? "1" : "0");
+            });
+
+            // 得分框blur事件
+            $(document).on('blur', '.iScore', function () {
+                var val = $(this).val();
+
+                if (!val) {
+                    TotalScore();
+                    return false;
+                }
+
+                if (isNaN(val)) {
+                    layui.layer.msg('请输入数字格式分数！');
+                    $(this).val("");
+                    TotalScore();
+                    return false;
+                }
+
+                // 计算得分
+                TotalScore();
+            });
+
+            // 保存按钮
+            form.on('submit(btnSave)', function (data) {
+                data.field.ScoreList = ContentScore();
+                data.field.TotalScore = $("#hdtotalscore").html();
+                data.field.AdjunctList = $("#hdTemAdjunctList").val();
+                data.field.CheckId = $("#hdCheckId").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraMonthCheckContent/AddContentScoreList",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            top.layui.layer.msg('考核信息保存成功！');
+                            location.href = '/Tra/TraMonthCheck/Index';
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('考核信息保存失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回事件
+            $(document).on('click', '#btnGoBack', function () {
+                //top.layui.layer.close(top.window.topdialog);
+                location.href = '/Tra/TraMonthCheck/Index';
+            });
+        });
+
+        // 文件上传弹窗（新增）
+        function UploadFiles() {
+            top.window.AdjunctDialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '文件上传',
+                content: '/Tra/TraMonthCheckContent/ContentFile?url=/Tra/TraMonthCheck/Index&tId=' + $("#hdCheckFromId").val(),
+                area: ['450px', '300px'],
+            });
+        }
+
+        // 文件上传重复判断(新增)
+        function isHasAdjunctName(fns) {
+            for (var i in fileList) {
+                if (fileList[i].FileName == fns) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 添加新文件(新增)
+        function addNewAdjunct(adjunctName, adjunctPath) { 
+            fileList.push({ id: new Date().getTime(), FileName: adjunctName, FileUrl: adjunctPath });
+
+            // 附件上传
+            uploadFiles();
+        }
+
+        $(function () {
+
+            // 上传事件
+            $(document).on('click', '#btnUpload', function () {
+
+                // 附件上传
+                UploadFiles();
+            });
+
+            // 查询评价内容
+            GetCompnentList();
+        });
+
+        // 查询评价内容
+        function GetCompnentList() {
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckContent/CompnentList",
+                data: { checkFromId: $("#hdCheckFromId").val() },
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    $("#CompnentList").html(template('temslist', { list: data }));
+                }
+            });
+        }
+
+        // 内容评分List
+        function ContentScore() {
+            var tempScoreList = [];
+            $(".iScore").each(function () {
+                if ($(this).val()) {
+                    tempScoreList.push({ CheckComponentId: $(this).data("checkcomponentid"), Score: parseFloat($(this).val()), NormState: "" });
+                }
+            });
+
+            for (var i in tempScoreList) {
+                $(".txtNormState").each(function () {
+                    if (tempScoreList[i].CheckComponentId == $(this).data("checkcomponentid")) {
+                        var parentTd = $(this).parents("td");
+                        tempScoreList[i].NormState = parentTd.find(('input:eq(1)')).val();
+                    }
+                });
+            }
+
+            return JSON.stringify(tempScoreList);
+        }
+
+        // 计算总得分
+        function TotalScore() {
+            var totalScore = 0;
+
+            $(".iScore").each(function () {
+
+                var Project = $(this).data("project");
+
+                // 考核得分等于=基本项+加分项+其他项-扣分项
+                // 项目：0-基础项；1-加分项；2-扣分项；3-其他项
+                if (!isNaN($(this).val()) && $(this).val().trim() != "") {
+                    if (Project == 2) {
+                        totalScore -= parseFloat($(this).val());
+                    }
+                    else {
+                        totalScore += parseFloat($(this).val());
+                    }
+                }
+            });
+
+            $("#hdtotalscore").html(totalScore);
+        }
+    </script>
+}

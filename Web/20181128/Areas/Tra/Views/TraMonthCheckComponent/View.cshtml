@@ -1,0 +1,560 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraMonthCheckComponentModel
+<div class="layui-card">
+    <div class="layui-card-header">绩效考核元件编辑</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Tra/TraMonthCheckComponent/EditMonthCheckComponent" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">元件名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtCheckComponentName" name="CheckComponentName" value="@Model.CheckComponentName" type="text" maxlength="100" class="layui-input" lay-verify="required" disabled>
+                </div>
+                <input name="CheckComponentId" type="hidden" value="@Model.CheckComponentId" />
+                <input name="CheckComponentNumber" type="hidden" value="@Model.CheckComponentNumber" />
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">考核类型</label>
+                <div class="layui-input-inline">
+                    <select id="selCheckComponentType" name="CheckComponentType" lay-verify="required" class="select" disabled>
+                        <option value="">请选择</option>
+                        <option value="0">调拨</option>
+                        <option value="1">运输(干线)</option>
+                        <option value="2">运输(配送)</option>
+                    </select>
+                    <input id="hdCheckComponentType" type="hidden" value="@Model.CheckComponentType" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">项目</label>
+                <div class="layui-input-inline">
+                    <select id="selProject" name="Project" lay-verify="required" lay-filter="project" class="select" disabled>
+                        <option value="">请选择</option>
+                        <option value="0">基础项</option>
+                        <option value="1">加分项</option>
+                        <option value="2">扣分项</option>
+                        <option value="3">其他项</option>
+                    </select>
+                    <input id="hdProject" type="hidden" value="@Model.Project" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">权重</label>
+                <div class="layui-input-inline">
+                    <input id="txtWeight" name="Weight" value="@Model.Weight" type="text" maxlength="10" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">最小得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtMinScore" name="MinScore" value="@Model.MinScore" type="text" maxlength="4" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">最大得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtMaxScore" name="MaxScore" value="@Model.MaxScore" type="text" maxlength="4" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">考核指标</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCheckIndex" name="CheckIndex" lay-verify="required" maxlength="100" class="layui-textarea" style="height:60px;" disabled>@Model.CheckIndex</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">考核标准</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCheckStandard" name="CheckStandard" lay-verify="required" maxlength="100" class="layui-textarea" style="height:60px;" disabled>@Model.CheckStandard</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" lay-verify="required" maxlength="100" class="layui-textarea" style="height:60px;" disabled>@Model.Remark</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">公式计算</label>
+                <div class="layui-input-block">
+                    <input @(Html.Raw(Model.IsFormula == 1 ? "checked" : "")) type="checkbox" lay-skin="switch" lay-filter="isFormula" lay-text="是|否" disabled>
+                    <input id="hdIsFormula" name="IsFormula" type="hidden" value="@Model.IsFormula" />
+                </div>
+            </div>
+            <div id="divFormula">
+                <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">公式</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selFormula" name="Formula" lay-verify="isformula" lay-filter="formula" class="select" disabled>
+                            <option value="">请选择</option>
+                            <option value="0">参数1*分子*参数2+参数3</option>
+                            <option value="1">参数1（分母*参数2+分子*参数3）/分母+参数4</option>
+                        </select>
+                    </div>
+                    <input id="hdFormula" type="hidden" value="@Model.Formula" />
+                </div>
+                <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">参数数量</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <input id="txtParameterCount" name="ParameterCount" value="@Model.ParameterCount" type="text" class="layui-input" lay-verify="isformula" disabled>
+                    </div>
+                </div>
+                <div id="divParameter1" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">公式参数1</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <input id="txtParameter1" name="Parameter1" value="@Model.Parameter1" type="text" class="layui-input" lay-verify="parameter" disabled>
+                    </div>
+                </div>
+                <div id="divParameter2" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">公式参数2</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <input id="txtParameter2" name="Parameter2" value="@Model.Parameter2" type="text" class="layui-input" lay-verify="parameter" disabled>
+                    </div>
+                </div>
+                <div id="divParameter3" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">公式参数3</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <input id="txtParameter3" name="Parameter3" value="@Model.Parameter3" type="text" class="layui-input" lay-verify="parameter" disabled>
+                    </div>
+                </div>
+                <div id="divParameter4" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">公式参数4</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <input id="txtParameter4" name="Parameter4" value="@Model.Parameter4" type="text" class="layui-input" lay-verify="parameter" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分子取值方式</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selMoleculeType" name="MoleculeType" lay-verify="isformula" class="select" disabled>
+                            <option value="">请选择</option>
+                            <option value="0">无</option>
+                            <option value="1">求和(函数sum)</option>
+                            <option value="2">汇总(函数count)</option>
+                            <option value="3">取列</option>
+                        </select>
+                        <input id="hdMoleculeType" type="hidden" value="@Model.MoleculeType" />
+                    </div>
+                </div>
+                <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分子取值表列</label>
+                    <div class="layui-input-inline" style="width:245px;">
+                        <input id="txtMoleculeSurface" type="text" value="@ViewBag.Molecule" class="layui-input" lay-verify="isformula" disabled>
+                        <input id="hdMoleculeSurface" name="MoleculeSurface" value="@Model.MoleculeSurface" type="hidden">
+                    </div> 
+                </div>
+                <div id="divMoleculeCondition1" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分子条件一</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selMoleculeCondition1" name="MoleculeCondition1" lay-verify="isformula" lay-filter="moleculeCondition1" class="select" disabled></select>
+                        <input id="hdMoleculeCondition1" type="hidden" value="@Model.MoleculeCondition1" />
+                    </div>
+                </div>
+                <div id="divMoleculeCondition2" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分子条件二</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selMoleculeCondition2" name="MoleculeCondition2" lay-filter="moleculeCondition2" class="select" disabled></select>
+                        <input id="hdMoleculeCondition2" type="hidden" value="@Model.MoleculeCondition2" />
+                    </div>
+                </div>
+                <div id="divMoleculeCondition3" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分子条件三</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selMoleculeCondition3" name="MoleculeCondition3" lay-filter="moleculeCondition3" class="select" disabled></select>
+                        <input id="hdMoleculeCondition3" type="hidden" value="@Model.MoleculeCondition3" />
+                    </div>
+                </div>
+                <div id="divMoleculeCondition4" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分子条件四</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selMoleculeCondition4" name="MoleculeCondition4" lay-filter="moleculeCondition4" class="select" disabled></select>
+                        <input id="hdMoleculeCondition4" type="hidden" value="@Model.MoleculeCondition4" />
+                    </div>
+                </div>
+                <div id="divDenominatorType" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分母取值方式</label>
+                    <div class="layui-input-inline" style="width:300px;">
+                        <select id="selDenominatorType" name="DenominatorType" lay-verify="formula0" class="select" disabled>
+                            <option value="">请选择</option>
+                            <option value="0">无</option>
+                            <option value="1">求和(函数sum)</option>
+                            <option value="2">汇总(函数count)</option>
+                            <option value="3">取列</option>
+                        </select>
+                        <input id="hdDenominatorType" type="hidden" value="@Model.DenominatorType" />
+                    </div>
+                </div>
+                <div id="divDenominatorColumn" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分母取值表列</label>
+                    <div class="layui-input-inline" style="width:245px">
+                        <input id="txtDenominatorColumn" type="text" value="@ViewBag.Denominator" class="layui-input" lay-verify="formula0" lay-filter="denominator" disabled>
+                        <input id="hdDenominatorColumn" name="DenominatorColumn" type="hidden" value="@Model.DenominatorColumn">
+                    </div> 
+                </div>
+                <div id="divDenominatorCondition1" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分母条件一</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selDenominatorCondition1" name="DenominatorCondition1" lay-verify="denominator" lay-filter="denominatorCondition1" class="select" disabled></select>
+                        <input id="hdDenominatorCondition1" type="hidden" value="@Model.DenominatorCondition1" />
+                    </div>
+                </div>
+                <div id="divDenominatorCondition2" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分母条件二</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selDenominatorCondition2" name="DenominatorCondition2" lay-filter="denominatorCondition2" class="select" disabled></select>
+                        <input id="hdDenominatorCondition2" type="hidden" value="@Model.DenominatorCondition2" />
+                    </div>
+                </div>
+                <div id="divDenominatorCondition3" class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label">分母条件三</label>
+                    <div class="layui-input-inline" style="width:300px">
+                        <select id="selDenominatorCondition3" name="DenominatorCondition3" lay-filter="denominatorCondition3" class="select" disabled></select>
+                        <input id="hdDenominatorCondition3" type="hidden" value="@Model.DenominatorCondition3" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+@section scripts{
+    <script>
+
+        // 分子/分母条件个数
+        var ConditionCount = 0;
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开关
+            form.on('switch(isFormula)', function (data) {
+                $("#hdIsFormula").val(this.checked ? "1" : "0");
+
+                if ($("#hdIsFormula").val() == 1) {
+                    $("#divFormula").show();
+
+                    // 设置默认值
+                    TypeSelected();
+
+                    $("#selFormula").val("")
+                    $("#txtParameterCount").val("");
+
+                    MoleculeHide();
+                    DenominatorHide();
+                    ParameterHide();
+
+                    layui.form.render('select');
+                } else if ($("#hdIsFormula").val() == 0) {
+                    $("#divFormula").hide();
+
+                    // 设置默认值
+                    $("#selMoleculeType").val("0");
+                    $("#txtMoleculeSurface").val("");
+                    $("#hdMoleculeSurface").val("0");
+                    $("#selDenominatorType").val("0");
+                    $("#txtDenominatorColumn").val("");
+                    $("#hdDenominatorColumn").val("0");
+                    MoleculeSelected();
+                    DenominatorSelected();
+                    $("#selFormula").val("0")
+                    $("#txtParameterCount").val("0");
+                    $("#txtParameter1").val("0");
+                    $("#txtParameter2").val("0");
+                    $("#txtParameter3").val("0");
+                    $("#txtParameter4").val("0");
+
+                    layui.form.render('select');
+                }
+            });
+             
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraMonthCheckComponent/Index';
+            });
+        });
+
+        $(function () {
+            $("#selCheckComponentType").val($("#hdCheckComponentType").val());
+            $("#selProject").val($("#hdProject").val());
+
+            // 公式计算
+            if ($("#hdIsFormula").val() == 0) {
+                $("#divFormula").hide();
+            }
+            else {
+                GetWhereList("Molecule");
+
+                $("#selFormula").val($("#hdFormula").val());
+
+                // 公式参数 
+                if ($("#selFormula").val() == 0) {
+                    $("#divParameter1").show();
+                    $("#divParameter2").show();
+                    $("#divParameter3").show();
+                    $("#divParameter4").hide();
+
+                    $("#divDenominatorType").hide();
+                    $("#divDenominatorColumn").hide();
+
+                    DenominatorHide();
+                }
+                else if ($("#selFormula").val() == 1) {
+                    $("#divParameter1").show();
+                    $("#divParameter2").show();
+                    $("#divParameter3").show();
+                    $("#divParameter4").show();
+
+                    GetWhereList("Denominator");
+                }
+
+                // 页面加载下拉列表赋值
+                $("#selMoleculeType").val($("#hdMoleculeType").val());
+                $("#selMoleculeCondition1").val($("#hdMoleculeCondition1").val());
+                $("#selMoleculeCondition2").val($("#hdMoleculeCondition2").val());
+                $("#selMoleculeCondition3").val($("#hdMoleculeCondition3").val());
+                $("#selMoleculeCondition4").val($("#hdMoleculeCondition4").val());
+                $("#selDenominatorType").val($("#hdDenominatorType").val());
+                $("#selDenominatorCondition1").val($("#hdDenominatorCondition1").val());
+                $("#selDenominatorCondition2").val($("#hdDenominatorCondition2").val());
+                $("#selDenominatorCondition3").val($("#hdDenominatorCondition3").val());
+
+                layui.use('form', function () {
+                    layui.form.render("select");
+                });
+            }
+        });
+
+        // 分子取值列
+        window.MoleculeColumn = [];
+
+        // 分母取值列
+        window.DenominatorColumn = [];
+
+        // 取值条件
+        function GetWhereList(type) {
+
+            var number = "";
+            var checkComponentType = -1;
+            var project = -1;
+
+            if (type == "Molecule") {
+                // 分子取值列
+                window.MoleculeColumn = [];
+                MoleculeColumn.push({ id: '0', name: "无" });
+                // MoleculeColumn.push({ id: '0', name: "请选择" });
+                number = $("#hdMoleculeSurface").val();
+            }
+            else if (type == "Denominator") {
+                // 分母取值列
+                window.DenominatorColumn = [];
+                DenominatorColumn.push({ id: '0', name: "无" });
+                // DenominatorColumn.push({ id: '0', name: "请选择" });
+                number = $("#hdDenominatorColumn").val();
+            }
+
+            // 分子取值列/分母取值列number为0
+            if (number == 0) {
+                checkComponentType = $("#selCheckComponentType").val();
+                project = $("#selProject").val();
+            } else {
+                checkComponentType = -1;
+                project = -1;
+            }
+
+            $.ajax({
+                url: '/Tra/TraMonthCheckComponent/MonthCheckWhereList',
+                type: 'POST',
+                async: false,
+                data: {
+                    tCheckComponentType: checkComponentType,
+                    tProject: project,
+                    checkValueNumber: number
+                },
+                datatype: 'json',
+                success: function (data) {
+
+                    // 如果选择是月运营并数据长度大于0
+                    if (number == 0 && data.length > 0) {
+                        ConditionCount = 1;
+                    } else {
+                        ConditionCount = data.length;
+                    }
+
+                    if (data) {
+                        if (type == "Molecule") {
+
+                            MoleculeHide();
+
+                            // 分子条件 隐藏
+                            if (ConditionCount == 0) {
+                            }
+                            else if (ConditionCount == 1) {
+                                $("#divMoleculeCondition1").show();
+                            }
+                            else if (ConditionCount == 2) {
+                                $("#divMoleculeCondition1").show();
+                                $("#divMoleculeCondition2").show();
+                            }
+                            else if (ConditionCount == 3) {
+                                $("#divMoleculeCondition1").show();
+                                $("#divMoleculeCondition2").show();
+                                $("#divMoleculeCondition3").show();
+                            }
+                            else if (ConditionCount >= 4) {
+                                $("#divMoleculeCondition1").show();
+                                $("#divMoleculeCondition2").show();
+                                $("#divMoleculeCondition3").show();
+                                $("#divMoleculeCondition4").show();
+                            }
+                        }
+                        else if (type == "Denominator") {
+
+                            DenominatorHide();
+
+                            // 如果分母条件小于3 隐藏
+                            if (ConditionCount == 0) {
+                            }
+                            else if (ConditionCount == 1) {
+                                $("#divDenominatorCondition1").show();
+                            }
+                            else if (ConditionCount == 2) {
+                                $("#divDenominatorCondition1").show();
+                                $("#divDenominatorCondition2").show();
+                            }
+                            else if (ConditionCount >= 3) {
+                                $("#divDenominatorCondition1").show();
+                                $("#divDenominatorCondition2").show();
+                                $("#divDenominatorCondition3").show();
+                            }
+                        }
+
+                        for (var i in data) {
+                            if (type == "Molecule") {
+                                MoleculeColumn.push({ id: data[i].CheckWhereId, name: data[i].WhereValue });
+                            }
+                            else if (type == "Denominator") {
+                                DenominatorColumn.push({ id: data[i].CheckWhereId, name: data[i].WhereValue });
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (type == "Molecule") {
+                $("#selMoleculeCondition1").html(template('temdictlist', { list: MoleculeColumn }));
+                $("#selMoleculeCondition2").html(template('temdictlist', { list: MoleculeColumn }));
+                $("#selMoleculeCondition3").html(template('temdictlist', { list: MoleculeColumn }));
+                $("#selMoleculeCondition4").html(template('temdictlist', { list: MoleculeColumn }));
+
+                MoleculeSelected();
+            }
+            else if (type == "Denominator") {
+                $("#selDenominatorCondition1").html(template('temdictlist', { list: DenominatorColumn }));
+                $("#selDenominatorCondition2").html(template('temdictlist', { list: DenominatorColumn }));
+                $("#selDenominatorCondition3").html(template('temdictlist', { list: DenominatorColumn }));
+
+                DenominatorSelected();
+            }
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        var flag = "";
+
+        // 设置取值表列
+        function setinfo(checkValueNumber, checkValue) {
+            if (flag == "Molecule") {
+                $("#hdMoleculeSurface").val(checkValueNumber);
+                $("#txtMoleculeSurface").val(checkValue);
+                GetWhereList(flag);
+            }
+            else if (flag == "Denominator") {
+                $("#hdDenominatorColumn").val(checkValueNumber);
+                $("#txtDenominatorColumn").val(checkValue);
+                GetWhereList(flag);
+            }
+        }
+
+        // 选择取值表列
+        function ChooseColumn(type) {
+            var title = "";
+            var number = 0;
+            flag = type;
+            if (type == "Molecule") {
+                title = "选择分子取值表列";
+            }
+            else if (type = "Denominator") {
+                title = "选择分母取值表列";
+            }
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: title,
+                content: '/Tra/TraMonthCheckValue/Index?url=/Tra/TraMonthCheckComponent/Index',
+                area: ['600px', '500px'],
+            });
+        }
+
+        // 参数隐藏
+        function ParameterHide() {
+            $("#divParameter1").hide();
+            $("#divParameter2").hide();
+            $("#divParameter3").hide();
+            $("#divParameter4").hide();
+        }
+
+        // 分子条件隐藏
+        function MoleculeHide() {
+            $("#divMoleculeCondition1").hide();
+            $("#divMoleculeCondition2").hide();
+            $("#divMoleculeCondition3").hide();
+            $("#divMoleculeCondition4").hide();
+        }
+
+        // 分母条件隐藏
+        function DenominatorHide() {
+            $("#divDenominatorCondition1").hide();
+            $("#divDenominatorCondition2").hide();
+            $("#divDenominatorCondition3").hide();
+        }
+
+        // 分子条件默认值
+        function MoleculeSelected() {
+            $("#selMoleculeCondition1").val("0");
+            $("#selMoleculeCondition2").val("0");
+            $("#selMoleculeCondition3").val("0");
+            $("#selMoleculeCondition4").val("0");
+        }
+
+        // 分母条件默认值
+        function DenominatorSelected() {
+            $("#selDenominatorCondition1").val("0");
+            $("#selDenominatorCondition2").val("0");
+            $("#selDenominatorCondition3").val("0");
+        }
+
+        // 分子/分母取值方式/表列默认值
+        function TypeSelected() {
+            $("#selMoleculeType").val("");
+            $("#txtMoleculeSurface").val("");
+            $("#hdMoleculeSurface").val("");
+            $("#selDenominatorType").val("");
+            $("#txtDenominatorColumn").val("");
+            $("#hdDenominatorColumn").val("");
+        }
+
+    </script>
+}

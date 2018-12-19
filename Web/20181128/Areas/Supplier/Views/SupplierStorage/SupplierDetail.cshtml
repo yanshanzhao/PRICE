@@ -1,0 +1,165 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                供应商名称：
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" value="" placeholder="供应商名称" class="layui-input">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table" id="cominfos">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">供应商名称</th>
+                        <th>供应商编号</th>
+                        <th>供应商类别</th>
+                        <th>企业性质</th>
+                        <th>证件类型</th>
+                        <th>证件号码</th>
+                        <th>企业地址</th>
+                        <th>联系人</th>
+                        <th>联系人职位</th>
+                        <th>联系电话</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr data-id="{{c.SupplierId}}"
+                    data-suppliertype="{{c.SupplierType}}"
+                    data-enterprisetype="{{c.EnterpriseType}}"
+                    data-paperstype="{{c.PapersType}}"
+                    data-suppliername="{{c.SupplierName}}"
+                    data-suppliernumber="{{c.SupplierNumber}}"
+                    data-suppliertypename="{{c.SupplierTypeName}}"
+                    data-enterprisetypename="{{c.EnterpriseTypeName}}"
+                    data-paperstypename="{{c.PapersTypeName}}"
+                    data-papersnumber="{{c.PapersNumber}}"
+                    data-enterpriseaddresses="{{c.EnterpriseAddresses}}"
+                    data-contactsname="{{c.ContactsName}}"
+                    data-contactsposition="{{c.ContactsPosition}}"
+                    data-contactsphone="{{c.ContactsPhone}}">
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.SupplierNumber}}</td>
+                    <td>{{c.SupplierTypeName}}</td>
+                    <td>{{c.EnterpriseTypeName}}</td>
+                    <td>{{c.PapersTypeName}}</td>
+                    <td>{{c.PapersNumber}}</td>
+                    <td>{{c.EnterpriseAddresses}}</td>
+                    <td>{{c.ContactsName}}</td>
+                    <td>{{c.ContactsPosition}}</td>
+                    <td>{{c.ContactsPhone}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            // 查询
+            inits();
+
+            // tr点击事件
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo(
+                    $(this).data("id"), $(this).data("suppliertype"), $(this).data("enterprisetype"), $(this).data("paperstype"), $(this).data("suppliername"), $(this).data("suppliernumber"), $(this).data("suppliertypename"), $(this).data("enterprisetypename"), $(this).data("paperstypename"), $(this).data("papersnumber"), $(this).data("enterpriseaddresses"), $(this).data("contactsname"), $(this).data("contactsposition"), $(this).data("contactsphone")
+                    );
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () { 
+                inits();
+            });
+
+        });
+         
+        // 查询总记录数
+        function inits() {
+
+            // 总记录数
+            var flagCount = 0;
+
+            // 页面索引
+            pageIndex = 0; 
+
+            // 等待时显示
+            $("#userlist").html("数据加载中……");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Supplier/SupplierStorage/SupplierAmount",
+                async: false,
+                data: { supplierName: $("#txtSupplierName").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Supplier/SupplierStorage/SupplierList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+} 

@@ -1,0 +1,155 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-header">添加客户</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">企业名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="CompanyName" maxlength="100" lay-verify="required" placeholder="" class="layui-input">
+                   
+                </div>
+            </div>
+            @*<div class="layui-form-item">
+                <label class="layui-form-label">企业编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="CompanyNo" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>*@
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="EmailAddress" maxlength="100" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">手机号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="MobileNumber" maxlength="100" placeholder="" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="PhoneNumber" maxlength="100" placeholder="" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">其他联系方式</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="OtherContact" maxlength="100" placeholder="" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">地址</label>
+                    <div class="layui-input-inline">
+                        <select id="Province" name="Province" class="select" lay-filter="org_province"></select>
+                    </div><div class="layui-input-inline">
+                        <select id="City" name="City" class="select" lay-filter="org_city"></select>
+                    </div><div class="layui-input-inline">
+                        <select id="Village" name="Village" lay-filter="org_area" class="select"></select>
+                    </div>
+                    <input id="hdProvince" type="hidden" />
+                    <input id="hdCity" type="hidden" />
+                    <input id="hdArea" type="hidden" />
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">详细地址</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="Address" maxlength="100" placeholder="" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">公司简介</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="Expertise" maxlength="300" placeholder="" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="state" lay-text="启用|禁用">
+                    <input id="hdstate" type="hidden" name="State" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                <div style="margin-left:110px;margin-top:30px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+<script src="~/assets/js/PCASClass.js"></script>
+@section scripts{
+    <script>
+        var mypcas = new PCAS("Province,请选择省份", "City,请选择城市", "Village,请选择县区");
+            layui.use(['form', 'element', ], function () {
+                var form = layui.form, ele = layui.element;
+
+                form.on('switch(state)', function (data) {
+                    $("#hdstate").val(this.checked ? "1" : "0");
+                });
+
+                var province;
+                form.on('select(org_province)', function (data) {
+                    province = data.value;
+                    mypcas.SetValue(data.value, "", "");
+                    form.render('select');
+                });
+                form.on('select(org_city)', function (data) {
+                    mypcas.SetValue(province, data.value, "");
+                    form.render('select');
+                });
+
+
+                form.on('submit(saveuser)', function (data) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/syscomp/addcomp",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                top.layui.layer.msg('添加成功');
+                                location.href = '/syscomp/index';
+                            }
+                            if (data.flag == "exist") {
+                                top.layui.layer.msg('已存在此企业');
+                            }
+                            if (data.flag == "fail") {
+                                top.layui.layer.msg('添加失败');
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+           
+
+            $(function () {
+                $(document).on('click', '#btnGoBack', function () {
+                    location.href = '/syscomp/index';
+                });
+            });
+
+    </script>
+}

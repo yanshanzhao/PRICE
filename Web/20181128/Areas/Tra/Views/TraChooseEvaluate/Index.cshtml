@@ -1,0 +1,448 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    申请时间：
+                    <div class="layui-input-inline">
+                        <input type="text" name="ApplyTime" lay-verify="required" placeholder="" class="layui-input" id="txtApplyTime">
+                    </div>
+                    &nbsp;&nbsp;
+                    意向供应商：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="" name="SupplierName" class="layui-input" type="text" id="txtSupplierName">
+                    </div>
+                    &nbsp;&nbsp;
+                    评价审核状态：
+                    <div class="layui-input-inline">
+                        <select name="EvaluateState" lay-verify="" placeholder="" class="layui-select" id="txtEvaluateState">
+                            <option></option>
+                            <option value="0">初始状态</option>
+                            <option value="1">审核中</option>
+                            <option value="5">审核通过</option>
+                            <option value="10">驳回</option>
+                            <option value="20">已使用</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    启用招标：
+                    <div class="layui-input-inline">
+                        <select name="IsNotification" lay-verify="" placeholder="" class="layui-select" id="txtIsNotification">
+                            <option></option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>
+                    <br />
+                    <br />
+                    招标状态：
+                    <div class="layui-input-inline">
+                        <select name="NotificationType" lay-verify="" placeholder="" class="layui-select" id="txtNotificationType">
+                            <option></option>
+                            <option value="0">初始</option>
+                            <option value="1">使用</option>
+                            <option value="2">结束</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    是否评价：
+                    <div class="layui-input-inline">
+                        <select name="IsEvaluate" lay-verify="" placeholder="" class="layui-select" id="txtIsEvaluate">
+                            <option></option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div> &nbsp;&nbsp;
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">申请编号</th>
+                                <th>申请时间</th>
+                                <th>评价负责人</th>
+                                <th>评价时间</th>
+                                <th>评价审核状态</th>
+                                <th>意向供应商</th>
+                                <th>意向供应商评分得分</th>
+                                <th>启用招标</th>
+                                <th>招标状态</th>
+                                <th>是否评价</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TraChooseEvaluatelist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.TraChooseNumber}}</td>
+                    <td>{{c.ApplyTime}}</td>
+                    <td>{{c.EvaluateUser}}</td>
+                    <td>{{c.EvaluateTime}}</td>
+                    <td>{{c.EvaluateStateName}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.EvaluateSuppMark}}</td>
+                    <td>{{c.IsNotificationName}}</td>
+                    <td>{{c.NotificationTypeName}}</td>
+                    <td>{{c.IsEvaluateName}}</td>
+                    <td>
+                        {{if c.EvaluateState==0||c.EvaluateState==10}}
+                        <a class="layui-btn layui-btn-sm btnScore" data-id="{{c.TraChooseId}}" data-state="{{c.EvaluateState}}" data-isnotification="{{c.IsNotification}}" data-isevaluate="{{c.IsEvaluate}}" data-notificationtype="{{c.NotificationType}}">
+                            <i class="iconfont icon-edit"></i>评分
+                        </a>
+                        {{/if}}
+                        {{if ((c.EvaluateState==0)&&(c.EvaluateSuppMark>0))||((c.EvaluateState==10)&&(c.EvaluateSuppMark>0))}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.TraChooseId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>
+                        {{/if}}
+                        {{if (c.IsEvaluate==1 && c.EvaluateState==0)||c.EvaluateState==10}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.TraChooseId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-isevaluate="{{c.IsEvaluate}}" data-id="{{c.TraChooseId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnTrail" data-id="{{c.TraChooseId}}">
+                            <i class="layui-icon"></i>轨迹
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if c.EvaluateState==0||c.EvaluateState==10}}
+                                <a class="layui-btn layui-btn-sm btnScore" data-id="{{c.TraChooseId}}" data-state="{{c.EvaluateState}}" data-isnotification="{{c.IsNotification}}" data-isevaluate="{{c.IsEvaluate}}" data-notificationtype="{{c.NotificationType}}">
+                                    <i class="iconfont icon-edit"></i>评分
+                                </a>
+                                {{/if}}
+                                {{if ((c.EvaluateState==0)&&(c.EvaluateSuppMark>0))||((c.EvaluateState==10)&&(c.EvaluateSuppMark>0))}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.TraChooseId}}">
+                                    <i class="layui-icon"></i>提交
+                                </a>
+                                {{/if}}
+                                {{if (c.IsEvaluate==1 && c.EvaluateState==0)||c.EvaluateState==10}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.TraChooseId}}">
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-isevaluate="{{c.IsEvaluate}}" data-id="{{c.TraChooseId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnTrail" data-id="{{c.TraChooseId}}">
+                                    <i class="layui-icon"></i>轨迹
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证申请时间
+            laydate.render({
+                elem: '#txtApplyTime'
+            });
+
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraChooseEvaluate/Export'
+                    , {
+                        applyTime: $("#txtApplyTime").val()//申请时间
+                      , supplierName: $("#txtSupplierName").val()//意向供应商名称
+                      , evaluateState: $("#txtEvaluateState").val() //评价审核状态
+                      , isNotification: $("#txtIsNotification").val() //启用招标
+                      , notificationType: $("#txtNotificationType").val() //招标状态
+                      , isEvaluate: $("#txtIsEvaluate").val() //是否评价
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=选用评分表";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //评分按钮
+            $(document).on('click', '.btnScore', function () {
+
+                var tId = $(this).data("id");//仓储供应商选择id
+                var tchoicefromid = $(this).data("choicefromid");//仓储供应商选择id
+                var tisevaluate = $(this).data("isevaluate");//是否评价
+                var tState = $(this).data("state");//评价审核状态
+                var tisnotification = $(this).data("isnotification");//启用招标
+                var tnotificationtype = $(this).data("notificationtype");//招标状态
+                if (tState == 0 || tState == 10) { //评价审核状态为初始和驳回状态的
+                    if (tisnotification == 1 || tnotificationtype == 2) {//如果启用招标为是且招标状态为已结束的才可以评分，
+                        if (tisevaluate == 1) //是否评价为1的是编辑
+                            ModifyData(tId);
+                        else
+                            AddData(tId);//是否评价为0的是新增
+                    }
+                    else if (tisnotification == 0) {//如果启用招标为否
+                        if (tisevaluate == 1) //是否评价为1的是编辑
+                            ModifyData(tId);
+                        else
+                            AddData(tId);//是否评价为0的是新增
+                    }
+                }
+                else if (tState == 1) {
+                    ModifyData(tId);
+                }
+            });
+
+            //提交按钮
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");//运输选择id
+                SubmitData(tId);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//运输选择id
+                DeleteData(tId);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");//运输选择id
+                var tisevaluate = $(this).data("isevaluate");//是否评价
+                ShowData(tId, tisevaluate);
+            });
+
+            // 轨迹
+            $(document).on('click', '.btnTrail', function () {
+                var tId = $(this).data("id");
+                TrailData(tId);
+            });
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChooseEvaluatelist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChooseEvaluate/TraChooseEvaluateCount",
+                async: false,
+                data: {
+                    applyTime: $("#txtApplyTime").val()//申请时间
+                      , supplierName: $("#txtSupplierName").val()//意向供应商名称
+                      , evaluateState: $("#txtEvaluateState").val() //评价审核状态
+                      , isNotification: $("#txtIsNotification").val() //启用招标
+                      , notificationType: $("#txtNotificationType").val() //招标状态
+                      , isEvaluate: $("#txtIsEvaluate").val() //是否评价
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                applyTime: $("#txtApplyTime").val()//申请时间
+                      , supplierName: $("#txtSupplierName").val()//意向供应商名称
+                      , evaluateState: $("#txtEvaluateState").val() //评价审核状态
+                      , isNotification: $("#txtIsNotification").val() //启用招标
+                      , notificationType: $("#txtNotificationType").val() //招标状态
+                      , isEvaluate: $("#txtIsEvaluate").val() //是否评价
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChooseEvaluate/TraChooseEvaluateList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraChooseEvaluatelist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChooseEvaluatelist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 新增
+        function AddData(tId) {
+            location.href = '/Tra/TraChooseEvaluate/Add?tId=' + tId;
+        }
+
+        // 评分
+        function ModifyData(tId) {
+            location.href = '/Tra/TraChooseEvaluate/Edit?tId=' + tId;
+        }
+
+        // 提交按钮
+        function SubmitData(tId) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraChooseEvaluate/SubmitTraChooseEvaluate',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 作废
+        function DeleteData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraChooseEvaluate/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId, tisevaluate) {
+            if (tisevaluate != '1') {
+                top.layer.msg('该行数据未被评价，不能查看！');
+                return;
+            }
+            location.href = '/Tra/TraChooseEvaluate/Check?tId=' + tId;
+        }
+
+        // 轨迹
+        function TrailData(tId) {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '审核轨迹',
+                content: '/Tra/TraSupplierTransit/Trail?tId=' + tId + '&supplierAuditType=5',
+                area: ['700px', '470px'],
+            });
+        }
+
+    </script>
+}

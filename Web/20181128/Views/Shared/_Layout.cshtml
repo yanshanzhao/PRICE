@@ -1,0 +1,419 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>供应商关系管理系统</title>
+    <link href="~/assets/layui/css/layui.css" rel="stylesheet" />
+    @Styles.Render("~/bundles/css/uc")
+    <style>
+        .rightmenu { position: absolute; width: 100px; z-index: 9999; display: none; background-color: #fff; padding: 2px; color: #333; border: 1px solid #eee; border-radius: 2px; cursor: pointer; }
+        .rightmenu li { text-align: center; display: block; height: 35px; line-height: 35px; }
+        .rightmenu li:hover { background-color: #666; color: #fff; }
+
+        .layui-nav-item a{cursor:pointer;}
+
+        .layui-layout-body .layui-header .layui-nav .layui-nav-item a{color:#333;}
+        .layui-layout-admin .layui-logo{border-bottom:3px solid #009688;font-size:18px;line-height:50px;}
+
+        #admin-body .layui-tab{margin:0px;}
+
+        #admin-body .layui-tab .layui-tab-title li { border-top: 2px solid #fff; border-right: 1px solid #f2f2f2;transition:none;-webkit-transition:none;border-left:1px solid #fff;}
+        #admin-body .layui-tab .layui-tab-title li.layui-this { border-top: 2px solid #292B34; background-color: #f6f6f6; border-left:1px solid #009688;border-right:1px solid #009688;}
+        #admin-body .layui-tab .layui-this::after{border-bottom:1px solid #f2f2f2;}
+        #admin-body .layui-tab .layui-tab-content { padding: 0px; }
+
+        #admin-body .layui-tab .layui-tab-title li.first i { display: none; }
+        .navtop .layui-nav-bar{display:none;}
+        .navtop .layui-this { background-color: #009688; color: white; }
+        .layui-layout-body .layui-header .layui-nav.navtop .layui-nav-item.layui-this a{color:white;}
+        .layui-nav-bar, .layui-nav.navtop .layui-this::after { background-color: #009688; }
+
+        #admin-body .layui-tab .layui-tab-title li{border-top:none;}
+        #admin-body .layui-tab .layui-tab-title { border-top: 3px solid #009688;border-color:#009688; }
+        #admin-body .layui-tab .layui-tab-title .layui-this:after{}
+        #admin-body .layui-tab .layui-tab-title li.layui-this { border-top:none; }
+
+        .layui-nav .layui-nav-item{line-height:50px;}
+        .layui-layout-admin .layui-side{top:50px;}
+        .layui-layout-admin .layui-body{top:50px;}
+
+    </style>
+</head>
+<body class="layui-layout-body">
+
+    <ul class="rightmenu">
+        <li data-type="closethis">关闭当前</li>
+        <li data-type="closeall">关闭所有</li>
+    </ul>
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header"  style="background-color:#fff;height:50px;">
+            <div class="layui-logo" style="height:auto;">供应商关系管理系统</div>
+            <!-- 头部区域（可配合layui已有的水平导航） -->
+            <ul class="layui-nav layui-layout-left" style="overflow:hidden;">
+                <li style="line-height:50px;cursor:pointer;">
+                    <a id="adminswitch"><i class="layui-icon layui-icon-shrink-right"></i></a>
+                </li>
+            </ul>
+            <ul class="layui-nav layui-layout-left navtop" id="topnavlist" style="height:50px;padding-left:0px;margin-left:50px;">
+                <li class="layui-nav-item" id="adminswitch"><a href="#">数据加载中</a></li>
+            </ul>
+
+            <script type="text/html" id="temtopnavlist">
+                {{each list as c}}
+                   <li class="layui-nav-item "><a href="#" data-id="{{c.ModuleId}}">{{c.ModuleName}}</a></li>
+                {{/each}}
+            </script>
+
+            <ul class="layui-nav layui-layout-right" style="height:50px;">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <img src="/assets/img/avata.jpg" class="layui-nav-img" id="useravataimgs">
+                        @(HttpContext.Current.User.Identity.Name)
+                    </a>
+                    <dl class="layui-nav-child dluser">
+                        <dd><a  data-url='/index/base' data-title='基本资料' data-id="-100">基本资料</a></dd>
+                        <dd><a id="asetpwd">修改密码</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item"><a  style="padding:0px 3px;"><em onclick="loginout()">退出</em></a></li>
+            </ul>
+        </div>
+
+        <div class="layui-side layui-bg-black" id="admin-side">
+            <div class="layui-side-scroll" id="admin-navbar-side" > 
+
+                <script type="text/html" id="temslidenavlist">
+                    {{each list as c}} 
+                    @*layui-nav-itemed  darksalmon*@
+                    <li class="layui-nav-item">
+                        {{if c.Url}}
+                        <a data-url='{{c.Url}}' data-title='{{c.ModuleName}}' data-id="{{c.ModuleId}}"><span style="font-size:15px;">{{c.ModuleName}}</span></a>
+                        {{else}}
+                          <a href="javascript:;" ><span style="font-size:15px;">{{c.ModuleName}}</span></a>
+                        {{/if}}                      
+                        {{if c.children}}
+                           <dl class="layui-nav-child">
+                             {{each c.children as d}}
+                                {{if d.Url}}
+                                   <dd><a data-url='{{d.Url}}' data-title='{{d.ModuleName}}' data-id="{{d.ModuleId}}"><span style="font-size:14px;">&nbsp;&nbsp;{{d.ModuleName}}</span></a></dd>
+                                {{else}}
+                                   <dd>
+                                       <a href="javascript:;"><span style="font-size:14px;">&nbsp;&nbsp;{{d.ModuleName}}</span></a>
+                                       @*修改时间：20180824 修改人：HDS 修改方式：添加三级菜单*@
+                                       {{if d.children}} 
+                                       <ol class="layui-nav-child" >
+                                           {{each d.children as e}}
+                                           {{if e.Url}}
+                                           <li><a data-url='{{e.Url}}' data-title='{{e.ModuleName}}' data-id="{{e.ModuleId}}">&nbsp;&nbsp;&nbsp;&nbsp;{{e.ModuleName}}</a><li></li>
+                                           {{else}}
+                                           <li><a href="javascript:;">&nbsp;&nbsp;&nbsp;&nbsp;{{d.ModuleName}}</a></li>
+                                               {{/if}}
+                                               {{/each}}
+</ol> 
+                                       {{/if}} 
+                                  </dd>
+                                {{/if}}       
+                             {{/each}}
+                          </dl>
+                        {{/if}}                        
+                    </li>
+                    {{/each}}
+                </script>
+
+                <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                <ul class="layui-nav layui-nav-tree" lay-filter="side" id="slidenavlist">
+                   <li class="layui-nav-item"><a href="">数据加载中……</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="layui-body" style="bottom: 0;" id="admin-body">
+
+            <div class="layui-tab tabnavs" lay-filter="tab" lay-allowclose="true">
+                <ul class="layui-tab-title"  >
+                    <li class="layui-this first">首页</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">@RenderBody()</div>
+                </div>
+
+     
+            </div>
+
+        </div>
+    </div>
+
+    <div style="height:0px;padding:10px;position:relative;width:0px;" >
+        <div style="overflow:hidden;" id="setpwd">
+            <form class="layui-form layui-form-pane" method="post" style="margin-top:20px;margin-left:20px;">
+                <div class="layui-form-item">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">新密码</label>
+                        <div class="layui-input-inline" style="width:auto;">
+                            <input type="password" placeholder="" class="layui-input" id="inewpwd">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">确认密码</label>
+                        <div class="layui-input-inline" style="width:auto;">
+                            <input type="password" placeholder="" class="layui-input" id="irenewpwd">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+</div>
+    <script src="~/assets/layui/layui.js"></script>
+    <script src="~/assets/js/jquery-1.8.2.min.js"></script>
+    <script src="~/assets/js/base/template.js"></script>
+    <script src="~/assets/js/jquery.cookie.js"></script>
+    <script>
+
+        layui.use(['element','layer','jquery'], function () {
+            var $=layui.jquery
+            ,layer=layui.layer
+            ,element = layui.element;
+
+            $(function () {
+              var toplayer=layui.layer.msg('加载中', {
+                    icon: 16,
+                    shade: 0.4,
+                    time: false,
+                    area:['180px','70px']
+                });
+                $.ajax({
+                    type: "POST",
+                    url: '/sysuser/UserModule',
+                    success: function (data) {
+
+                        layer.close(toplayer);
+
+                        window.gloabledata = data;
+
+                       var temlist = [];
+                       for (var i in data) {
+                           if (data[i].ParentId == 0) {
+                               temlist.push(data[i]);
+                           }
+                       }              
+                       $("#topnavlist").html(template('temtopnavlist', { list: temlist }));
+                       $("#topnavlist li").first().addClass("layui-this");
+
+                       if (temlist.length) {                        
+                           //alert(JSON.stringify( fnTree(data, temlist[4].ModuleId) ))
+                           $("#slidenavlist").html(template('temslidenavlist', { list: fnTree(data, temlist[0].ModuleId) }));
+                       }                   
+                       layui.element.render();
+                    }
+                });
+
+                $(document).on('click', '.navtop a', function () {
+                    $("#slidenavlist").html(template('temslidenavlist', { list: fnTree(window.gloabledata, $(this).data("id")) }));
+                    layui.element.render();
+                });
+
+                $(document).on('click', '#adminswitch', function () {
+                    var ico = $(this).find("i").eq(0);
+
+                    if (ico.hasClass("layui-icon-shrink-right")) {
+                        ico.attr("class", "layui-icon layui-icon-spread-left");
+                        $("#admin-side").css({"width": "5px" });
+                        $("#admin-body").css({"left": "5px" });
+                    }
+                    else {
+                        ico.attr("class", "layui-icon layui-icon-shrink-right");
+                        $("#admin-side").css("width", "200px");
+                        $("#admin-body").css("left", "200px")
+                    }
+                });
+
+                $(document).on('click', '.tabnavs .layui-tab-title li', function () {
+                    var _id = $(this).attr("lay-id");
+
+                    if (_id > 0) {
+                        $.cookie("modid", _id, { path: "/" });
+                    }
+                    
+                });
+            });
+            function fnTree(data, pid) {
+                var result = [], temp;
+                for (var i in data) {
+
+                    if (data[i].ParentId == pid) {
+                        result.push(data[i]);
+                        temp = fnTree(data, data[i].ModuleId);
+                        if (temp.length > 0) {
+                            data[i].children = temp;
+                        }
+                    }
+                }
+                return result;
+            }
+            var active = {
+                tabAdd: function (url, id, title) {
+                    $.cookie("modid", id, { path: "/" });
+                    //新增一个Tab项
+                  element.tabAdd('tab', {
+                      title: title
+                    , content: '<iframe data-frameid="' + id + '" frameborder="0" name="content"  width="100%" src="' + url + '"></iframe>'
+                    , id: id
+                  });            
+                    CustomRightClick(id);//绑定右键菜单
+                    FrameWH();//计算框架高度
+                }
+            , tabChange: function (id) {
+              //切换到指定Tab项
+                element.tabChange('tab', id); //切换到：用户管理
+                $.cookie("modid", id, { path: "/" });
+              $("iframe[data-frameid='" + id + "']").attr("src", $("iframe[data-frameid='" + id + "']").attr("src"))//切换后刷新框架
+          }
+            , tabDelete: function (id) {
+                element.tabDelete("tab", id);//删除
+            }
+            , tabDeleteAll: function (ids) {//删除所有
+                $.each(ids, function (i, item) {
+                    element.tabDelete("tab", item);
+                })
+            }
+            };
+            $(document).on("click", ".dluser a", function () {
+                var dataid = $(this);
+
+                if (!dataid.attr("data-url")) return false;
+
+                if ($(".layui-tab-title li[lay-id]").length <= 0) {
+                    active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"), dataid.data("title"));
+                } else {
+                    var isData = false;
+                    $.each($(".layui-tab-title li[lay-id]"), function () {
+                        if ($(this).attr("lay-id") == dataid.attr("data-id")) {
+                            isData = true;
+                        }
+                    })
+                    if (isData == false) {
+                        active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"), dataid.data("title"));
+                    }
+                }
+                active.tabChange(dataid.attr("data-id"));
+            })
+
+            $("#asetpwd").click(function () {
+                window.sets = layer.open({
+                    type: 1,
+                    shade: 0,
+                    area:['300px','260px'],
+                    title: '修改密码',
+                    content: $("#setpwd"),
+                    btn: ['确定', '取消'],
+                    yes: function () {
+                        if ($("#inewpwd").val().length < 6) {
+                            layer.msg('请输入不低于6位的密码');
+                            return;
+                        }
+                        if ($("#inewpwd").val()!=$("#irenewpwd").val())
+                        {
+                            layer.msg('密码输入不一致');
+                            return;
+                        }
+                        $.post('/sysuser/changepwds', { pwd: escape($("#inewpwd").val()) }, function (data) {
+                            if (data.flag == "ok") {
+                                layer.msg("密码修改成功");
+                                layer.close(window.sets);
+                            }
+                            if (data.flag == "noauth") {
+                              
+                            }
+                        }, 'json');
+                    }, btn2: function () {
+                        layer.close(window.resets);
+                    }
+                });
+            });
+
+            $(document).on("click", ".layui-side-scroll a", function () {
+                var dataid = $(this);
+
+                if (!dataid.attr("data-url")) return false;
+
+                if ($(".layui-tab-title li[lay-id]").length <= 0) {
+                    active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"), dataid.data("title"));
+                } else {
+                    var isData = false;
+                    $.each($(".layui-tab-title li[lay-id]"), function () {
+                        if ($(this).attr("lay-id") == dataid.attr("data-id")) {
+                            isData = true;
+                        }
+                    })
+                    if (isData == false) {
+                        active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"), dataid.data("title"));
+                    }
+                }
+                active.tabChange(dataid.attr("data-id"));
+            })
+            function CustomRightClick(id) {
+                //取消右键 
+                $('.layui-tab-title li').on('contextmenu', function () { return false; })
+                $('.layui-tab-title,.layui-tab-title li').click(function () {
+                    $('.rightmenu').hide();
+                });
+
+                //桌面点击右击 
+                $('.layui-tab-title li').on('contextmenu', function (e) {
+                    var popupmenu = $(".rightmenu");
+                    popupmenu.find("li").attr("data-id", id);
+                    l = ($(document).width() - e.clientX) < popupmenu.width() ? (e.clientX - popupmenu.width()) : e.clientX;
+                    t = ($(document).height() - e.clientY) < popupmenu.height() ? (e.clientY - popupmenu.height()) : e.clientY;
+                    popupmenu.css({ left: l, top: t }).show();
+                    //alert("右键菜单")
+                    return false;
+                });
+            }
+            $(".rightmenu li").click(function () {
+                if ($(this).attr("data-type") == "closethis") {
+                    active.tabDelete($(this).attr("data-id"))
+                } else if ($(this).attr("data-type") == "closeall") {
+                    var tabtitle = $(".layui-tab-title li");
+                    var ids = new Array();
+                    $.each(tabtitle, function (i) {
+                        ids[i] = $(this).attr("lay-id");
+                    })
+
+                    active.tabDeleteAll(ids);
+                }
+
+                $('.rightmenu').hide();
+            })
+            function FrameWH() {
+                var h = $(window).height() - 41 - 10 - 60;
+                $("iframe").css("height", h + "px");
+            }
+
+            $(window).resize(function () {
+                FrameWH();
+            })      
+        });
+
+        function loginout() {
+            layui.layer.confirm('确认要退出吗？', {
+                btn: ['确定', '取消']//按钮
+            }, function (index) {
+
+                layui.layer.close(index);
+
+                $.post('/index/loginout', function (data) {
+                    if (data == "ok") {
+                        location.href = '/index/login';
+                    }
+                });
+            });
+        }
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

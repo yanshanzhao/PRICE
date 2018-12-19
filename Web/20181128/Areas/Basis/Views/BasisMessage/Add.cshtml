@@ -1,0 +1,291 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+<form class="layui-form layui-form-pane" action="/Basis/BasisMessage/AddMessage" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">添加信息预登记</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>信息类型</label>
+                <div class="layui-input-inline">
+                    <select id="iMessageType" class="select" lay-verify="selects" name="DictionaryId" lay-filter="selvalues"></select>
+                    <input name="DictionaryName" id="hdMessageType" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>有效期开始时间</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input type="text" name="BeginTime" lay-verify="required" placeholder="" class="layui-input" id="txtBeginTime">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>有效结束时间</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input type="text" name="EndTime" lay-verify="required" placeholder="" class="layui-input" id="txtEndTime">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>信息置顶</label>
+                <div class="layui-input-inline">
+                    <select type="text" name="MessageTop" id="txtMessageTop" lay-verify="required" placeholder="" class="layui-input">
+                        <option value="0">是</option>
+                        <option value="1">否</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>信息标题</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="信息标题" name="MessageTitle" maxlength="30" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>信息内容</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="信息内容" name="MessageContent" maxlength="500" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">信息备注</label>
+                    <div class="layui-input-block">
+                        <textarea placeholder="信息备注" name="MessageRemark" maxlength="100" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <label style="color:lightcoral;">温馨提示：单击文件名称可修改名称</label>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfilelist" name="SuppFileLists" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                    <div id="filelist" style="float:left;margin-right:5px;margin-bottom:5px;">
+
+                    </div>
+                    <script type="text/html" id="temfilelist">
+                        {{each list as c}}
+                        <div class="layui-btn-group" style="margin-bottom:5px;">
+                            <div class="layui-btn layui-btn-primary">
+                                <span class="modify" data-id="{{c.id}}">{{c.filename}}</span>{{c.ext}}
+                                <em onclick="downfile('{{c.id}}')"><i class="layui-icon layui-icon-download-circle"></i></em>
+                                <em onclick="delfilelist('{{c.id}}')"><i class="layui-icon layui-icon-close-fill"></i></em>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </script>
+                    <script type="text/html" id="temdictlist">
+                        {{each list as c}}
+                        <option value="{{c.id}}">{{c.name}}</option>
+                        {{/each}}
+                    </script>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            form.verify({
+                selects: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (value == -1) {
+                        return $(item).find("option").first().text();
+                    }
+                }
+            });
+
+            form.on('select(selvalues)', function (data) {
+                initsSelect();
+            });
+
+            // 开始日期
+            var insStart = laydate.render({
+                elem: '#txtBeginTime'
+                , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+                , done: function (value, date) {
+                    // 更新结束日期的最小日期
+                    insEnd.config.min = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+
+                    // 自动弹出结束日期的选择器
+                    insEnd.config.elem[0].focus();
+                }
+            });
+
+            // 结束日期
+            var insEnd = laydate.render({
+                elem: '#txtEndTime'
+                , type: 'datetime'
+                , format: 'yyyy/MM/dd HH:mm:ss'
+                , min: 0
+                , btns: ['clear', 'confirm']
+                , done: function (value, date) {
+                    //更新开始日期的最大日期
+                    insStart.config.max = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+                }
+        });
+
+        //文件上传
+        layui.upload.render({
+            elem: '#btnUpload'
+           , url: '/index/upload?type=message'
+           , accept: 'file'
+           , auto: true
+           , done: function (res) {
+               if (res.flag == "ok") {
+                   filelist.push({ id: new Date().getTime(), path: res.path, filename: res.filename, ext: res.ext });
+                   initfiles();
+               }
+               return false;
+           }
+        });
+
+
+        //保存按钮
+        form.on('submit(btnSave)', function (data) {
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisMessage/AddMessage",
+                data: data.field,
+                async: false,
+                success: function (data) {
+                    if (data.flag == 'success') {
+                        layui.layer.msg('添加成功');
+                        location.href = '/Basis/BasisMessage/Index'
+                    }
+                    if (data.flag == "exist") {
+                        layui.layer.msg('已存在此字典编号');
+                    }
+                    if (data.flag == "fail") {
+                        layui.layer.msg('信息添加失败');
+                    }
+                }
+            });
+            return false;
+        });
+
+        });
+
+        $(function () {
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisMessage/Index';
+            });
+
+            //字典初始化
+            dictinits();
+
+            initsSelect();
+
+            //修改上传上级名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+                return false;
+            });
+        });
+
+        window.Dict_1 = [];
+
+        function dictinits() {
+
+            Dict_1.push({ id: -1, name: "请选择信息类型" });
+
+            $.ajax({
+                type: "POST",
+                url: '/Basis/BasisMessage/MessageTypelist',
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 8) {
+                                Dict_1.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#iMessageType").html(template('temdictlist', { list: Dict_1 }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        function initsSelect() {
+            $("#hdMessageType").val($("#iMessageType").find("option:selected").text());
+        }
+
+    </script>
+}

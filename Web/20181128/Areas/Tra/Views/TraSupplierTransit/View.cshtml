@@ -1,0 +1,198 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+@model SRM.Model.Tra.TraSupplierTransitModel
+<form class="layui-form layui-form-pane" action="/Tra/TraSupplierTransit/EditSupplierTransit" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商选择信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">运输选择编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtChooseNumber" value="@Model.TraChooseNumber" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" value="@Model.ApplyTime" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:11%;">运输供应商名称</label>
+                <div class="layui-input-inline" style="width:20%;">
+                    <input id="txtSupplierName" value="@Model.SupplierName" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:11%;">运输供应商编号</label>
+                <div class="layui-input-inline" style="width:20%;">
+                    <input id="txtTransportNumber" value="@Model.TransportNumber" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">供应商运作信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:13%;">SCM供应商编号</label>
+                <div class="layui-input-inline" style="width:53%;">
+                    <input id="txtSCMNumber" name="SCMNumber" value="@Model.SCMNumber" type="text" maxlength="160" class="layui-input" disabled>
+                </div>
+                <label style="color:lightcoral;">❀多个时需用英文逗号隔开❀</label>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:13%;">采购系统供应商编号</label>
+                <div class="layui-input-inline" style="width:53%;">
+                    <input id="txtProcurementNumber" name="ProcurementNumber" value="@Model.ProcurementNumber" type="text" maxlength="200" class="layui-input" disabled>
+                </div>
+                <label style="color:lightcoral;">❀多个时需用英文逗号隔开❀</label>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">运作时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtOfficialTime" name="OfficialTime" value="@Model.OfficialTime" type="text" lay-verify="required" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">签订合同</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" lay-skin="switch" lay-filter="signContract" lay-text="是|否" @(Html.Raw(Model.SignContract == 1 ? "checked" : "")) disabled>
+                    <input id="hdSignContract" name="SignContract" value="@Model.SignContract" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item divSignContract" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合同编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractNumber" name="ContractNumber" value="@Model.ContractNumber" type="text" maxlength="60" class="layui-input" disabled>
+                </div>
+            </div>
+            @*<div class="layui-form-item divSignContract" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合同开始时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractBeginTime" name="ContractBeginTime" value="@Model.ContractBeginTime" type="text" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item divSignContract" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合同结束时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractEndTime" name="ContractEndTime" value="@Model.ContractEndTime" type="text" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>*@
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">结账周期</label>
+                <div class="layui-input-inline">
+                    <input id="txtAccountsPeriod" name="AccountsPeriod" value="@Model.AccountsPeriod" type="text" maxlength="60" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">押金金额</label>
+                <div class="layui-input-inline">
+                    <input id="txtDeposit" name="Deposit" value="@Model.Deposit" type="text" maxlength="200" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">参与培训</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" lay-skin="switch" lay-filter="isCultivate" lay-text="是|否" @(Html.Raw(Model.IsCultivate == 1 ? "checked" : "")) disabled>
+                    <input id="hdIsCultivate" name="IsCultivate" value="@Model.IsCultivate" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item divOperationNumber" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperationNumber" type="text" maxlength="60" class="layui-input" lay-verify="Cultivate" value="@ViewBag.OperationNumber" disabled>
+                    <input id="hdOperationClaimId" name="OperationClaimId" type="hidden" value="@Model.OperationClaimId" />
+                </div> 
+            </div>
+            <div class="layui-form-item divCultivateIntro">
+                <label class="layui-form-label">培训简介</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCultivateIntro" name="CultivateIntro" maxlength="600" class="layui-textarea" disabled>@Model.CultivateIntro</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">合作事项说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCooperationRemark" name="CooperationRemark" class="layui-textarea" disabled>@Model.CooperationRemark</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtApplyTime'
+              , type: 'datetime'
+              , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+            laydate.render({
+                elem: '#txtOfficialTime'
+              , type: 'datetime'
+              , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+            //laydate.render({
+            //    elem: '#txtContractBeginTime'
+            //  , type: 'datetime'
+            //  , format: 'yyyy-MM-dd HH:mm:ss'
+            //});
+            //laydate.render({
+            //    elem: '#txtContractEndTime'
+            //  , type: 'datetime'
+            //  , format: 'yyyy-MM-dd HH:mm:ss'
+            //});
+             
+        });
+
+        $(function () {
+
+            // 合同
+            if ($("#hdSignContract").val() == 1) {
+                $(".divSignContract").show();
+            } else if ($("#hdSignContract").val() == 0) {
+                $(".divSignContract").hide();
+
+                // 合同编号
+                $("#txtContractNumber").val("");
+
+                //// 合同开始时间
+                //$("#txtContractBeginTime").val("");
+
+                //// 合同结束时间
+                //$("#txtContractEndTime").val("");
+            }
+
+            // 培训
+            if ($("#hdIsCultivate").val() == 1) {
+                $(".divCultivateIntro").show();
+                $(".divOperationNumber").show();
+            } else if ($("#hdIsCultivate").val() == 0) {
+                $(".divCultivateIntro").hide();
+                $(".divOperationNumber").hide();
+
+                // 培训简介
+                $("#txtCultivateIntro").val("");
+            }
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraSupplierTransit/Index';
+            });
+        });
+    </script>
+}

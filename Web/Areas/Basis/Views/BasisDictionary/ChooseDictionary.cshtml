@@ -1,0 +1,108 @@
+﻿@{
+    ViewBag.Title = "ChooseDictionary";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form">
+            <table class="layui-table" id="cominfos">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">字典名称</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr data-id="{{c.DictionaryId}}" data-name="{{c.DictionaryName}}">
+                    <td>{{c.DictionaryName}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        var pageIndex = 0;//页面索引
+        var pageSize = 15;//页面条数
+
+        //绑定事件
+        $(function () {
+            inits();
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo($(this).data("id"), $(this).data("name"));
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        //查询总记录数
+        function inits() {
+            var flagCount = 0;//页面行数
+            pageIndex = 0;//页面索引
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisDictionary/ChooseDictionaryCount",
+                async: false,
+                data: {},
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面行数
+            InitCusTable(indexs);//页面表格
+        }
+
+        //查询表格的行数
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Basis/BasisDictionary/ChooseDictionaryList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").hide();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+

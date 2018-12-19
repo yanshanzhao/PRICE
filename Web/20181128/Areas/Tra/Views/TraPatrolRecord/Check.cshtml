@@ -1,0 +1,197 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraPatrolRecordModel
+<form class="layui-form layui-form-pane" action="/Tra/TraPatrolRecord/EditTraPatrolRecord" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">添加过程巡查维护</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"style="width:130px;">运输供应商名称</label>
+                <div class="layui-input-inline"style="width:170px;"> 
+                    <input id="txtSupplierName" type="text" class="layui-input" value="@Model.SupplierName" lay-verify="traPatrol" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">巡查类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtPatrolType" name="PatrolType" lay-verify="traPatrol" class="select" disabled>
+                        <option value="0">定期</option>
+                        <option value="1">专项</option>
+                        <option value="2">其他</option>
+                    </select>
+                    <input id="hdPatrolType" type="hidden" value="@Model.PatrolType" />
+                    <input id="hdPatrolId" type="hidden" name="PatrolId" value="@Model.PatrolId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">巡查内容</label>
+                <div class="layui-input-block">
+                    <textarea id="txtPatrolContent" name="PatrolContent" lay-verify="traPatrol" class="layui-textarea" disabled>@Model.PatrolContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">巡查备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtPatrolRemark" name="PatrolRemark" class="layui-textarea" disabled>@Model.PatrolRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">过程巡查记录</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">记录时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtRecordTime" type="text" name="RecordTime" lay-verify="required" value="@Model.RecordTime" class="layui-input" disabled>
+                    <input id="hdPatrolId" name="PatrolId" type="hidden" value="@Model.PatrolId" />
+                    <input id="hdRecordId" name="RecordId" type="hidden" value="@Model.RecordId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">记录负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtRecordUsers" type="text" lay-verify="required" name="RecordUsers" value="@Model.RecordUsers" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"style="width:130px;">是否异常整改</label>
+                <div class="layui-input-inline"style="width:170px;"> 
+                    <select id="txtNormState" name="NormState" lay-verify="required" class="select" disabled>
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                    </select>
+                    <input id="hdNormState" type="hidden" value="@Model.NormState" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">巡查得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtRecordScore" type="text" name="RecordScore" value="@Model.RecordScore" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">记录备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRecordRemark" name="RecordRemark"   class="layui-textarea" disabled>@Model.RecordRemark</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">异常备注</label>
+                <div class="layui-input-block"> 
+                    <textarea id="txtNormRemark" name="NormRemark"  class="layui-textarea" disabled>@Model.NormRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            @*<label style="color:lightcoral;">温馨提示：单击文件名称可修改名称</label>*@
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+                <input type="hidden" id="hdfilelist" name="SuppNotificationFileList" />
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    if (filelist[i].path.lastIndexOf('.') != -1) {
+                        var lastnum = filelist[i].path.lastIndexOf('.');
+                        var exts = filelist[i].path.substring(lastnum + 1);
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                    }
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+
+        });
+
+        // 页面加载事件
+        $(function () {
+
+            $("#txtPatrolType").val($("#hdPatrolType").val());//为巡查类型赋值
+            
+            $("#txtNormState").val($("#hdNormState").val());//为巡查类型赋值
+            //修改上传文件名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+
+                return false;
+            });
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            // 关闭按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraPatrolRecord/Index';
+            });
+        });
+    </script>
+}

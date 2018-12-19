@@ -1,0 +1,302 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                考核类型：
+                <div class="layui-input-inline">
+                    <select class="select" id="selCheckType">
+                        <option value="">请选择</option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option>
+                    </select>
+                </div>
+                &nbsp;&nbsp;
+                运营类型名称：
+                <div class="layui-input-inline">
+                    <input id="txtOperateName" value="" type="text" class="layui-input">
+                </div>
+                <div class="layui-inline" style="margin-left:10px;">
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">考核类型</th>
+                        <th>项目</th>
+                        <th>运营类型名称</th>
+                        <th>数值</th>
+                        <th>区间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="OperateList" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.CheckTypeName}}</td>
+                    <td>{{c.ProjectName}}</td>
+                    <td>{{c.OperateName}}</td>
+                    <td>{{c.IsNumberName}}</td>
+                    <td>{{c.IsIntervalName}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDetail" data-id="{{c.OperateId}}" data-isnumber="{{c.IsNumber}}" data-isinterval="{{c.IsInterval}}">
+                            <i class="layui-icon"></i>明细
+                        </a>
+                        {{if c.DetailState==0}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.OperateId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{/if}} 
+                        {{if c.DetailState==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.OperateId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>
+                        {{/if}}                         
+                        {{/if}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnInvalid" data-id="{{c.OperateId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.OperateId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraOperate/Export'
+                    , {
+                        checkType: $("#selCheckType").val(),
+                        operateName: $("#txtOperateName").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=运营类型维护";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 明细
+            $(document).on('click', '.btnDetail', function () {
+                var tId = $(this).data("id");
+                var tIsInterval = $(this).data("isinterval");
+                var tIsNumber = $(this).data("isnumber");
+                DetailData(tId, tIsInterval, tIsNumber);
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+
+            // 提交
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");
+                ModifyState(tId);
+            });
+
+            // 作废
+            $(document).on('click', '.btnInvalid', function () {
+                var tId = $(this).data("id");
+                InvalidData(tId);
+            });
+
+            // 查看
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+        });
+
+        // 新增
+        function AddData() {
+            location.href = '/Tra/TraOperate/Add';
+        }
+
+        // 明细
+        function DetailData(tId, tIsInterval, tIsNumber) {
+            location.href = '/Tra/TraOperateDetail/Index?tOperateId=' + tId + '&tIsInterval=' + tIsInterval + '&tIsNumber=' + tIsNumber;
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Tra/TraOperate/Edit?tId=' + tId;
+        }
+
+        // 提交
+        function ModifyState(tId) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraOperate/SubmitState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+
+                            // 重新查询
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 作废
+        function InvalidData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraOperate/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll(); 
+                            SearchData();
+                            top.layer.msg("作废成功！");
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraOperate/View?tId=' + tId;
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#OperateList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraOperate/OperateCount",
+                async: false,
+                data: {
+                    checkType: $("#selCheckType").val(),
+                    operateName: $("#txtOperateName").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checkType: $("#selCheckType").val(),
+                operateName: $("#txtOperateName").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraOperate/OperateList',
+                data: userjosn,
+                success: function (data) {
+                    $("#OperateList").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#OperateList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

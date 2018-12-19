@@ -1,0 +1,350 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraNotification/AddTraNotification" method="post">
+    <div class="layui-card" id="clearDivinput">
+        <div class="layui-card-header">选择申请</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:100%;clear:none !important; float:left;">
+                <div class="layui-btn" id="btnTraSuppChoose" style="width:15%;" title="点击选择申请">选择申请</div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtTraChooseNumber" type="text" placeholder="申请编号" class="layui-input" lay-verify="supplier" disabled>
+                    <input id="hdTraChooseId" type="hidden" name="TraChooseId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请机构</label>
+                <div class="layui-input-inline">
+                    <input id="txtDepartmentName" type="text" placeholder="申请机构" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" type="text" placeholder="申请负责人" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" placeholder="申请时间" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">招标通知基本信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>通知编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtNotificationNumber" type="text" name="NotificationNumber" value="@ViewBag.NotificationNumber" maxlength="60" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>招标开始时间</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input id="txtNotificationBeginTime" type="text" name="NotificationBeginTime" lay-verify="required" placeholder="招标开始时间" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>招标结束时间</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input id="txtNotificationEndTime" type="text" name="NotificationEndTime" lay-verify="required" placeholder="招标结束时间" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:116px;"><em>*</em>暨邀请函名称</label>
+                <div class="layui-input-inline" style="width:973px; margin-right:0 !important">
+                    <textarea id="txtInvitationName" placeholder="暨邀请函名称" name="InvitationName" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">公司简介</label>
+                <div class="layui-input-block">
+                    <textarea id="txtExpertise" name="Expertise" class="layui-textarea" disabled>@ViewBag.Expertise</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">招标原因</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationCause" placeholder="招标原因" name="NotificationCause" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>招标线路</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationLines" placeholder="招标线路" name="NotificationLines" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>货量信息</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCargoVolume" placeholder="货量信息" name="CargoVolume" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>招标要求</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationDemand" placeholder="招标要求" name="NotificationDemand" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">招标备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationRemark" placeholder="招标备注" name="NotificationRemark" class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <input type="hidden" id="hdfilelist" name="NotificationFileList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                    <script type="text/html" id="temfilelists">
+                        {{each list as c}}
+                        <div class="layui-btn-group" style="margin-bottom:5px;">
+                            <div class="layui-btn layui-btn-primary">
+                                <span class="modify" data-id="{{c.id}}">{{c.filename}}</span>{{c.ext}}
+                                <em onclick="downfile('{{c.id}}')"><i class="layui-icon layui-icon-download-circle"></i></em>
+                                <em onclick="delfilelist('{{c.id}}')"><i class="layui-icon layui-icon-close-fill"></i></em>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </script>
+                    <script type="text/html" id="temdictlist">
+                        {{each list as c}}
+                        <option value="{{c.id}}">{{c.name}}</option>
+                        {{/each}}
+                    </script>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delfilelist('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 上传文件
+            $(document).on('click', '#btnUpload', function () {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/files?url=/Tra/TraNotification/Index&type=notification',
+                    area: ['450px', '300px'],
+                });
+            });
+
+            ////文件上传
+            //layui.upload.render({
+            //    elem: '#btnUpload'
+            //   , url: '/index/upload?type=tra'
+            //   , accept: 'file'
+            //   , auto: true
+            //   , done: function (res) {
+            //       if (res.flag == "ok") {
+            //           filelist.push({ id: new Date().getTime(), path: res.path, filename: res.filename, ext: res.ext });
+            //           initfiles();
+            //       }
+            //       return false;
+            //   }
+            //});
+
+            // 开始日期
+            var insStart = laydate.render({
+                elem: '#txtNotificationBeginTime'
+                , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+                , done: function (value, date) {
+                    // 更新结束日期的最小日期
+                    insEnd.config.min = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+
+                    // 自动弹出结束日期的选择器
+                    insEnd.config.elem[0].focus();
+                }
+            });
+
+            // 结束日期
+            var insEnd = laydate.render({
+                elem: '#txtNotificationEndTime'
+                , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+                , min: 0,
+                btns: ['clear', 'confirm'],
+                done: function (value, date) {
+                    //更新开始日期的最大日期
+                    insStart.config.max = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+                }
+            });
+
+            form.verify({
+                supplier: function (value, item) {
+                    if (!value) {
+                        return '选择申请不能为空！';
+                    }
+                }
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraNotification/AddTraNotification",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Tra/TraNotification/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        //添加新文件(新增)
+        function setnewfiles(filename, path) {
+            filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+            initfiles();
+        }
+
+
+        $(function () {
+
+            //点击后退按钮，清除文本框的值
+            $("#clearDivinput input").val("");
+
+            // 选择申请
+            $(document).on('click', '#btnTraSuppChoose', function () {
+                GetTraSuppChoose();
+            });
+
+            // 修改上传上级名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraNotification/Index';
+            });
+        });
+
+        // 设置选择申请
+        function setinfo(id, trachoosenumber, departmentname, applyuser, applytime) {
+            $("#hdTraChooseId").val(id);
+            $("#txtTraChooseNumber").val(trachoosenumber);
+            $("#txtDepartmentName").val(departmentname);
+            $("#txtApplyUser").val(applyuser);
+            $("#txtApplyTime").val(applytime);
+        }
+
+        // 选择申请
+        function GetTraSuppChoose() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择申请',
+                content: '/Tra/TraNotification/TraSuppChooseInfo?url=/Tra/TraNotification/Index',
+                area: ['1100px', '600px'],
+            });
+        }
+    </script>
+}

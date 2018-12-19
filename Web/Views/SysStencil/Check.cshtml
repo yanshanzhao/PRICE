@@ -1,0 +1,173 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model Model.Sys.SysStencilModel
+
+<form class="layui-form layui-form-pane" action="/SysStencil/EditSysStencil" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">编辑模版维护信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>模版名称</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input type="text" name="StencilName" value="@Model.StencilName" maxlength="50" placeholder="" class="layui-input" disabled>
+                    <input type="hidden" id="hdStencilId" name="ResourceId" value="@Model.StencilId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" maxlength="100" class="layui-textarea" disabled>@Model.Remark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <label style="color:lightcoral;">温馨提示：单击文件名称可修改名称</label>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+                <input type="hidden" id="hdfilelist" name="SuppFileLists" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                        </div>
+                    </div>
+                    <div id="filelist" style="float:left;margin-right:5px;margin-bottom:5px;">
+
+                    </div>
+                    <script type="text/html" id="temfilelist">
+                        {{each list as c}}
+                        <div class="layui-btn-group" style="margin-bottom:5px;">
+                            <div class="layui-btn layui-btn-primary">
+                                <span class="modify" data-id="{{c.id}}">{{c.filename}}</span>{{c.ext}}
+                            </div>
+                        </div>
+                        {{/each}}
+                    </script>
+
+                    <input id="hdTemSelectData" name="TemSelectData" type="hidden" />
+                    <script type="text/html" id="temdictlist">
+                        {{each list as c}}
+                        <option value="{{c.id}}">{{c.name}}</option>
+                        {{/each}}
+                    </script>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //文件上传
+            layui.upload.render({
+                elem: '#btnUpload'
+               , url: '/index/upload?type=sysstencil'
+               , accept: 'file'
+               , auto: true
+               , done: function (res) {
+                   if (res.flag == "ok") {
+                       $("#hdUrl").val(res.path);
+                       $("#hdFileName").val(res.filename);
+                       filelist.push({ id: new Date().getTime(), path: res.path, filename: res.filename, ext: res.ext });
+                       initfiles();
+                   }
+                   return false;
+               }
+            });
+
+            // 保存按钮
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/SysStencil/EditSysStencil",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/SysStencil/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 返回事件
+        $(function () {
+
+            //修改上传文件名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+
+                return false;
+            });
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            //返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/SysStencil/Index';
+            });
+        });
+    </script>
+}

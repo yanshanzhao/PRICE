@@ -1,0 +1,423 @@
+﻿@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+@model SRM.Model.Tra.TraOperationRecordModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraOperationRecord/EditTraOperationRecord" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">添加运作要求维护</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperationNumber" type="text" value="@Model.OperationNumber" class="layui-input" disabled>
+                    <input id="hdOperationClaimId" type="hidden" name="OperationClaimId" value="@Model.OperationClaimId"  /> 
+                    <input id="hdOperationSuppId" type="hidden" name="OperationSuppId" value="@Model.OperationSuppId" />
+                    <input id="hdOperationRecordId" name="OperationRecordId" type="hidden" value="@Model.OperationRecordId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训主题</label>
+                <div class="layui-input-inline">
+                    <input id="txtTheme" type="text" value="@Model.Theme" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训目的</label>
+                <div class="layui-input-inline">
+                    <input id="txtDestination" type="text" value="@Model.Destination" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtRectificationUser" type="text" value="@Model.RectificationUser" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训方式</label>
+                <div class="layui-input-inline">
+                    <input id="txtTypeText" type="text" value="@Model.TypeText" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运作要求信息</div>
+        <div class="layui-btn" id="btnTraSupplierName">
+            运作供应商信息
+        </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-card-body">
+                <div class="layui-form">
+                    <table class="layui-table" id="cominfos">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">运输供应商名称</th>
+                                <th>供应商种类</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TraOperationRecordDetaillist" style="min-height:400px;"></tbody>
+                    </table>
+                    <div id="pageinfos" class="pagebox">
+                        <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                    </div>
+                    <script type="text/html" id="temslist">
+                        {{each list as c}}
+                        <tr  >
+                            <td>{{c.SupplierName}}</td>
+                            <td>{{c.DictionaryName}}</td>
+                        </tr>
+                        {{/each}}
+                    </script>
+                </div>
+                <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                    <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+                </div>
+            </div> 
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">执行记录信息</div>
+        <div class="layui-card-body" style="height:170px;overflow:hidden;">
+            
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtRecordTime" type="text" name="RecordTime" lay-verify="required" value="@Model.RecordTime" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:60%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训达标</label>
+                <div class="layui-input-inline"> 
+                    <select id="txtRecordResult" name="RecordResult" lay-filter="selRecordResult"  lay-verify="required" class="select">
+                        <option></option>
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                        <option value="2">二次培训</option>
+                    </select>
+                    <input id="hdRecordResult" type="hidden" value="@Model.RecordResult" />
+                </div>
+                <label style="color:lightcoral;">❀若培训达标为二次培训,二次培训时间必须输入❀</label>
+            </div>
+            <div id="divTwoRecordTime" >
+                <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                    <label class="layui-form-label"style="width:130px;"><em>*</em>二次培训时间</label>
+                    <div class="layui-input-inline"style="width:170px;">
+                        <input id="txtTwoRecordTime" type="text" name="TwoRecordTime" lay-verify="tworecordtime" value="@Model.TwoRecordTime" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><em>*</em>培训结论</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtRecordConclusion" name="RecordConclusion" lay-verify="tworecordtime" class="layui-textarea">@Model.RecordConclusion</textarea>
+                    </div>
+                </div>
+            </div>
+            @*
+            <div class="layui-form-item">
+                <label class="layui-form-label">培训备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRecordRemark" name="RecordRemark" lay-verify="required" class="layui-textarea">@Model.RecordRemark</textarea>
+                </div>
+            </div>*@ 
+
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+                <input type="hidden" id="hdfilelist" name="TraOperationRecordFileList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delfilelist('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        //删除文件
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        //设置文件名称
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        //文件下载
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证二次培训时间
+            laydate.render({
+                elem: '#txtTwoRecordTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+            //初始化时让二次培训按钮隐藏
+            var recordresult = $("#txtRecordResult").val();
+            if (recordresult == 2)
+                $("#divTwoRecordTime").show();//二次培训时间显示
+            else
+                $("#divTwoRecordTime").hide();//二次培训时间隐藏
+
+            //若培训达标是二次培训时，将二次培训按钮隐藏
+            form.on('select(selRecordResult)', function (data) {
+                var recordresult = $("#txtRecordResult").val();
+                if (recordresult == 2) {
+                    $("#divTwoRecordTime").show();//二次培训时间显示
+                    $("#txtTwoRecordTime").val("");
+                    $("#txtRecordConclusion").val("");
+                }
+                else {
+                    $("#divTwoRecordTime").hide();//二次培训时间隐藏
+                    $("#txtTwoRecordTime").val("");
+                    $("#txtRecordConclusion").val("");
+                }
+                layui.form.render('select');
+            });
+
+            // 上传文件
+            $(document).on('click', '#btnUpload', function () {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/files?url=/Tra/TraOperationRecord/Index&type=patrolrecord',
+                    area: ['450px', '300px'],
+                });
+            });
+
+            form.verify({
+                 
+                tworecordtime: function (value, item) {
+                    var recordresult = $("#txtRecordResult").val();
+                    if (recordresult == 2) {
+                        if (!value) {
+                            return '二次培训时间和培训结论不能为空！';
+                        }
+                    }
+                }
+            });
+
+            //验证结束时间
+            laydate.render({
+                elem: '#txtRecordTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraOperationRecord/EditTraOperationRecord",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Tra/TraOperationRecord/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+            //点击选择按钮
+            $(document).on('click', '#btnTraSupplierName', function () {
+                TraSupplierName();
+            });
+        });
+
+        //添加新文件(新增)
+        function setnewfiles(filename, path) {
+            filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+            initfiles();
+        }
+
+        // 页面加载事件
+        $(function () {
+
+            SearchData();
+             
+            $("#txtRecordResult").val($("#hdRecordResult").val()); //考核类型
+
+            //修改上传文件名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+
+                return false;
+            });
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            // 关闭按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraOperationRecord/Index';
+            });
+        });
+         
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraOperationRecordDetaillist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraOperationRecord/TraOperationRecordeditAmount",
+                async: false,
+                data: {
+                    OperationRecordId: $("#hdOperationRecordId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条"); 
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                OperationRecordId: $("#hdOperationRecordId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraOperationRecord/TraOperationRecordeditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraOperationRecordDetaillist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#TraOperationRecordDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraOperationRecordDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+        // 选择供应商种类
+        function TraSupplierName() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商信息',
+                content: '/Tra/TraOperationRecord/TraOperationClaimDetail?url=/Tra/TraOperationRecord/Index&ids=' + $("#hdOperationRecordId").val() + '&idss=' + $("#hdOperationClaimId").val() + '&type=edit',
+                area: ['900px', '580px'],
+            });
+        }
+    </script>
+}

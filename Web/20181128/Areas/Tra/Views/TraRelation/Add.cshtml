@@ -1,0 +1,135 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraRelation/AddRelation" method="post"> 
+    <div class="layui-card">
+        <div class="layui-card-header">维护关系信息新增</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item" style="width:12%;">
+                <div class="layui-btn" id="btnChooseTransport" style="width:100%;" title="点击选择运输供应商">选择运输供应商</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdTransportId" name="TransportId" type="hidden"/>
+                    <input id="hdCheckYearId" name="CheckYearId" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtTransportNumber" type="text" class="layui-input" lay-verify="required" disabled> 
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>考核年</label>
+                <div class="layui-input-inline">
+                    <input id="txtCheckYear" name="CheckYear" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>服务等级名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSuppServiceName" type="text" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdSuppServiceId" name="SuppServiceId" type="hidden"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtScore" name="Score" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>培养期望</label>
+                <div class="layui-input-inline">
+                    <input id="txtCultureContent" name="CultureContent" type="text" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>管理策略</label>
+                <div class="layui-input-block">
+                    <textarea id="txtManageContent" name="ManageContent" lay-verify="required" class="layui-textarea" style="width:95%;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width:12%;">备注</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtRemark" name="Remark" maxlength="200" class="layui-textarea" style="width:95%;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:45%;margin:0 auto !important;">
+                    <div class="layui-btn" lay-submit="" lay-filter="btnSave">保存</div>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div> 
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) { 
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraRelation/AddRelation",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功！');
+                            location.href = '/Tra/TraRelation/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+         
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraRelation/Index';
+            });
+        });
+
+        $(function () { 
+            // 选择运输供应商
+            $(document).on('click', '#btnChooseTransport', function () {
+                ChooseTransport();
+            }); 
+        });
+         
+        // 设置供应商信息
+        function setinfo(resultId, transportId, supplierName, transportNumber, checkYear, suppServiceId, suppServiceName, score) {
+            $("#hdCheckYearId").val(resultId);
+            $("#hdTransportId").val(transportId);
+            $("#txtSupplierName").val(supplierName);
+            $("#txtTransportNumber").val(transportNumber);
+            $("#txtCheckYear").val(checkYear);
+            $("#hdSuppServiceId").val(suppServiceId);
+            $("#txtSuppServiceName").val(suppServiceName);
+            $("#txtScore").val(score);
+        }
+
+        // 选择运输供应商
+        function ChooseTransport() { 
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商',
+                content: '/Tra/TraRelation/TransportDetail?url=/Tra/TraRelation/Index',
+                area: ['800px', '550px'],
+            });
+        } 
+    </script>
+}

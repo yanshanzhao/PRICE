@@ -1,0 +1,455 @@
+﻿@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@*@model SRM.Model.Tra.TraSuppChooseAuditModel*@
+<style>
+    .layui-table td.tdscore {
+        width: 60px;
+        padding-left: 0px;
+        padding-right: 0px;
+        text-align: center;
+        padding: 0px;
+    }
+
+        .layui-table td.tdscore input {
+            border: 1px solid #fff;
+            text-align: center;
+            padding-left: 0px;
+        }
+</style>
+@model SRM.Web.Areas.Tra.Controllers.SuppModelss
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <input type="hidden" id="hdCount" value="@Model.EvaluateSupplierNameCount" />
+        <div class="layui-card-header">运供应商选择信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@ViewBag.applytime" class="layui-input" disabled>
+                    <input id="hdSupplierAuditId" type="hidden" name="SupplierAuditId" value="@ViewBag.supplierauditid" />
+                    <input id="hdPresentId" type="hidden" name="PresentId" value="@ViewBag.presentid" />
+                    <input id="hdTraChooseId" type="hidden" name="TraChooseId" value="@ViewBag.trachooseid" />
+                    <input id="hdTransportId" type="hidden" name="TransportId" value="@ViewBag.transportid" />
+                    <input type="hidden" id="hdchoiceevaluateid" value="@ViewBag.choiceevaluateid" name="ChoiceEvaluateId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">评价负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtEvaluateUser" type="text" name="EvaluateUser" value="@ViewBag.evaluateuser" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">评价时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtEvaluateTime" type="text" name="EvaluateTime" value="@ViewBag.evaluatetime" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">评价审核状态</label>
+                <div class="layui-input-inline">
+                    <input id="txtEvaluateStateName" type="text" name="EvaluateStateName" value="@ViewBag.evaluatestatename" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">意向供应商</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" name="SupplierName" value="@ViewBag.suppliername" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:150px;">意向供应商评分得分</label>
+                <div class="layui-input-inline" style="width:150px;">
+                    <input id="txtEvaluateSuppMark" type="text" name="EvaluateSuppMark" value="@ViewBag.evaluatesuppmark" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">供应商选择评价表</div>
+        <div class="layui-card-body">
+            <input type="hidden" id="hdAdjunctList" name="AdjunctList" />
+            <input type="hidden" id="hdCount" value="@Model.EvaluateSupplierNameCount" />
+
+            <input id="hdtotalscore" type="hidden" value="0" />
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">一、选择条件</th>
+                        </tr>
+                    </thead>
+                    <tbody id="EvaluateLists" style="min-height:400px;"></tbody>
+                </table>
+                <script type="text/html" id="temslists">
+                    {{each list as c}}
+                    <tr class="comscores">
+                        <td>{{c.ConditionContent}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form">
+                <table class="layui-table" style="width:950px;">
+                    <tr>
+                        <td>二、补充选择条件</td>
+                        <td class="tdscore">评估分数</td>
+                        @foreach (var itemss in Model.EvaluateSupplierNameList)
+                        {
+                            <td><input id="@("Tr_" + itemss.TransportId)" type="hidden" data-ids="@itemss.TransportId" />@itemss.SupplierName</td>
+                        }
+                    </tr>
+
+                    @foreach (var item in Model.EvaluateContentList)
+                    {
+                        <tr style="background-color:#f2f2f2;" data-id="@item.ChoiceId" data-pid="0" data-score="@item.StandardScore" class="comscore">
+                            <td colspan="2">@item.ConditionContent</td>
+                            @for (int i = 0; i < Model.EvaluateSupplierNameCount; i++)
+                            {
+                                <td></td>
+                            }
+                        </tr>
+
+                        foreach (var items in Model.EvaluateEditListss)
+                        {
+                            if (items.ChoiceId == item.ChoiceId)
+                            {
+                                <tr data-id="@items.ChoiceDetailId" data-pid="@items.ChoiceId" class="comscores">
+                                    <td>@items.ChoiceContent</td>
+                                    <td class="tdscore">@items.StandardScore</td>
+
+                                    @for (int i = 0; i < Model.EvaluateSupplierNameCount; i++)
+                                    {
+                                        if (i == 0)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score1) disabled /></td>
+                                        }
+                                        else if (i == 1)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score2) disabled /></td>
+                                        }
+                                        else if (i == 2)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score3) disabled /></td>
+                                        }
+                                        else if (i == 3)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score4) disabled /></td>
+                                        }
+                                        else if (i == 4)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score5) disabled /></td>
+                                        }
+                                        else if (i == 5)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score6) disabled /></td>
+                                        }
+                                        else if (i == 6)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score7) disabled /></td>
+                                        }
+                                        else if (i == 7)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score8) disabled /></td>
+                                        }
+                                        else if (i == 8)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score9) disabled /></td>
+                                        }
+                                        else if (i == 9)
+                                        {
+                                            <td class="tdscore"><input class="layui-input @("iScore" + i)" data-id="@items.ChoiceDetailId" id="@("iscore" + i + items.ChoiceDetailId)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" onblur="upperCase(this.id)" value=@(items.Score10) disabled /></td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                    }
+                    <tr>
+                        <td style="text-align:right;">
+                            得分总计：
+                        </td>
+                        <td>
+                            100
+                        </td>
+                        @for (int i = 0; i < Model.EvaluateSupplierNameCount; i++)
+                        {
+                            <td style="text-align:right;">
+                                <span id="@("assessscore" + i)">0</span>
+                            </td>
+                        }
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <input type="hidden" id="hdTemAdjunctList" value="@ViewBag.files" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            @*<div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>*@
+                        </div>
+                    </div>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>附件名称</th>
+                            <th>文件地址</th>
+                        </tr>
+                    </thead>
+                    <tbody id="FileList"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.FileName}}</td>
+                        <td>{{c.FileUrl}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核意见</label>
+            <div class="layui-input-block">
+                <textarea id="txtAuditRemark" placeholder="审核意见" name="AuditRemark" lay-verify="required" maxlength="400" class="layui-textarea" disabled>@ViewBag.auditremark</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block" style="width:30%;margin:0 auto !important;"> 
+            <a class="layui-btn" id="btnGoBack">关闭</a>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+
+        // 附件List
+        var fileList = [];
+        //计算得分
+        function calscore() {
+            var totalscore = 0;// 列总得分
+            for (var i = 0; i < $("#hdCount").val() ; i++) {
+                var totalscore = 0;
+                $(".iScore" + i).each(function () {
+                    if (!isNaN(parseFloat($(this).val()))) {
+                        totalscore += parseFloat($(this).val());
+                    }
+                });
+                $("#assessscore" + i).text(totalscore);
+            }
+        }
+        function upperCase(id) {
+
+            var val = $("#" + id).val();
+            var max = parseInt($("#" + id).data("max"));
+            var min = parseInt($("#" + id).data("min"));
+
+            if (!val) {
+                calscore();
+                return false;
+            }
+            if (isNaN(val)) {
+                layui.layer.msg('请输入数字格式分数');
+                $("#" + id).val("");
+                calscore();
+                return false;
+            }
+
+            if (parseInt(val) > max || parseInt(val) < min) {
+
+                layui.layer.msg('此项分数范围在(' + min + '-' + max + ')');
+                $("#" + id).val("");
+                calscore();
+                return false;
+            }
+            calscore();
+        }
+        // 附件上传
+        function uploadFiles() {
+            $("#FileList").html(template('temfilelist', { list: fileList }));
+            $("#hdTemAdjunctList").val(JSON.stringify(fileList));
+        }
+
+        // 附件删除
+        function delFileList(ids) {
+            var tem = [];
+            for (var i in fileList) {
+                if (fileList[i].id != ids) {
+                    tem.push(fileList[i]);
+                }
+            }
+
+            fileList = tem;
+
+            // 附件上传
+            uploadFiles();
+        }
+
+        // 附件名称编辑
+        function setAdjunctName(ids, names) {
+            for (var i in fileList) {
+                if (fileList[i].id == ids) {
+                    fileList[i].FileName = names;
+                }
+            }
+            $("#hdTemAdjunctList").val(JSON.stringify(fileList));
+        }
+
+        // 附件下载
+        function downFile(ids) {
+            for (var i in fileList) {
+                if (fileList[i].id == ids) {
+                    location.href = '/index/down?url=' + fileList[i].path + "&name=" + fileList[i].FileName + "&ext=" + fileList[i].ext;
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 审核通过
+            form.on('submit(btnThroughAudit)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraSuppChooseAudit/ThroughAudit",
+                    data: data.field,
+                    async: true,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            location.href = '/Tra/TraSuppChooseAudit/Index';
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 驳回
+            form.on('submit(btnReject)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraSuppChooseAudit/RejectAudit",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            location.href = '/Tra/TraSuppChooseAudit/Index';
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraSuppChooseAudit/Index';
+            });
+
+        });
+
+        $(function () {
+
+            GetEvaluateLists();
+
+            calscore();
+            // 计算总得分
+            TotalScore();
+
+            // 查询附件信息
+            GetAdjunctList();
+
+            // 附件List
+            fileList = JSON.parse($("#hdfiles").val());
+            setscores();
+            // 附件
+            uploadFiles();
+
+        });
+        function setscores() {
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChooseEvaluate/AssessScore",
+                data: { id: $("#hdchoiceevaluateid").val() },
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        $("#iscore" + data[i].id).val(data[i].score);
+                    }
+                    calscore();
+                }
+            });
+        }
+        // 查询评价内容
+        function GetEvaluateLists() {
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChooseEvaluate/EvaluateLists",
+                data: {},
+                //data: data.field,
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    $("#EvaluateLists").html(template('temslists', { list: data }));
+                }
+            });
+        }
+
+        // 查询附件信息
+        function GetAdjunctList() {
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChooseEvaluate/ChoiceFromAdjunctLists",
+                data: { tId: $("#hdTraChooseId").val() },
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    $("#FileList").html(template('temfilelist', { list: data }));
+                }
+            });
+        }
+
+        // 计算总得分
+        function TotalScore() {
+            var totalScore = 0;
+
+            $(".iScore").each(function () {
+
+                var Project = $(this).data("project");
+
+                // 考核得分等于=基本项+加分项+其他项-扣分项
+                // 项目：0-基础项；1-加分项；2-扣分项；3-其他项
+                if (Project == 2) {
+                    totalScore -= parseFloat($(this).val());
+                }
+                else {
+                    totalScore += parseFloat($(this).val());
+                }
+            });
+
+            $("#hdtotalscore").html(totalScore);
+        }
+    </script>
+}

@@ -1,0 +1,307 @@
+﻿@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Storage.StorageChooseAuditModel
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-header">仓储供应商选择信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" type="text" name="ApplyUser" value="@Model.ApplyUser" class="layui-input" disabled>
+                    <input id="hdSupplierAuditId" type="hidden" name="SupplierAuditId" value="@Model.SupplierAuditId" />
+                    <input id="hdPresentId" type="hidden" name="PresentId" value="@Model.PresentId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.ApplyTime" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请内容</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyContent" type="text" name="ApplyContent" value="@Model.ApplyContent" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请备注</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyRemark" type="text" name="ApplyRemark" value="@Model.ApplyRemark" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">意向供应商</label>
+                <div class="layui-input-inline">
+                    <input id="txtAffirmStorageName" type="text" name="AffirmStorageIdName" value="@Model.SupplierName" class="layui-input" disabled>
+                    <input id="hdAffirmStorageId" type="hidden" name="AffirmStorageId" />
+                    <input id="hdSupplierId" type="hidden" name="SupplierId" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">仓储供应商信息明细</div>
+        <input type="hidden" id="hdTransportId" name="TraChooseIdList" />
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <div class="forzenbox">
+                    <div class="normaltable ">
+                        <table class="layui-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">仓储供应商编号</th>
+                                    <th>供应商名称</th>
+                                    <th>评估得分</th>
+                                    <th>库房性质</th>
+                                    <th>库区面积</th>
+                                    <th>拟租托盘数量</th>
+                                    <th>拟租面积</th>
+                                    <th>拟租托盘</th>
+                                    <th>仓库详细地址</th>
+                                </tr>
+                            </thead>
+                            <tbody id="TraChooseDetaillist" style="min-height:400px;"></tbody>
+                        </table>
+                    </div>
+                    <div class="forzentable"></div>
+                </div>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr data-id="{{c.StorageId}}" data-type="{{c.SupplierName}}">
+                        <td>{{c.StorageNumber}}</td>
+                        <td>{{c.SupplierName}}</td>
+                        <td>{{c.AssessScore}}</td>
+                        <td>{{c.StorageNatureName}}</td>
+                        <td>{{c.TotalArea}}</td>
+                        <td>{{c.TotalTray}}</td>
+                        <td>{{c.RentArea}}</td>
+                        <td>{{c.RentTray}}</td>
+                        <td>{{c.Address}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">仓储供应商选择审核信息</div>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">申请机构</th>
+                        <th>审核人员</th>
+                        <th>审核时间</th>
+                        <th>审核状态</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfoss" class="pagebox">
+                <div id="Paginations" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslists">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.TrueName}}</td>
+                    <td>{{c.AuditTime}}</td>
+                    <td>{{c.StateName}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核意见</label>
+            <div class="layui-input-block">
+                <textarea id="txtAuditRemark" placeholder="审核意见" name="AuditRemark" lay-verify="required" maxlength="400" class="layui-textarea" disabled>@Model.AuditRemark</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block" style="width:30%;margin:0 auto !important;"> 
+            <a class="layui-btn" id="btnGoBack">关闭</a>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            
+        });
+
+        $(function () {
+            SearchData();
+            SearchDatas(); 
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Storage/StorageChooseAudit/Index';
+            });
+        });
+
+       
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChooseDetaillist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageChooseAudit/StorageChooseAuditdetaileditAmount",
+                async: false,
+                data: {
+                    supplierAuditId: $("#hdSupplierAuditId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierAuditId: $("#hdSupplierAuditId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageChooseAudit/StorageChooseAuditdetaileditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraChooseDetaillist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#TraChooseDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChooseDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+
+        // 查询总记录数
+        function SearchDatas() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageChooseAudit/StorageChooseAuditInfoAmount",
+                async: false,
+                data: {
+                    supplierAuditId: $("#hdSupplierAuditId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Paginations").pagination(amount, {
+                callback: PageCallbackOfCuss,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCuss(indexs) {
+            pageIndex = indexs;
+            InitCusTables(indexs);
+        }
+
+        // 查询数据
+        function InitCusTables(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierAuditId: $("#hdSupplierAuditId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageChooseAudit/StorageChooseAuditInfoLists',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslists', { list: data }));
+                    $("#pageinfoss").show();
+                    if (data == null) {
+                        $("#pageinfoss").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfoss").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

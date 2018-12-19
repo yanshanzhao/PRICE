@@ -1,0 +1,274 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraMonthCheckFromModel
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-header">绩效考核模板建立查看</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">考核类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtCheckFromType" name="CheckFromType" lay-verify="required" class="select" disabled>
+                        <option value="">请选择考核类型</option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option>
+                    </select>
+                    <input id="hdCheckFromType" type="hidden" value="@Model.CheckFromType" />
+                    <input id="hdCheckFromId" name="CheckFromId" type="hidden" value="@Model.CheckFromId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" maxlength="100" class="layui-textarea" disabled>@Model.Remark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">自定义元件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;"> 
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">元件编号</th>
+                            <th>元件名称</th>
+                            <th>考核类型</th>
+                            <th>项目</th>
+                            <th>考核指标</th>
+                            <th>权重</th>
+                            <th>考核标准</th>
+                            <th>公式计算</th>
+                            <th>状态</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="ComponentList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="PageComponent" class="pagebox">
+                    <div id="PageForComponent" class="pagination"></div><div id="ComponentAmount" class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.CheckComponentNumber}}</td>
+                        <td>{{c.CheckComponentName}}</td>
+                        <td>{{c.TypeName}}</td>
+                        <td>{{c.ProjectName}}</td>
+                        <td>{{c.CheckIndex}}</td>
+                        <td>{{c.Weight}}</td>
+                        <td>{{c.CheckStandard}}</td>
+                        <td>{{c.IsFormulaName}}</td>
+                        <td>{{c.StateName}}</td> 
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">模版附件类型信息</div>
+        <div class="layui-card-body" style="overflow:hidden;"> 
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>附件名称</th>
+                        <th>附件唯一</th>
+                        <th>说明</th>
+                        <th>状态</th> 
+                    </tr>
+                </thead>
+                <tbody id="AdjunctTypeList" style="min-height:400px;"></tbody>
+            </table>
+            <div id="PageAdjunctType" class="pagebox">
+                <div id="PageForAdjunctType" class="pagination"></div><div id="AdjunctTypeAmount" class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="TempAdjunctList">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.AdjunctName}}</td>
+                    <td>{{c.AdjunctOnlyName}}</td>
+                    <td>{{c.Remark}}</td>
+                    <td>{{c.StateName}}</td> 
+                </tr>
+                {{/each}}
+            </script>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <div class="layui-input-block" style="width:6%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+              
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraMonthCheckFrom/Index';
+            });
+        });
+
+        $(function () {
+            // 查询模版明细信息TraMonthCheckFromComponent(运输月度绩效自定义元件表)
+            SearchComponentData();
+
+            // 查询模版附件类型TraMonthCheckFromAdjunct(运输月度考核表单自定义附件明细)
+            SearchAdjunctTypeData();
+
+            // 考核类型下拉列表赋值
+            $("#txtCheckFromType").val($("#hdCheckFromType").val()); 
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询模版明细信息
+        // 查询模版明细信息Amount
+        function SearchComponentData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ComponentList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 模版明细信息Amount
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckFrom/MonthCheckFromComponentAmount",
+                async: false,
+                data: {
+                    tId: $("#hdCheckFromId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $("#ComponentAmount").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#PageForComponent").pagination(amount, {
+                callback: PageCallbackForComponent,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackForComponent(indexs,jq) {
+            pageIndex = indexs;
+            GetComponentList(indexs);
+        }
+
+        // 查询模版明细信息List
+        function GetComponentList(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tId: $("#hdCheckFromId").val()
+            };
+
+            // 模版明细信息List
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckFrom/MonthCheckFromComponentList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ComponentList").html(template('temslist', { list: data }));
+                    $("#PageComponent").show();
+                    if (data.length == 0) {
+                        $("#PageComponent").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+         
+        // 查询模版附件类型
+        // 查询模版附件类型Amount
+        function SearchAdjunctTypeData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#AdjunctTypeList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 模版附件类型Amount
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckFrom/MonthCheckFromAdjunctAmount",
+                async: false,
+                data: {
+                    tId: $("#hdCheckFromId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $("#AdjunctTypeAmount").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#PageForAdjunctType").pagination(amount, {
+                callback: PageCallbackForAdjunctType,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数 查询模版附件类型
+        function PageCallbackForAdjunctType(indexs, jq) {
+            pageIndex = indexs;
+            GetAdjunctTypeList(indexs);
+        }
+
+        // 查询模版附件类型List
+        function GetAdjunctTypeList(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tId: $("#hdCheckFromId").val()
+            };
+
+            // 模版附件类型List
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckFrom/MonthCheckFromAdjunctList',
+                data: userjosn,
+                success: function (data) {
+                    $("#AdjunctTypeList").html(template('TempAdjunctList', { list: data }));
+                    $("#PageAdjunctType").show();
+                    if (data.length == 0) {
+                        $("#PageAdjunctType").hide();
+                        $("#AdjunctTypeList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        } 
+    </script>
+}

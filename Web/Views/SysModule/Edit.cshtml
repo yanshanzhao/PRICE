@@ -1,0 +1,126 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@model  Model.Sys.SysModuleModel
+<div class="layui-card">
+    <div class="layui-card-header">修改菜单</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">上级名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ParentName" maxlength="200" id="hdnames" placeholder="" value="@Model.ModulePName" class="layui-input">
+                    <input type="hidden" name="ParentId" id="hdids" value="@Model.ParentId" />
+                    <input type="hidden" name="ModuleId" value="@Model.ModuleId" />
+                </div>
+                <div class="layui-input-inline"> <a class="layui-btn layui-btn-sm"><em onclick="seltree()">选择</em></a>  </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜单名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ModuleName" maxlength="20" lay-verify="required" placeholder="" class="layui-input" value="@Model.ModuleName">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">网址</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Url" maxlength="100" placeholder="" class="layui-input" value="@Model.Url">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">图标</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Iconic" maxlength="100" placeholder="" value="@Model.Iconic" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Sort" lay-verify="number" placeholder="" class="layui-input" value="@Model.Sort">
+                </div>
+                <div class="layui-input-inline"></div>数字越小越靠前
+            </div>
+            @*<div class="layui-form-item">
+                <label class="layui-form-label">后台菜单</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" lay-skin="switch" lay-filter="state" lay-text="启用|禁用">
+                    <input id="hdstate" type="hidden" name="IsAdmin" value="0" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">功能类型</label>
+                <div class="layui-input-inline">
+                    <select type="text" name="ModuleType" lay-verify="required" placeholder="" class="layui-input" id="txtDictionaryType">
+                        <option value="0">系统菜单</option>
+                        <option value="1">公示菜单</option>
+                    </select>
+                </div>
+            </div>*@ 
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    </div>
+    @section scripts{
+        <script>
+            layui.use(['form', 'element', ], function () {
+                var form = layui.form, ele = layui.element;
+
+                form.on('switch(state)', function (data) {
+                    $("#hdstate").val(this.checked ? "1" : "0");
+                });
+
+                form.on('submit(saveuser)', function (data) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/sysmodule/modifymodule",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                layui.layer.msg('修改成功');
+                                location.href = '/sysmodule/index'
+                            }
+                            if (data.flag == "exist") {
+                                layui.layer.msg('已存在此菜单');
+                            }
+                            if (data.flag == "fail") {
+                                layui.layer.msg('信息添加失败');
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+            $(function () {
+                $(document).on('click', '#btnGoBack', function () {
+                    location.href = '/sysmodule/index';
+                });
+            });
+
+            function setinfo(ids, names) {
+                if (ids == -1) { ids = 0; }
+                $("#hdids").val(ids);
+                $("#hdnames").val(names);
+            }
+
+            function seltree() {
+                top.window.topdialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '选择菜单',
+                    content: '/sysmodule/tree?url=/sysmodule/index',
+                    area: ['300px', '450px'],
+                });
+            }
+
+        </script>
+    }

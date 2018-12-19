@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "AddDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraChoiceComponentModel
+ 
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" /> 
+<input id="hdIds" type="hidden"  name="ChoiceId"  value="@ViewBag.ChoiceId" />
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>选择内容</label>
+                <div class="layui-input-block">
+                    <input type="text" name="ChoiceContent" maxlength="50" lay-verify="required" placeholder="" class="layui-input" style="width:500px;"> 
+                    <input type="hidden" id="hdChoiceId" name="ChoiceId" value="@ViewBag.ChoiceId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>标准分</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="StandardScore" maxlength="50" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>得分最大值</label>
+                <div class="layui-input-inline">
+                    <input id="txtMaxScore" name="MaxScore" type="text" maxlength="10" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>得分最小值</label>
+                <div class="layui-input-inline">
+                    <input id="txtMinScore" name="MinScore" type="text" maxlength="10" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>排序</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Sort" maxlength="50" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" maxlength="100" class="layui-textarea" style="height:60px;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div style="margin-left:110px;margin-top:30px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">关闭</a>
+                </div>
+            </div>
+
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'layer'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate; 
+
+            form.on('submit(saveuser)', function (data) { 
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraChoiceComponent/AddDetails",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.SearchData();
+                            top.layui.layer.close(top.window.topdialog); 
+                        }
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        }); 
+    </script>
+}

@@ -1,0 +1,170 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <input id="hduid" type="hidden" value="@ViewBag.uid" />
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th><input lay-filter="allChoose" id="allChoose" type="checkbox" lay-skin="primary"></th>
+                        <th>角色名称</th>
+                        <th>描述</th>
+                        <th>授权信息</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                {{if c.State==1}}
+                <tr>
+                    <td><input name="checked" lay-skin="primary" lay-filter="choose" type="checkbox" class="cksel" subid="ck{{c.RoleId}}" data-id="{{c.RoleId}}" data-name="{{c.RoleName}}"></td>
+                    <td>{{c.RoleName}}</td>                 
+                    <td>{{c.Remark}}</td>
+                    <td class="authtd" data-id="{{c.RoleId}}"></td>
+                </tr>
+                {{/if}}
+                {{/each}}
+            </script>
+        </div>
+
+        <div class="layui-form-item">
+            @*<div class="layui-input-block">*@
+            <div style="margin-left:200px;margin-top:30px;">
+                <div class="layui-btn" lay-submit="" lay-filter="saveuser"><em onclick="saveinfo()">保存</em></div>
+                <a class="layui-btn" id="btnGoBack">关闭</a>
+            </div>
+            @*</div>*@
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+            form.render(); //更新全部
+
+            form.on('checkbox(allChoose)', function (data) {
+                var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]:not([name="show"])');
+                child.each(function (index, item) {
+                    item.checked = data.elem.checked;
+                });
+                form.render('checkbox');
+            });
+
+
+        });
+
+        function selrole() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                data: { uid: $("#hduid").val() },
+                url: '/sysuser/UserRoleList',
+                success: function (data) {
+                    for (var i in data) {
+                        $("input[subid='ck" + data[i] + "'].cksel").attr("checked", true);
+                    }
+                }
+            });
+        }
+
+
+        function saveinfo() {
+            var temlist = [];
+            var temnamelist = [];
+            $(".cksel").each(function () {
+                if ($(this).attr("checked")) {
+                    temlist.push($(this).data("id"));
+                    temnamelist.push($(this).data("name"));
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                data: { uid: $("#hduid").val(),ids:JSON.stringify(temlist),names:temnamelist.join(',')},
+                url: '/sysuser/UserRole',
+                success: function (data) {
+                    if (data.flag == 'ok') {
+                        top.layui.layer.msg('保存成功');
+                        top.$.find('iframe[src="/sysuser/index"]')[0].contentWindow.inits();
+                        top.layui.layer.close(top.window.setroles);
+                    }
+                    else if (data.flag == 'noauth')
+                    {
+                        top.layui.layer.msg(data.content);
+                    }
+                    else
+                    {
+                        top.layui.layer.msg('保存失败');
+                    }
+                }
+            });
+        }
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.setroles);
+            });
+        });
+
+        function inits() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async:false,
+                data: { keyword: $("#ikeyWord").val() },
+                url: '/sysrole/rolelist',
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                   // layui.form.render("checkbox");
+                }
+            });
+            roleauthstate();
+        }
+
+        function roleauthstate() {
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                url: '/sysrole/authrolelist',
+                success: function (data) {
+                    $(".authtd").each(function () {
+                        var roleid = $(this).data("id");
+                        var flag = false;
+                        for (var i in data) {
+                            if (data[i] == roleid) {
+                                flag = true;
+                                break;
+                            }
+                        }
+
+                        if (flag) {
+                            $(this).html("已授权");
+                        }
+                        else {
+                            $(this).html("未授权");
+                        }
+
+                    });
+                }
+            });
+
+            selrole();
+        }
+    
+
+       
+    </script>
+}

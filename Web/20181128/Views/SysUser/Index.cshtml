@@ -1,0 +1,322 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    @*<div class="layui-card-header">用户列表</div>*@
+    <div class="layui-card-body">
+
+
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input value="" placeholder="请输入关键字" class="layui-input" type="text" id="ikeyWord">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-normal " id="btnAdd">添加用户</a>
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+            </div>
+        </blockquote>
+
+
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                @*<th><input lay-filter="allChoose" id="allChoose" type="checkbox" lay-skin="primary"></th>*@
+                                <th style="text-align:left;">登录名</th>
+                                <th>姓名</th>
+                                <th>性别</th>
+                                <th>手机号</th>
+                                <th>邮箱</th>
+                                <th>部门</th>
+                                @*<th>状态</th>*@
+                                <th>角色</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" ></tbody>
+                    </table>
+                </div>
+
+                <div class="forzentable">
+                 </div>           
+            </div>
+                    <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+
+            <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.UserName}}  {{if c.IsSystem==1}}<span class="layui-badge-dot" title="系统生成账号"></span> {{/if}}</td>
+                        <td>{{c.TrueName}}</td>
+                        <td>{{c.Sex}}</td>
+                        <td>{{c.MobileNumber}}</td>
+                        <td>{{c.EmailAddress}}</td>
+                        <td>{{c.DepartmentName}}</td>
+                        @*<td><input name="show" lay-skin="switch" lay-text="是|否" data-val="{{c.UserId}}" lay-filter="isShow" type="checkbox" {{#c.State==1?"checked":"" }}>  </td>*@
+                        <td>{{c.Attach==''?"未设角色":"已设角色"}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.UserId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                            <a class="layui-btn layui-btn-danger layui-btn-sm btnDel" data-id="{{c.UserId}}" data-issys="{{c.IsSystem}}"><i class="layui-icon"></i>删除</a>
+                            <a class="layui-btn layui-btn-danger layui-btn-sm btnReset" data-id="{{c.UserId}}"><i class="layui-icon"></i>重置密码</a>
+                            <a class="layui-btn layui-btn-danger layui-btn-sm btnSetRole" data-id="{{c.UserId}}"><i class="layui-icon"></i>设置角色</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+
+            </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table','layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+            form.render(); //更新全部
+            //全选
+            form.on('checkbox(allChoose)', function (data) {
+                var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]:not([name="show"])');
+                child.each(function (index, item) {
+                    item.checked = data.elem.checked;
+                });
+                form.render('checkbox');
+            });
+
+            form.on('switch(isShow)', function (data) {
+                
+                top.layui.layer.confirm('您确定更改用户状态吗？', ['确定', '取消'], function () {    
+                    $.ajax({
+                        type: "POST",
+                        url: '/sysuser/changestate',
+                        dataType:'json',
+                        data: { state: data.elem.checked ? 1 : 0, uid: $(data.elem).data("val") },
+                        success: function (datas) {
+                            if (datas.flag == 'ok') {
+                                top.layui.layer.closeAll();
+                                location.href = '/sysuser/index';
+                            }
+                            if (datas.flag == 'noauth') {
+                                $(data.elem).attr("checked", data.elem.checked ? false : true);
+                                form.render("checkbox");
+                                top.layui.layer.msg(datas.content);                                                         
+                            }
+                            if (datas.flag == 'fail') {
+                                top.layui.layer.msg('操作失败');
+                            }
+                        }
+                    });
+                }, function () {
+                        $(data.elem).attr("checked", data.elem.checked ? false : true);
+                        form.render("checkbox");
+                });                  
+            });
+        });
+
+        var pageIndex = 0;
+        var pageSize =15;
+
+        function changestate(state, uid) {
+            $.ajax({
+                type: "POST",
+                url: '/sysuser/changestate',
+                data: { state: data.elem.checked?1:0,uid:$(data.elem).data("val") },
+                success: function (data) {
+                    location.href = '/sysuser/index';
+                }
+            });
+        }
+
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '#btnAdd', function () {
+                adduser();
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+
+               
+                $.post('/sysuser/export', { keyword: $("#ikeyWord").val() }, function (data) {                
+                    if (data.flag == 'noauth') {
+                        top.layui.layer.close(top.window.export);
+                        top.layui.layer.msg(data.content);
+                    }
+                    if (data.flag == 'ok') {
+                        location.href = '/excel/down?guid=' + data.guid + "&name=用户信息";
+                        top.layui.layer.close(top.window.export);
+                    }
+                }, 'json');
+
+            });
+
+            $(document).on('click', '.btnEdit', function () {
+                var ids = $(this).data("id");
+                modify(ids);
+            });
+
+            $(document).on('click', '.btnDel', function () {
+                var ids = $(this).data("id");
+                var issys = $(this).data("issys");
+                del(ids,issys);
+            });
+
+            $(document).on('click', '.btnReset', function () {
+                var ids = $(this).data("id");
+                reset(ids);
+            });
+
+            $(document).on('click', '.btnSetRole', function () {
+                var ids = $(this).data("id");
+                setrole(ids);
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/sysuser/usercount",
+                async: false,
+                data:{ keyword:$("#ikeyWord").val()},
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                keyword:$("#ikeyWord").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/sysuser/userlist',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#allChoose").removeAttr("checked")
+                    layui.use('form', function () {
+                        layui.form.render('checkbox');
+                    });
+                    
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }
+        function adduser() {
+            location.href = '/sysuser/add';
+        }
+        function modify(ids) {
+            location.href = '/sysuser/edit?ids='+ids;
+        }
+        function del(ids,issys) {
+            if (issys == '1') {
+                top.layer.msg('本账号由系统生成，不能删除！');
+                return;
+            }
+            top.layer.confirm('您确定删除此用户吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/sysuser/DelUser',
+                    data: { ids: ids },
+                    dataType:"json",
+                    success: function (data) {
+                        if (data.flag == "ok") {
+                            top.layer.closeAll();
+                            inits();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () {
+
+            });
+        }
+        function reset(ids) {         
+            $("#resetDialog").val("666666");
+            layer = layui.layer;
+            window.resets = layer.open({
+                type: 1,
+                shade: 0,
+                title: '重置密码',
+                content: $("#resetDialog"),
+                btn: ['确定', '取消'],
+                yes: function () {
+                    if ($("#resetDialog").val().length < 6) {
+                      layer.msg('请输入不低于6位的密码');
+                        return;
+                    }
+                    $.post('/sysuser/changepwd', { uid: ids, pwd: escape($("#resetDialog").val()) }, function (data) {
+                        if (data.flag== "ok") {
+                            layer.msg("密码修改成功");
+                            layer.close(window.resets);
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    },'json');
+                }, btn2: function () {
+                    layer.close(window.resets);
+                }
+            });
+        }
+
+        function setrole(ids) {
+            top.window.setroles = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '设置角色',
+                content: '/sysuser/rolelist?ids=' + ids,
+                area: ['650px', '560px'],
+            });
+        }
+    </script>
+}

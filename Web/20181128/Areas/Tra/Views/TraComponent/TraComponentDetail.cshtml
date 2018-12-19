@@ -1,0 +1,178 @@
+﻿@{
+    ViewBag.Title = "TraComponentDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input type="hidden" id="hdUrl" value="@ViewBag.url" />
+<input type="hidden" id="hdId" value="@ViewBag.id" />
+<div class="layui-card">
+    <div class="layui-card-header">运输评估元件明细</div>
+    <div class="layui-card-body" style="overflow:hidden;">
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <table class="layui-table" id="cominfos">
+                    <thead>
+                        <tr>
+                            @*<th style="text-align:left;">运输评估元件id</th>*@
+                            <th style="text-align:left;">检查项目</th>
+                            <th>标准分</th>
+                            <th>得分最大值</th>
+                            <th>得分最小值</th>
+                            <th>备注</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TraChooselist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr 
+                        data-id="{{c.ComponentDetailId}}" data-type="{{c.ComponentId}}"
+                        data-max="{{c.MaxScore}}"
+                        data-min="{{c.MinScore}}"
+                        data-project="{{c.InspectProject}}"
+                        >
+                        @*<td>{{c.ComponentId}}</td>*@
+                        <td>{{c.InspectProject}}</td>
+                        <td>{{c.StandardScore}}</td>
+                        <td>{{c.MaxScore}}</td>
+                        <td>{{c.MinScore}}</td>
+                        <td>{{c.Remark}}</td>
+                        <td>{{c.State}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin-left:180px;">
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证开始时间
+            laydate.render({
+                elem: '#txtApplyTime'
+               , type: 'datetime'
+                , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+        });
+
+        $(function () {
+
+            SearchData();
+
+            ////点击选择按钮
+            // tr点击事件
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.setinfo(
+                    $(this).data("id"),
+                    $(this).data("max"),
+                    $(this).data("min"),
+                    $(this).data("project")
+                    );
+                //$(top.document.body).find('#layui-layer-iframe' + top.SearchTeacherLayerId).contents().find("td a").on('click', function () {
+                //    alert($(this).attr('data-id'));
+                //});
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChooselist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraComponent/TraComponentDetailAmount",
+                async: false,
+                data: {
+                    id: $("#hdId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                    $("#hdSupplierCounts").val(amount);
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                id: $("#hdId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraComponent/TraComponentDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraChooselist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#TraChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+    </script>
+}

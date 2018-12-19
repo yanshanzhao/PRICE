@@ -1,0 +1,129 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TrainNoticeModel
+
+<form class="layui-form layui-form-pane" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">培训信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            @*<div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperationNumber" type="text" name="OperationNumber" value="@Model.OperationNumber" class="layui-input" disabled>
+                    
+                </div>
+            </div>*@
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">资料类型</label>
+                <div class="layui-input-inline">
+                    <input id="hdOperationClaimId" name="OperationClaimId" type="hidden" value="@Model.OperationClaimId" />
+                    <input id="txtDepartmentName" type="text" name="DepartmentName" value="@Model.DatumTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">要求类型</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" type="text" name="ApplyUser" value="@Model.ClaimTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">使用方式</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.EmployTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">运作要求</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.OperationDetails" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">运作要求范围</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.StudyUsers" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">运作总要求</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.StudyDetails" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" id="btnGroup">
+                @*<a class="layui-btn layui-btn-primary" href="#">aa</a>*@
+            </div>
+
+            <script type="text/html" id="temfilelist">
+                {{each list as c}}
+                <a class="layui-btn layui-btn-primary" href="{{c.FileUrl}}">{{c.FileName}}</a>&nbsp;&nbsp;
+                {{/each}}
+            </script>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/SupplierQuery/TrainNotice/Index';
+            });
+
+        });
+
+
+        var tId = $("#hdOperationClaimId").val();
+
+        $(function () {
+
+            InitAujunct();
+        });
+
+        /////////////////////////// 附件 ////////////////////////////////
+
+        function SetGroupBtn(btnName,btnUrl)
+        {
+            var btn = "<a class=\"layui-btn layui-btn-primary\" href=\"" + btnUrl + "\">" + btnName + "</a>";
+        }
+
+        // 查询数据
+        function InitAujunct() {
+            var userjosn = {
+                tId: $("#hdOperationClaimId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/SupplierQuery/TrainNotice/AdjunctList',
+                data: userjosn,
+                success: function (data) {
+                    $("#btnGroup").html(template('temfilelist', { list: data }));
+
+                }
+            });
+        }
+    </script>
+}

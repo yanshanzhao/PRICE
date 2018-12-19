@@ -1,0 +1,587 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+ 
+@model SRM.Model.Tra.TraAbnormityRecordModel 
+<form class="layui-form layui-form-pane" action="/Tra/TraAbnormityRecord/EditAbnormityRecord" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商信息</div>
+        <div class="layui-card-body" style="overflow:visible;"> 
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>供应商名称</label>
+                <div class="layui-input-inline" style="width:300px;">
+                    <input id="txtSupplierName" type="text" class="layui-input" lay-verify="supplier" value="@ViewBag.SupplierName" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:135px;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline" style="width:165px;">
+                    <input id="txtTransportNumber" type="text" class="layui-input" lay-verify="supplier" value="@ViewBag.TransportNumber" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>供应商类型</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierTypeName" type="text" class="layui-input" lay-verify="supplier" value="@ViewBag.SupplierTypeName" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">异常整改记录</div>
+        <div class="layui-card-body" style="overflow:visible;">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>整改类型</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selRectificationTypes" disabled>
+                        <option value=""></option>
+                        <option value="0">月绩效</option>
+                        <option value="1">巡查</option>
+                        <option value="2">综合</option>
+                        <option value="3">日常运作</option>
+                        <option value="10">其它</option>
+                    </select>
+                    <input id="hdRectificationTypes" type="hidden" value="@Model.RectificationTypes"/>
+                    <input id="hdAbnormityId" type="hidden" name="AbnormityId" value="@Model.AbnormityId"/>
+                    <input id="hdTransportId" type="hidden" value="@Model.TransportId"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>二次整改</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selTwoAbnormity" disabled>
+                        <option value=""></option>
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                    </select>
+                    <input id="hdTwoAbnormity" type="hidden" name="TwoAbnormity" value="@Model.TwoAbnormity" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:135px;"><em>*</em>整改计划完成时间</label>
+                <div class="layui-input-inline" style="width:165px;">
+                    <input id="txtRectificationFinishTime" type="text" name="RectificationFinishTime" value="@Model.RectificationFinishTime" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>需整改事项</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRectificationContent" name="RectificationContent" class="layui-textarea" style="height:100px;" lay-verify="required">@Model.RectificationContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>要求效果</label>
+                <div class="layui-input-block">
+                    <textarea id="txtEffect" name="Effect" class="layui-textarea" lay-verify="required" style="height:100px;">@Model.Effect</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtAbnormityRemark" name="AbnormityRemark" maxlength="100" style="height:100px;" class="layui-textarea">@Model.AbnormityRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="divMonthCheckList">
+        <div class="layui-card-header">月绩效信息列表</div>
+        <div class="layui-card-body"> 
+            <div class="layui-form-item" style="width:12%;">
+                <div id="btnChooseMonthCheck" class="layui-btn" style="width:100%;" title="点击选择月绩效信息">选择月绩效信息</div>
+            </div>
+            <div class="layui-form"> 
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">考核年</th>
+                            <th>考核月</th>
+                            <th>考核得分</th>
+                            <th>考核类型</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="MonthCheckList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo" class="pagebox" style="display:none;">
+                    <div id="Pagination" class="pagination"></div><div id="pagedetail" class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfMC">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.CheckYear}}</td>
+                        <td>{{c.CheckMonth}}</td>
+                        <td>{{c.CheckTypeName}}</td>
+                        <td>{{c.Score}}<input type="hidden" class="monthCheckScore" value="{{c.Score}}" /></td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnMonthCheckInvalid" data-id="{{c.AbnormityDetailId}}" data-otherid="{{c.OtherId}}">
+                                <i class="iconfont icon-edit"></i>
+                                删除
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="divPatrolRecordList">
+        <div class="layui-card-header">巡查信息列表</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item" style="width:12%;">
+                <div id="btnChoosePatrolRecord" class="layui-btn" style="width:100%;" title="点击选择巡查信息">选择巡查信息</div>
+            </div>
+            <div class="layui-form">
+                <input id="hdRecordId" type="hidden" name="RecordIdList" />
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">巡查类型</th>
+                            <th>巡查编号</th>
+                            <th>巡查内容</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="PatrolRecordList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo1" class="pagebox">
+                    <div id="Pagination1" class="pagination"></div><div id="pagedetail1" class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfPR">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.PatrolTypeName}}</td>
+                        <td>{{c.PatrolNumber}}</td>
+                        <td>{{c.PatrolContent}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnPatrolRecordInvalid" data-id="{{c.AbnormityDetailId}}" data-otherid="{{c.OtherId}}">
+                                <i class="iconfont icon-edit"></i>
+                                删除
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdfilelist" name="FileList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delfilelist('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script> 
+
+        // initfiles/delfilelist/setfilename/downfile 附件上传/删除/更改名称/下载
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    if (filelist[i].path.lastIndexOf('.') != -1) {
+                        var lastnum = filelist[i].path.lastIndexOf('.');
+                        var exts = filelist[i].path.substring(lastnum + 1);
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                    }
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtRectificationFinishTime'
+              , type: 'datetime'
+              , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            // 验证
+            form.verify({
+                supplier: function (value, item) {
+                    if (!value) {
+                        return '运输供应商信息不能为空！';
+                    }
+                }
+            });
+
+            // 上传文件
+            $(document).on('click', '#btnUpload', function () {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/files?url=/Tra/TraAbnormityRecord/Index&type=plan',
+                    area: ['450px', '300px'],
+                });
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraAbnormityRecord/EditAbnormityRecord",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('保存成功！');
+                            location.href = '/Tra/TraAbnormityRecord/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('保存失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        //添加新文件(新增)
+        function setnewfiles(filename, path) {
+            filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+            initfiles();
+        }
+
+        $(function () {
+
+            alert($("#hdRectificationTypes").val());
+
+            // 整改类型
+            $("#selRectificationTypes").val($("#hdRectificationTypes").val());
+
+            // 二次整改
+            $("#selTwoAbnormity").val($("#hdTwoAbnormity").val());
+
+            if ($("#selRectificationTypes").val() == 0) {
+                $("#divMonthCheckList").show();
+                $("#divPatrolRecordList").hide();
+
+                // 月绩效列表 
+                SearchMonthCheck(); 
+            }
+            else if ($("#selRectificationTypes").val() == 1) {
+                $("#divMonthCheckList").hide();
+                $("#divPatrolRecordList").show();
+
+                // 巡查列表
+                SearchPatrolRecord();
+            }
+            else if ($("#selRectificationTypes").val() == 2) {
+                $("#divMonthCheckList").show();
+                $("#divPatrolRecordList").show();
+
+                // 月绩效列表/巡查列表
+                SearchMonthCheck();
+                SearchPatrolRecord();
+            }
+            else {
+                $("#divMonthCheckList").hide();
+                $("#divPatrolRecordList").hide();
+            }
+             
+            // 选择月绩效信息列表
+            $(document).on('click', '#btnChooseMonthCheck', function () {
+                ChooseMonthCheck();
+            });
+
+            // 作废月绩效信息
+            $(document).on('click', '.btnMonthCheckInvalid', function () {
+                var tId = $(this).data("id");
+                var tOtherId = $(this).data("otherid");
+                InvalidRecordDetail(tId, tOtherId, 0);
+            });
+
+            // 选择巡查信息列表
+            $(document).on('click', '#btnChoosePatrolRecord', function () {
+                ChoosePatrolRecord();
+            });
+
+            // 作废巡查信息
+            $(document).on('click', '.btnPatrolRecordInvalid', function () { 
+                var tId = $(this).data("id");
+                var tOtherId = $(this).data("otherid");
+                InvalidRecordDetail(tId, tOtherId, 1);
+            });
+
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraAbnormityRecord/Index';
+            }); 
+        });
+         
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 5;
+
+        // 选择月绩效信息列表
+        function ChooseMonthCheck() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择月绩效信息列表',
+                content: '/Tra/TraAbnormityRecord/MonthCheckDetail?tUrl=/Tra/TraAbnormityRecord/Index&tIds=' + $("#hdAbnormityId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tTwoAbnormity=" + $("#hdTwoAbnormity").val() + "&tType=edit",
+                area: ['550px', '550px'],
+            });
+        }
+
+        // 月绩效信息
+        // 查询总记录数
+        function SearchMonthCheck() {
+            // 页面索引
+            pageIndex = 0;
+
+            // 总条数
+            var count = 0;
+
+            // 等待时显示
+            $("#MonthCheckList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraAbnormityRecord/RecordDetailCount",
+                async: false,
+                data: {
+                    tAbnormityId: $("#hdAbnormityId").val(),
+                    tDetailType: 0
+                },
+                success: function (data) {
+                    count = data;
+                    $("#pagedetail").text("共" + count + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(count, {
+                callback: PageCallbackOfMC,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfMC(indexs) {
+            pageIndex = indexs;
+            InitMCTable(indexs);
+        }
+
+        // 查询数据
+        function InitMCTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tAbnormityId: $("#hdAbnormityId").val(),
+                tDetailType: 0
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraAbnormityRecord/RecordDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#MonthCheckList").html(template('temslistOfMC', { list: data }));
+                    $("#pageinfo").show();
+                    if (data == null) {
+                        $("#pageinfo").hide();
+                        $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo").hide();
+                        $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 选择巡查记录列表
+        function ChoosePatrolRecord() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择巡查记录列表',
+                content: '/Tra/TraAbnormityRecord/PatrolRecordDetail?tUrl=/Tra/TraAbnormityRecord/Index&tIds=' + $("#hdAbnormityId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tType=edit",
+                area: ['650px', '550px'],
+            });
+        }
+
+        // 巡查记录信息
+        // 查询总记录数
+        function SearchPatrolRecord() {
+
+            // 页面索引
+            pageIndex = 0;
+
+            var count = 0;
+
+            // 等待时显示
+            $("#PatrolRecordList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraAbnormityRecord/RecordDetailCount",
+                async: false,
+                data: {
+                    tAbnormityId: $("#hdAbnormityId").val(),
+                    tDetailType: 1
+                },
+                success: function (data) {
+                    count = data;
+                    $("#pagedetail1").text("共" + count + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination1").pagination(count, {
+                callback: PageCallbackOfPR,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfPR(indexs) {
+            pageIndex = indexs;
+            InitPRTable(indexs);
+        }
+
+        // 查询数据
+        function InitPRTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tAbnormityId: $("#hdAbnormityId").val(),
+                tDetailType: 1
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraAbnormityRecord/RecordDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#PatrolRecordList").html(template('temslistOfPR', { list: data }));
+                    $("#pageinfo1").show();
+                    if (data == null) {
+                        $("#pageinfo1").hide();
+                        $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo1").hide();
+                        $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 作废明细表信息
+        function InvalidRecordDetail(tAbnormityDetailId, tOtherId, tDetailType) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraAbnormityRecord/InvalidRecordDetail',
+                    data: {
+                        tAbnormityDetailId: tAbnormityDetailId,
+                        tOtherId: tOtherId,
+                        tDetailType: tDetailType
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+
+                            if (tDetailType == 0) {
+                                // 月绩效列表
+                                SearchMonthCheck();
+                            }
+                            else if (tDetailType == 1) {
+                                // 巡查记录
+                                SearchPatrolRecord();
+                            } 
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        } 
+    </script>
+}

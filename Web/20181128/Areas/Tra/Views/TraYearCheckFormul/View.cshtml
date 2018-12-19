@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+@model SRM.Model.Tra.TraYearCheckFormulModel
+<form class="layui-form layui-form-pane" action="/Tra/TraYearCheckFormul/EditYearCheckFormul" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">绩效考核评价信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>公式类型</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selFormulaType" name="FormulaType" disabled>
+                        <option value="" selected>请选择</option>
+                        <option value="0">月度绩效</option>
+                        <option value="1">巡查</option>
+                        <option value="2">年评估</option>
+                        <option value="3">月度绩效+巡查</option>
+                        <option value="4">巡查+年评估</option>
+                        <option value="5">月度绩效+年评估</option>
+                        <option value="6">月度绩效+巡查+年评估</option>
+                    </select>
+                    <input id="hdFormulaType" type="hidden" value="@Model.FormulaType" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>公式类型名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtFormulaName" type="text" name="FormulaName" value="@Model.FormulaName" maxlength="100" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>有效期开始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="BeginTime" value="@Model.BeginTime" lay-verify="required" placeholder="" class="layui-input" id="txtBeginTime" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>有效期结束时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="EndTime" value="@Model.EndTime" lay-verify="required" placeholder="" class="layui-input" id="txtEndTime" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开始日期
+            var insStart = laydate.render({
+                elem: '#txtBeginTime',
+                format: 'yyyy/MM/dd HH:mm:ss',
+                done: function (value, date) {
+                    // 更新结束日期的最小日期
+                    insEnd.config.min = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+
+                    // 自动弹出结束日期的选择器
+                    insEnd.config.elem[0].focus();
+                }
+            });
+
+            // 结束日期
+            var insEnd = laydate.render({
+                elem: '#txtEndTime',
+                format: 'yyyy/MM/dd HH:mm:ss',
+                min: 0,
+                btns: ['clear', 'confirm'],
+                done: function (value, date) {
+                    //更新开始日期的最大日期
+                    insStart.config.max = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+                }
+            });
+             
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraYearCheckFormul/Index';
+            });
+        });
+
+        $(function () {
+            // 公式类型赋值
+            $("#selFormulaType").val($("#hdFormulaType").val());
+        });
+    </script>
+}

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SRM-登陆首页</title>
+    <link href="~/assets/css/login/login.css" rel="stylesheet" />
+    <link href="~/assets/css/login/normalize.css" rel="stylesheet" />
+    <style>
+        .haha {
+            background: linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px, linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0px, linear-gradient(27deg, #222 5px, transparent 5px) 0px 10px, linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px, linear-gradient(90deg, #1b1b1b 10px, transparent 10px), linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424);
+            background-color: #131313;
+            background-size: 20px 20px;
+        } 
+    </style>
+</head>
+<body>
+    <div class="container login">
+        <div class="content">
+            <div id="large-header" class="large-header">
+                <canvas id="canvas" style="height:100%;"></canvas>
+                <div class="logo_box">
+                    <h3>SRM-供应商关系管理系统</h3>
+                    <form action="#" name="f" method="post">
+                        <div class="input_outer">
+                            <span class="u_user"></span>
+                            <input id="iusername" class="text" style="color: #FFFFFF !important" type="text" placeholder="请输入账户">
+                        </div>
+                        <div class="input_outer">
+                            <span class="us_uer"></span>
+                            <input id="ipwd" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;" value="" type="password" placeholder="请输入密码">
+                        </div>
+                        <input type="checkbox" id="ckremember" style="margin-left:20px;" /><label style="font-size:15px;margin-left:6px;">记住密码</label>
+                        <div class="mb2"><a class="act-but submit" href="javascript:;" onclick="login()" style="color: #FFFFFF">登录</a></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/assets/js/jquery-1.8.2.min.js"></script>
+    <script src="~/assets/js/layer/layer.js"></script>
+    <script src="~/assets/js/jquery.cookie.js"></script>
+    <script>
+        $(function () {
+            $("#canvas").height($(window).height());
+            $(window).resize(function () { $("#canvas").height($(window).height()); });
+
+            $(document).keydown(function (event) {
+                if (event.keyCode == 13) {
+                    login();
+                }
+            });
+
+            if ($.cookie("isrem") && $.cookie("isrem") == "1") {
+                $("#ckremember").attr("checked", true);
+                $("#iusername").val($.cookie("user"));
+                $("#ipwd").val($.cookie("pwd"));
+            }
+        });
+
+        function login() {
+            if (!$('#iusername').val()) {
+                layer.msg('请输入账户', { icon: 5 });
+
+                return false;
+            }
+            if (!$('#ipwd').val()) {
+                layer.msg('请输入密码', { icon: 4 });
+                return false;
+            }
+
+            var toplayer = layer.msg('加载中', {
+                icon: 16,
+                shade: 0.4,
+                time: false,
+                area: ['180px', '70px']
+            });
+
+            $.post('/index/logins', { user: $("#iusername").val(), pwd: $("#ipwd").val() }, function (data) {
+
+                layer.close(toplayer);
+                if (data.flag != 'ok') {
+                    layer.msg(data.content);
+                }
+                else {
+                    if ($("#ckremember").attr("checked")) {
+                        $.cookie('isrem', '1', { expires: 365 * 10, path: '/' })
+                        $.cookie('user', $("#iusername").val(), { expires: 365 * 10, path: '/' })
+                        $.cookie('pwd', $("#ipwd").val(), { expires: 365 * 10, path: '/' })
+                    }
+                    else {
+                        $.cookie('isrem', '0', { expires: 365 * 10, path: '/' })
+                    }
+
+                    location.href = '/index/index';
+                }
+            }, 'json');
+        }
+    </script>
+</body>
+</html>

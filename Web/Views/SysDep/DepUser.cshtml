@@ -1,0 +1,133 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@section Styles{
+    <style>
+        .pagination a{padding:1px 3px;font-size:10px;}
+        .pagination .current{padding:1px 3px;}
+    </style>
+}
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input value="" placeholder="请输入关键字" class="layui-input" type="text" id="ikeyWord" style="height:30px;">
+                </div>
+                <a class="layui-btn layui-btn-sm" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+
+        <div class="layui-form">
+
+            <ul class="layui-timeline" id="deplist">
+                <li class="layui-timeline-item" style="padding-bottom:5px;">
+                   <div style="text-align:center;font-size:12px;">
+                        请输入机构名称进行查询
+                   </div>
+                </li>
+
+            </ul>
+
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <li class="layui-timeline-item" style="padding-bottom:5px;">
+                    <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                    <div class="layui-timeline-content layui-text" style="cursor:pointer;">
+                        <h3 class="layui-timeline-title seldep" style="font-size:12px;" data-id="{{c.DepartmentId}}" data-name="{{c.DepartmentName}}" data-uid="{{c.UserId}}" data-uname="{{c.UserName}}">
+                            <span>{{c.DepartmentName}}</span>-<span>{{c.UserName}}</span>
+                        </h3>
+                    </div>
+                </li>
+                {{/each}}
+             </script>
+
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+      </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        var pageIndex = 0;
+        var pageSize = 10;
+
+        $(function () {
+           // inits();
+
+            $(document).on('click', '.seldep', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo($(this).data("uid"), $(this).data("uname"));
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/sysdep/selectcount",
+                async: false,
+                data: { keyword: $("#ikeyWord").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                keyword: $("#ikeyWord").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/sysdep/selectlist',
+                data: userjosn,
+                success: function (data) {
+                    $("#deplist").html(template('temslist', { list: data }));
+
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#deplist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }
+    </script>
+}

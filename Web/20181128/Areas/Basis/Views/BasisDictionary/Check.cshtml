@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<style>
+    label {
+        width: 150px !important;
+    }
+
+    .layui-input-inline {
+        width: 250px !important;
+    }
+
+    .layui-input-block {
+        margin-left: 180px !important;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">修改系统字典</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Basis/BasisDictionary/EditDictionary" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">字典名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="DictionaryName" value="@Model.DictionaryName" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                    <input name="DictionaryId" type="hidden" value="@Model.DictionaryId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">字典编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="DictionaryNumber" value="@Model.DictionaryNumber" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">字典排序</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Sort" value="@Model.Sort" maxlength="50" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">字典类型</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="DictionaryTypeName" value="@Model.DictionaryTypeName" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">使用类型</label>
+                <div class="layui-input-inline">
+                    <select class="select" name="UseType" id="txtUseType" lay-filter="selUseType" disabled>
+                        <option value="0">系统统一</option>
+                        <option value="1">公司使用</option>
+                    </select>
+                    <input id="hdUseType" type="hidden" value="@Model.UseType" />
+                </div>
+            </div> 
+            <div class="layui-form-item" id="selectcompanyname">
+                <label class="layui-form-label">选择公司</label>
+                <div class="layui-input-inline">
+                    <input id="hdCompanyName" type="text" name="CompanyName" value="@Model.CompanyName" lay-verify="" placeholder="" class="layui-input" disabled>
+                    <input id="hdCompanyID" type="hidden" name="CompanyId" value="@Model.CompanyId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" @(Html.Raw(Model.DictionaryState == 1 ? "checked" : "")) lay-skin="switch" lay-filter="dictionaryState" lay-text="启用|禁用" disabled>
+                    <input id="hdictionaryState" type="hidden" name="DictionaryState" value="@Model.DictionaryState" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'upload'], function () {
+            var form = layui.form, ele = layui.element;
+
+            //提交时给信息置顶赋值
+            form.on('switch(dictionaryState)', function (data) {
+                $("#hdictionaryState").val(this.checked ? "1" : "0");
+            });
+
+            //点击编辑时，为使用类型赋值
+            form.on('switch(selUseType)', function (data) {
+                $("#hdUseType").val(this.checked ? "1" : "0");
+            });
+
+            
+        });
+
+        //绑定事件
+        $(function () {
+            $("#txtUseType").val($("#hdUseType").val()); //信息置顶
+
+            var useType = $("#txtUseType").val();
+            if (useType == "0")
+                $("#selectcompanyname").hide();//字典类型下拉框隐藏
+            else
+                $("#selectcompanyname").show();//字典类型下拉框显示
+
+            //返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisDictionary/Index';
+            });
+        });
+ 
+    </script>
+}
+
+

@@ -1,0 +1,319 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Storage.StorageFromModel
+
+<style>
+    .pagedetaila {
+        position: absolute;
+        right: 60px;
+        font-size: 14px;
+        color: #333;
+        top: 5px;
+    }
+</style>
+<form class="layui-form layui-form-pane" action="/Tra/TraAssessFrom/EditTraAssessFrom" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">运输评估元件自定义信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">自定义编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtFromNumber" type="text" name="FromNumber" value="@Model.FromNumber" class="layui-input" disabled>
+                    <input id="hdFromId" name="FromId" type="hidden" value="@Model.FromId" />
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">评估类型</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.FromTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合格最小值</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyContent" type="text" name="ApplyContent" value="@Model.AdoptMin" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">分母</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyRemark" type="text" name="ApplyRemark" value="@Model.Molecule" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">分子</label>
+                <div class="layui-input-inline">
+                    <input id="txtMonthCost" type="text" name="MonthCost" value="@Model.Denominator" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">乘数常量</label>
+                <div class="layui-input-inline">
+                    <input id="txtMonthCost" type="text" name="MonthCost" value="@Model.Constant" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <input id="txtMonthCost" type="text" name="MonthCost" value="@Model.StateName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">创建时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtMonthCost" type="text" name="MonthCost" value="@Model.CreateTime" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">自定义元件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">元件编号</th>
+                            <th>元件名称</th>
+                            <th>评估类型</th>
+                            <th>标准得分</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ComponentList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.ComponentNumber}}</td>
+                        <td>{{c.ComponentName}}</td>
+                        <td>{{c.AssessTypeName}}</td>
+                        <td>{{c.StandardScore}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">模版附件类型信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>附件名称</th>
+                        <th>附件唯一</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody id="AdjunctTypeList"></tbody>
+            </table>
+            <script type="text/html" id="temfilelist">
+                {{each list as c}}
+                <tr data-id="{{c.FromAdjunctId}}">
+                    <td>{{c.AdjunctName}}</td>
+                    <td>{{c.AdjunctOnlyName}}</td>
+                    <td>{{c.Remark}}</td>
+                </tr>
+                {{/each}}
+            </script>
+
+            <div id="pageinfosa" class="pagebox">
+                <div id="Paginationa" class="pagination"></div><div class="pagedetaila">共0条记录</div>
+            </div>
+
+            <div class="layui-form-item" style="margin-top:30px;">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证开始时间
+            laydate.render({
+                elem: '#txtApplyTime'
+               , type: 'datetime'
+                , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Storage/StorageFrom/Index';
+            });
+
+        });
+
+        var tId = $("#hdFromId").val();
+
+        $(function () {
+
+            SearchData(tId);
+
+            SearchDataAdjunct(tId);
+            InitCusTableAdjunct();
+
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData(tId) {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ComponentList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageFrom/ComponentAmount",
+                async: false,
+                data: {
+                    fromId: tId
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                fromId: $("#hdFromId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageFrom/ComponentList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ComponentList").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        ////////////////////////////////     附件表分页列表     //////////////////////////////////////////////
+        // 查询总记录数
+        function SearchDataAdjunct(tId) {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#AdjunctTypeList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageFrom/FromAdjunctAmount",
+                async: false,
+                data: {
+                    fromId: tId
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetaila").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Paginationa").pagination(amount, {
+                callback: PageCallbackOfCusAdjunct,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCusAdjunct(indexs) {
+            pageIndex = indexs;
+            InitCusTableAdjunct(indexs);
+        }
+
+        // 查询数据
+        function InitCusTableAdjunct(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                fromId: $("#hdFromId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageFrom/FromAdjunctList',
+                data: userjosn,
+                success: function (data) {
+                    $("#AdjunctTypeList").html(template('temfilelist', { list: data }));
+                    $("#pageinfosa").show();
+                    if (data == null) {
+                        $("#pageinfosa").hide();
+                        $("#AdjunctTypeList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfosa").hide();
+                        $("#AdjunctTypeList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

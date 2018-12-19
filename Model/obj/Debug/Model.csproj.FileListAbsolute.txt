@@ -1,0 +1,5 @@
+E:\源代码\TMS项目\2018年项目\PRICE\Model\bin\Debug\SRM.Model.dll
+E:\源代码\TMS项目\2018年项目\PRICE\Model\bin\Debug\SRM.Model.pdb
+E:\源代码\TMS项目\2018年项目\PRICE\Model\obj\Debug\SRM.Model.dll
+E:\源代码\TMS项目\2018年项目\PRICE\Model\obj\Debug\SRM.Model.pdb
+E:\源代码\TMS项目\2018年项目\PRICE\Model\obj\Debug\Model.csprojResolveAssemblyReference.cache

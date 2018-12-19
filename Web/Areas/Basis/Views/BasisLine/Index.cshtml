@@ -1,0 +1,351 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<style>
+    .layui-form-switch {
+        height: 20px !important;
+    } 
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    线路名称：
+                    <div class="layui-input-inline" style="width:220px;">
+                        <input id="txtLineName" type="text" placeholder="线路名称" value="" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    起始位置：
+                    <div class="layui-input-inline" style="width:220px;">
+                        <input id="txtBeginName" type="text" value="" placeholder="起始位置" class="layui-input" readonly>
+                        <input id="hdBeginId" type="hidden" />
+                    </div>
+                    <i class="layui-icon layui-icon-delete clearBeginName"></i>
+                    &nbsp;&nbsp;
+                    结束位置：
+                    <div class="layui-input-inline" style="width:220px;">
+                        <input id="txtEndName" type="text" value="" placeholder="结束位置" class="layui-input" readonly>
+                        <input id="hdEndId" type="hidden" />
+                    </div>
+                    <i class="layui-icon layui-icon-delete clearEndName"></i>
+                    <div class="layui-inline" style="margin-top:10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">线路名称</th>
+                                <th>起始位置</th>
+                                <th>结束位置</th>
+                                <th>创建时间</th>
+                                <th>状态</th>
+                                <th>使用状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ServiceLevelList" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr style="height:49px !important;">
+                    <td>{{c.LineName}}</td>
+                    <td>{{c.BeginName}}</td>
+                    <td>{{c.EndName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td><input name="show" lay-skin="switch" lay-text="启用|停用" data-val="{{c.LineId}}" data-usestate="{{c.UseState}}" lay-filter="isShow" type="checkbox" {{#c.State==1?"checked":"" }}>  </td>
+                    @*<td>{{c.StateName}}</td>*@
+                    <td>{{c.UseStateName}}</td>
+                    <td>
+                        {{if c.UseState==0}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.LineId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.LineId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if c.UseState==0}}
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.LineId}}">
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a>
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.LineId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+    </div>
+</div>
+<script src="~/assets/js/PCASClass.js"></script>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+            form.on('switch(isShow)', function (data) {
+                if ($(data.elem).data("usestate") == 1) { 
+                    $(data.elem).attr("checked", data.elem.checked ? false : true);
+                    form.render("checkbox");
+                    layui.layer.msg('数据已被使用，不可停用！');
+                    return false;
+                }
+                top.layui.layer.confirm('您确定更改线路状态吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/Basis/BasisLine/ChangeState',
+                        dataType: 'json',
+                        data: { tId: $(data.elem).data("val"), tState: data.elem.checked ? 1 : 0 },
+                        success: function (datas) {
+                            if (datas.flag == 'success') {
+                                top.layui.layer.closeAll();
+                                top.layui.layer.msg('操作成功！');
+                                location.href = '/Basis/BasisLine/Index';
+                            }
+                            if (datas.flag == 'noauth') {
+                                $(data.elem).attr("checked", data.elem.checked ? false : true);
+                                form.render("checkbox");
+                                top.layui.layer.msg(datas.content);
+                            }
+                            if (datas.flag == 'fail') {
+                                top.layui.layer.msg('操作失败！');
+                            }
+                        }
+                    });
+                }, function () {
+                    $(data.elem).attr("checked", data.elem.checked ? false : true);
+                    form.render("checkbox");
+                });
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0; 
+        var pageSize = 5;
+
+        // 绑定事件
+        $(function () {
+
+            // 查询
+            SearchData();
+
+            // 清除条件(起迄位置)
+            $(document).on('click', '.clearBeginName', function () {
+                $("#txtBeginName").val("");
+                $("#hdBeginId").val("");
+            });
+            $(document).on('click', '.clearEndName', function () {
+                $("#txtEndName").val("");
+                $("#hdEndId").val("");
+            });
+
+            // 起始位置
+            $(document).on('click', '#txtBeginName', function () {
+                GetAreaName("Begin");
+            });
+
+            // 结束位置
+            $(document).on('click', '#txtEndName', function () {
+                GetAreaName("End");
+            });
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Basis/BasisLine/Export'
+                    , {
+                        lineName: $("#txtLineName").val(),
+                        beginId: $("#hdBeginId").val(),
+                        endId: $("#hdEndId").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=线路维护";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+
+            // 查看
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+        });
+
+        // 新增
+        function AddData() {
+            location.href = '/Basis/BasisLine/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ServiceLevelList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisLine/LineCount",
+                async: false,
+                data: {
+                    lineName: $("#txtLineName").val(),
+                    beginId: $("#hdBeginId").val(),
+                    endId: $("#hdEndId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                lineName: $("#txtLineName").val(),
+                beginId: $("#hdBeginId").val(),
+                endId: $("#hdEndId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Basis/BasisLine/LineList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ServiceLevelList").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    layui.use('form', function () {
+                        layui.form.render("checkbox");
+                    });
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#ServiceLevelList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Basis/BasisLine/Edit?tId=' + tId;
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Basis/BasisLine/View?tId=' + tId;
+        }
+
+        // 标识
+        var flag = "";
+
+        // 设置起始/结束位置
+        function setinfo(tAreaId, tAreaName) {
+            if (flag == "Begin") {
+                $("#hdBeginId").val(tAreaId);
+                $("#txtBeginName").val(tAreaName);
+            }
+            else if (flag == "End") {
+                $("#hdEndId").val(tAreaId);
+                $("#txtEndName").val(tAreaName);
+            }
+        }
+
+        // 获取位置
+        function GetAreaName(type) {
+            flag = type;
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择区域位置',
+                content: '/Basis/BasisLine/Areas?url=/Basis/BasisLine/Index',
+                area: ['800px', '500px'],
+            });
+        }
+    </script>
+}

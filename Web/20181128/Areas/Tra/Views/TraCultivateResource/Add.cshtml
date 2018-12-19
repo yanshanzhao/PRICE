@@ -1,0 +1,168 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraCultivateResource/AddTraCultivateResource" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">添加培训资料</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>培训资料名称</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input id="txtResourceName" type="text" name="ResourceName" maxlength="30" lay-verify="required" placeholder="培训资料名称" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block">
+                        <textarea placeholder="备注" name="Remark" maxlength="50" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息(只能上传一个文件)</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <label style="color:lightcoral;">温馨提示：单击文件名称可修改名称</label>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfilelist" name="TraCultivateResource" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                            <input type="hidden" name="Url" id="hdUrl" />
+                        </div>
+                    </div>
+                    <div id="filelist" style="float:left;margin-right:5px;margin-bottom:5px;">
+                    </div>
+                    <script type="text/html" id="temfilelist">
+                        {{each list as c}}
+                        <div class="layui-btn-group" style="margin-bottom:5px;">
+                            <div class="layui-btn layui-btn-primary">
+                                <span class="modify" data-id="{{c.id}}">{{c.filename}}</span>{{c.ext}}
+                                <em onclick="downfile('{{c.id}}')"><i class="layui-icon layui-icon-download-circle"></i></em>
+                                <em onclick="delfilelist('{{c.id}}')"><i class="layui-icon layui-icon-close-fill"></i></em>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </script>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //文件上传
+            layui.upload.render({
+                elem: '#btnUpload'
+               , url: '/index/upload?type=traresource'
+               , accept: 'file'
+               , auto: true
+               , done: function (res) {
+                   if (res.flag == "ok") {
+                       $("#hdUrl").val(res.path);
+                       filelist.push({ id: new Date().getTime(), path: res.path, filename: $("#txtResourceName").val(), ext: res.ext });
+                       initfiles();
+                   }
+                   return false;
+               }
+
+            });
+
+            //保存按钮
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraCultivateResource/AddTraCultivateResource",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Tra/TraCultivateResource/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            //修改上传上级名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+                return false;
+            });
+
+            //返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraCultivateResource/Index';
+            });
+        });
+
+    </script>
+}

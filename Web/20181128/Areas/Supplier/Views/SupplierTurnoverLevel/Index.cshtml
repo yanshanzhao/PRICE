@@ -1,0 +1,291 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    供应商种类：
+                    <div class="layui-input-inline"> 
+                        <select class="select" id="selDictionaryName"></select>
+                    </div>
+                    &nbsp;&nbsp;
+                    规模级别名称：
+                    <div class="layui-input-inline">
+                        <input name="SuppTurnoverName" value="" placeholder="规模级别名称" class="layui-input" type="text" id="txtSuppTurnoverName">
+                    </div>
+                    &nbsp;&nbsp;
+                    营业额限制：
+                    <div class="layui-input-inline">
+                        <select name="IsTurnover" lay-verify="" placeholder="" class="layui-select" id="txtIsTurnover">
+                            <option></option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    状态：
+                    <div class="layui-input-inline">
+                        <select name="SuppTurnoverState" lay-verify="" placeholder="" class="layui-select" id="txtSuppTurnoverState">
+                            <option></option>
+                            <option value="0">无效</option>
+                            <option value="1">有效</option>
+                        </select>
+                    </div>
+                    <br />
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a> 
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">供应商种类</th>
+                        <th>规模级别名称</th>
+                        <th>营业额限制</th>
+                        <th>营业额上限（不包含）</th>
+                        <th>营业额下限(含)</th>
+                        <th>状态</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="TurnoverLevellist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.DictionaryName}}</td>
+                    <td>{{c.SuppTurnoverName}}</td>
+                    <td>{{c.IsTurnovername}}</td>
+                    <td>{{c.TurnoverMax}}</td>
+                    <td>{{c.TurnoverMin}}</td>
+                    <td>{{c.SuppTurnoverStateName}}</td>
+                    <td>{{c.Remark}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.SuppTurnoverId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{if c.SuppTurnoverState==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.SuppTurnoverId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.SuppTurnoverId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 供应商种类
+            GetDictionaryName();
+
+            Search();
+             
+            $(document).on('click', '#btnAdd', function () {
+                AddData();//新增
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                Search();//查询
+            });
+
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Supplier/SupplierTurnoverLevel/Export'
+                    , {
+                        DictionaryName: $("#selDictionaryName").val(),
+                        SuppTurnoverName: $("#txtSuppTurnoverName").val(),
+                        IsTurnover: $("#txtIsTurnover").val(),
+                        SuppTurnoverState: $("#txtSuppTurnoverState").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=供应商规模级别维护列表";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            $(document).on('click', '.btnEdit', function () {  
+                var tId = $(this).data("id");
+                ModifyData(tId);//编辑
+            });
+
+            $(document).on('click', '.btnDelete', function () { 
+                var Id = $(this).data("id");
+                DeleteData(Id);//作废
+            });
+
+            $(document).on('click', '.btnView', function () {
+                var Id = $(this).data("id");//查看
+                ShowData(Id);
+            });
+        });
+
+        // 获取供应商种类(字典名称)
+        function GetDictionaryName() {
+            $.ajax({
+                url: '/Supplier/SupplierTurnoverLevel/GetDictionaryName',
+                type: 'POST',
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    if (data) {
+                        var dictionaryName = [];
+                        dictionaryName.push('<option value="" selected>请选择</option>')
+                        for (var i = 0, len = data.length; i < len; i++) {
+                            var param = data[i];
+                            dictionaryName.push('<option value="' + param.DictionaryId + '">' + param.DictionaryName + '</option>')
+                        }
+                        $("#selDictionaryName").html(dictionaryName.join(' '));
+                    }
+                }
+            });
+        }
+
+        //查询总记录数
+        function Search() {
+            var flagCount = 0;// 总记录数
+            pageIndex = 0;// 页面索引
+            $("#TurnoverLevellist").html("<tr class='loadings' ><td colspan=3>数据加载中……<td></tr>"); // 等待时显示
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Supplier/SupplierTurnoverLevel/TurnoverLevelCount",
+                async: false,
+                data: {
+                    DictionaryName: $("#selDictionaryName").val(),
+                    SuppTurnoverName: $("#txtSuppTurnoverName").val(),
+                    IsTurnover: $("#txtIsTurnover").val(),
+                    SuppTurnoverState: $("#txtSuppTurnoverState").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<', //上一页按钮里text
+                next_text: '>',//下一页按钮里text
+                items_per_page: pageSize,//显示条数
+                num_display_entries: 6,//连续分页主体部分分页条目数
+                current_page: pageIndex,//当前页索引
+                num_edge_entries: 2 //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                DictionaryName: $("#selDictionaryName").val(),
+                SuppTurnoverName: $("#txtSuppTurnoverName").val(),
+                IsTurnover: $("#txtIsTurnover").val(),
+                SuppTurnoverState: $("#txtSuppTurnoverState").val()
+            };
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Supplier/SupplierTurnoverLevel/SupplierTurnoverLevellist',
+                data: userjosn,
+                success: function (data) {
+                    $("#TurnoverLevellist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TurnoverLevellist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        } 
+
+        // 新增
+        function AddData() {
+            location.href = '/Supplier/SupplierTurnoverLevel/add';
+        }
+
+        // 查询
+        function SearchData() {
+            Search();
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Supplier/SupplierTurnoverLevel/Edit?tId=' + tId;
+        }
+
+        // 作废
+        function DeleteData(Id) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Supplier/SupplierTurnoverLevel/DelSupplierTurnoverLevel',
+                    data: { Id: Id },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            Search();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(Id) {
+            location.href = '/Supplier/SupplierTurnoverLevel/Check?tId=' + Id;
+        } 
+    </script>
+}

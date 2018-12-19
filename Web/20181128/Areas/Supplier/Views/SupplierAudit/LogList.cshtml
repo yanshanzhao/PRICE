@@ -1,0 +1,83 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>申请机构</th>
+                        <th>审核人员</th>
+                        <th>审核时间</th>
+                        <th>审核状态</th>
+                        <th>审核备注</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+
+            <input type="hidden" id="hdsuppid" value="@ViewBag.suppid" />
+            <input type="hidden" id="hdaudittype" value="@ViewBag.audittype" />
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.PresentDepartmentName}}</td>
+                    <td>{{c.AuditUserName}}</td>
+                    <td>{{c.AuditTime}}</td>
+                    <td>{{state(c.State)}}</td>
+                    <td>{{c.AuditRemark}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        $(function () {
+            inits();         
+        });
+
+        function inits() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                data:{audittype:$("#hdaudittype").val(),suppid:$("#hdsuppid").val()},
+                url: '/Supplier/SupplierAudit/loglists',
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                }
+            });
+        }
+
+        template.helper('state', function (j) {
+            if (j == "0") {
+                return '未审核';
+            }
+            if (j == "1") {
+                return '审核通过';
+            }
+            if (j == "3") {
+                return '审核未通过';
+            }
+            if (j == "2") {
+                return '审核退回';
+            }
+
+            if (j == '4') {
+                return '驳回';
+            }
+
+            return '撤销处理';
+
+        });
+    </script>
+}

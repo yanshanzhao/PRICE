@@ -1,0 +1,306 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@model  SRM.Model.Supplier.SupplierModel
+<div class="layui-card">
+    <div class="layui-card-header">基本信息</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="SupplierName" maxlength="50" lay-verify="required" placeholder="" class="layui-input" style="width:500px;" value="@Model.SupplierName">
+                    <input type="hidden" name="SupplierId" value="@Model.SupplierId" id="hdids" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="OtherNumber" maxlength="50" placeholder="" class="layui-input" value="@Model.SupplierNumber">
+                </div>
+                @*</div>
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label">供应商类型</label>
+              
+
+                <div class="layui-input-inline">
+                    <input type="text" id="type1" maxlength="50" placeholder="" class="layui-input">
+                    <input type="hidden" id="hdSupplierType" value="@Model.SupplierType" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">法人姓名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="OwnerName" maxlength="50" lay-verify="required" placeholder="" value="@Model.OwnerName" class="layui-input">
+                </div>
+                @*</div>
+
+            <div class="layui-form-item">*@
+                <label class="layui-form-label">企业性质</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="type3" maxlength="50" placeholder="" class="layui-input">
+                    <input type="hidden" id="hdEnterpriseType" value="@Model.EnterpriseType" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">证件类型</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="type2" maxlength="50" placeholder="" class="layui-input">
+                    <input type="hidden" id="hdPapersType" value="@Model.PapersType" />
+                </div>
+                @*</div>
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label">证件编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="PapersNumber" maxlength="50" placeholder="" class="layui-input" value="@Model.PapersNumber">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">企业地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="EnterpriseAddresses" maxlength="200" lay-verify="required" placeholder="" value="@Model.EnterpriseAddresses" class="layui-input" style="width:500px;">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">联系人</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ContactsName" maxlength="20" ay-verify="required" placeholder="" class="layui-input" value="@Model.ContactsName">
+                </div>
+                @*</div>
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label">联系人职位</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ContactsPosition" maxlength="30" placeholder="" class="layui-input" value="@Model.ContactsPosition">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">联系人电话</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ContactsPhone" maxlength="50" placeholder="" class="layui-input" value="@Model.ContactsPhone">
+                </div> 
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="layui-card">
+    <div class="layui-card-header">机构信息</div>
+    <div class="layui-card-body">
+        <table class="layui-table" style="width:610px;">
+            <thead>
+                <tr>
+                    <th style="text-align:left;">机构名称</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userlist" style="min-height:400px;"></tbody>
+        </table>
+        <script type="text/html" id="temslist">
+            {{each list as c}}
+             <tr>
+                 <td>{{c.DepartmentName}}</td>
+                 <td>{{infos(c.State)}}</td>
+                 <td>
+                     {{if c.State==1}}
+                     <a class="layui-btn layui-btn-danger layui-btn-sm btnsets " data-id="{{c.SupplierDepartmentId}}" data-s="{{c.State}}"><i class="layui-icon"></i>作废</a>
+                     {{/if}}
+                     {{if c.State==0}}
+                     <a class="layui-btn layui-btn-danger layui-btn-sm btnresets " data-id="{{c.SupplierDepartmentId}}" data-s="{{c.State}}"><i class="layui-icon"></i>启用</a>
+                     {{/if}}
+                 </td>
+             </tr>
+  
+            {{/each}}
+
+            <tr>
+                <td colspan="3" style="text-align:center;">
+                    <a class="layui-btn layui-btn-danger layui-btn-sm btnAdd "><i class="layui-icon"></i>新增</a>
+                </td>
+            </tr>
+        </script>
+</div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block" style="margin-left:15px;padding-bottom:10px;">
+            <a class="layui-btn" id="btnGoBack">返回</a>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+<script>
+    layui.use(['form', 'element', 'table', 'layer'], function () {
+        var form = layui.form, ele = layui.element, table = layui.table;
+    });
+    window.Dict_0 = [];
+    window.Dict_6 = []
+    window.Dict_9 = [];
+    function dictinits() {
+        $.ajax({
+            type: "POST",
+            url: '/supplier/supplier/dictlist',
+            async: false,
+            dataType: "json",
+            success: function (data) {
+                if (data) {
+                    for (var i in data) {
+                        if (data[i].Type == 0) {
+                            Dict_0.push({ id: data[i].Id, name: data[i].Name });
+                        }
+                        else if (data[i].Type == 6) {
+                            Dict_6.push({ id: data[i].Id, name: data[i].Name });
+                        }
+                        else if (data[i].Type == 9) {
+                            Dict_9.push({ id: data[i].Id, name: data[i].Name });
+                        }
+                    }
+                }
+            }
+        });
+
+        for (var i in Dict_0) {
+            if (Dict_0[i].id == $("#hdSupplierType").val()) {
+                $("#type1").val(Dict_0[i].name);
+            }
+        }
+
+        for (var i in Dict_6) {
+            if (Dict_6[i].id == $("#hdPapersType").val()) {
+                $("#type2").val(Dict_6[i].name);
+            }
+        }
+
+        for (var i in Dict_9) {
+            if (Dict_9[i].id == $("#hdEnterpriseType").val()) {
+                $("#type3").val(Dict_9[i].name);
+            }
+        }
+    }
+    function inits() {
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: '/supplier/supplier/deplist',
+            data: { ids: $("#hdids").val() },
+            success: function (data) {
+                $("#userlist").html(template('temslist', { list: data }));
+            }
+        });
+    }
+
+    $(function () {
+        dictinits();
+        inits();
+
+        $(document).on('click', '.btnsets', function () {
+            var j = $(this).data("s");
+
+            if (j == 2) {
+                layui.layer.msg("此机构正在使用中，请确认");
+            }
+
+            if (j == 0) {
+                layui.layer.msg("此数据已作废");
+            }
+
+            if (j == 1) {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '/supplier/supplier/MaintainDep',
+                    data: { ids: $(this).data("id") },
+                    success: function (data) {
+                        if (data.flag == 'ok') {
+                            layui.layer.msg("作废成功");
+                            inits();
+                        }
+                        else {
+                            layui.layer.msg("作废失败");
+                        }
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.btnresets', function () {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/supplier/supplier/resetmain',
+                data: { ids: $(this).data("id") },
+                success: function (data) {
+                    if (data.flag == 'ok') {
+                        layui.layer.msg("启用成功");
+                        inits();
+                    }
+                    else {
+                        layui.layer.msg("启用失败");
+                    }
+                }
+            });
+
+        });
+
+        $(document).on('click', '.btnAdd', function () {
+            seltree();
+        });
+
+        $(document).on('click', '#btnGoBack', function () {
+            location.href = '/supplier/supplier/index';
+        });
+    });
+
+    function setinfo(ids, names) {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: '/supplier/supplier/adddep',
+            data: { ids:ids,pkid:$("#hdids").val() },
+            success: function (data) {
+                if (data.flag == 'exsit') {
+                    layui.layer.msg('已存在此机构');
+                }
+                if (data.flag == 'ok') {
+                    layui.layer.msg('添加成功')
+                    inits();
+                }
+                if (data.flag == 'fail') {
+                    layui.layer.msg('操作失败');
+                }
+            }
+        });
+
+    }
+
+
+    function seltree() {
+        top.window.topdialog = top.layui.layer.open({
+            type: 2,
+            shade: 0.2,
+            title: '选择机构',
+            content: '/sysdep/tree?url=/Supplier/Supplier/Index',
+            area: ['300px', '450px'],
+        });
+    }
+
+    template.helper('infos', function (j) {
+       
+        if (j == 0) {
+            return '无效';
+        } else if (j == 1) {
+            return '有效';
+        } else {
+            return '使用';
+        }
+        return ''
+    });
+</script>
+}

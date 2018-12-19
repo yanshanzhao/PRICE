@@ -1,0 +1,154 @@
+﻿@{
+    ViewBag.Title = "AddPatrolRecordList";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<input type="hidden" id="hdTId" value="@ViewBag.tId" />
+<input type="hidden" id="hdUrl" value="@ViewBag.url" /> 
+@*巡查信息*@
+<div class="layui-card">
+    <div class="layui-card-header">巡查信息列表</div>
+    <div class="layui-card-body" style="overflow:hidden;">
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <table class="layui-table" id="cominfos">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">巡查编号</th>
+                            <th>巡查类型</th>
+                            <th>巡查内容</th>
+                        </tr>
+                    </thead>
+                    <tbody id="datalist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination1" class="pagination"></div><div class="pagedetail_PatrolRecord">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr data-id="{{c.PatrolId}}" data-type="{{c.TransportId}}"
+                        data-number="{{c.PatrolNumber}}"
+                        data-patrolType="{{c.PatrolType}}"
+                        data-patrolContent="{{c.PatrolContent}}">
+                        <td>{{c.PatrolNumber}}</td>
+                        <td>{{c.PatrolTypeName}}</td>
+                        <td>{{c.PatrolContent}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+        
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        //hdTransportId 运输供应商ID
+        var transportId = $("#hdTId").val();
+        $(function () {
+            var id = $(this).data("id");
+            var number = $(this).data("number");
+            var patrolType = $(this).data("patrolType");
+            var patrolContent = $(this).data("patrolContent");
+            SearchData();
+            ////点击选择按钮
+            // tr点击事件
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SavePatrolRecordList(
+                    id, number, patrolType, patrolContent
+                    );
+                //$(top.document.body).find('#layui-layer-iframe' + top.SearchTeacherLayerId).contents().find("td a").on('click', function () {
+                //    alert($(this).attr('data-id'));
+                //});
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+
+        //------------月度绩效信息列表--------------------------------------------------
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 5;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#datalist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraAbnormityRecord/TraComponentDetailAmount",
+                async: false,
+                data: {
+                    transportId: $("#hdTId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                transportId: $("#hdTId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraAbnormityRecord/GetTraPatrolRecordList',
+                data: userjosn,
+                success: function (data) {
+                    $("#datalist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#datalist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#datalist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+    </script>
+}

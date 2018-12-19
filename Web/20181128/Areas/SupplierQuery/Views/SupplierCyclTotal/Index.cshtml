@@ -1,0 +1,189 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    RDC：
+                    <div class="layui-input-inline">
+                        <input id="txtDepartmentName" type="text" value="" placeholder="部门名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    周期时间：
+                    <div class="layui-input-inline">
+                        <input id="txtBeginTime" type="text" value="" placeholder="开始时间" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input id="txtEndTime" type="text" value="" placeholder="结束时间" class="layui-input">
+                    </div>
+                    <div class="layui-inline" style="margin-left:10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>RDC</th>
+                        <th>新增</th>
+                        <th>变更</th>
+                        <th>总数量</th>
+                        <th>类型</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.RowNumber}}</td>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.NewAmount}}</td>
+                    <td>{{c.AlterAmount}}</td>
+                    <td>{{c.TotalAmount}}</td>
+                    <td>{{c.TypeName}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer', 'laydate'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table,
+                laydate = layui.laydate;
+            laydate.render({
+                elem: '#txtBeginTime'
+                ,type: 'datetime'
+            });
+            laydate.render({
+                elem: '#txtEndTime'
+                , type: 'datetime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 5;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/SupplierQuery/SupplierCyclTotal/Export'
+                    , {
+                        index: (pageIndex + 1),
+                        size: 1000000,
+                        departmentName: $("#txtDepartmentName").val(),
+                        beginTime: $("#txtBeginTime").val(),
+                        endTime: $("#txtEndTime").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=供应商信息汇总";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/SupplierQuery/SupplierCyclTotal/IndexAmount",
+                async: false,
+                data: {
+                    departmentName: $("#txtDepartmentName").val(),
+                    beginTime: $("#txtBeginTime").val(),
+                    endTime: $("#txtEndTime").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                departmentName: $("#txtDepartmentName").val(),
+                beginTime: $("#txtBeginTime").val(),
+                endTime: $("#txtEndTime").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/SupplierQuery/SupplierCyclTotal/Index',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

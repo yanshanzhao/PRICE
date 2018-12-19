@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "EditTraPatrolAllot";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraPatrolModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraPatrol/EditTraPatrolAllot" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">修改运作供应商</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">培训开始执行时间</label>
+                <div class="layui-input-block">
+                    <input id="txtBeginTime" name="BeginTime" type="text" value="@Model.BeginTime" class="layui-input">
+                    <input id="hdPatrolAllotId" type="hidden" name="PatrolAllotId" value="@Model.PatrolAllotId" />
+                    <input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">培训最后执行时间</label>
+                <div class="layui-input-block">
+                    <input id="txtLaseTime" name="LaseTime" type="text" value="@Model.LaseTime" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:180px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div> 
+</form>
+
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证预计到货时间
+            laydate.render({
+                elem: '#txtLaseTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            //验证实际到货时间
+            laydate.render({
+                elem: '#txtBeginTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraPatrol/EditTraPatrolAllotInfo",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.SearchData();
+                            top.layui.layer.close(top.window.operate);
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载事件
+        $(function () {
+            // 关闭按钮
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.operate);
+            });
+        });
+    </script>
+}

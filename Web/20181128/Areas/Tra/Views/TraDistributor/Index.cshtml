@@ -1,0 +1,460 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <!-- 查询条件  -->
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input placeholder="请输入运输供应商名称" class="layui-input" type="text" id="iSuppName">
+                    </div>
+                </div>
+                @*<div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <select id="comSuppScope" class="select" lay-filter="suppscope"></select>
+                        </div>
+                    </div>*@
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comState" class="select" lay-filter="state">
+                                <option value="-1">请选择状态</option>
+                                <option value="1">新增</option>
+                                <option value="10">启用</option>
+                                <option value="20">作废</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label>创建时间</label>
+                    <div class="layui-input-inline">
+                        <input placeholder="开始时间" class="layui-input isInitValueTimes" type="text" id="iCreateStartTime">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input placeholder="结束时间" class="layui-input seltimes" type="text" id="iCreateEndtime">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label>运作开始时间</label>
+                    <div class="layui-input-inline">
+                        <input placeholder="开始时间" class="layui-input seltimes" type="text" id="iSubmitTimeStartTime">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input placeholder="结束时间" class="layui-input seltimes" type="text" id="iSubmitTimeEndtime">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label>运作结束时间</label>
+                    <div class="layui-input-inline">
+                        <input placeholder="开始时间" class="layui-input seltimes" type="text" id="iDelTimeStartTime">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input placeholder="结束时间" class="layui-input seltimes" type="text" id="iDelTimeEndtime">
+                    </div>
+                </div>
+                <!-- 操作按钮 -->
+                <div class="layui-inline">
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-normal " id="btnExport">导出</a>
+                </div>
+            </div>
+            <input type="hidden" id="hddepid" value="@ViewBag.depid" />
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable">
+                    <table class="layui-table" id="tablelist">
+                        <thead>
+                            <tr>
+                                <th>运输供应商</th>
+                                <th>配送范围</th>
+                                <th>配送员ID</th>
+                                <th>配送员姓名</th>
+                                <th>年龄</th>
+                                <th>性别</th>
+                                <th>联系电话</th>
+                                <th>运作开始时间</th>
+                                <th>运作结束时间</th>
+                                <th>配送发料</th>
+                                <th>卸货地址</th>
+                                <th>路由地点</th>
+                                <th>提货方式</th>
+                                <th>当前星级</th>
+                                <th>状态</th>
+                                <th>备注</th>
+                                <th>新增时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.TransportSupplierName}}</td>
+                    <td>{{c.DistributionScopeName}}</td>
+                    <td>{{c.DistributorNumber}}</td>
+                    <td>{{c.DistributorName}}</td>
+                    <td>{{c.DistributorAge}}</td>
+                    <td>{{c.DistributorSex}}</td>
+                    <td>{{c.DistributorContact}}</td>
+                    <td>{{c.SubmitTime}}</td>
+                    <td>{{c.EndTime}}</td>
+                    <td>{{c.StoreIssue}}</td>
+                    <td>{{c.Unloading}}</td>
+                    <td>{{c.Route}}</td>
+                    <td>{{c.ExtractType}}</td>
+                    <td>{{c.Grade}}</td>
+                    <td>{{c.DistributorStateName}}</td>
+                    <td>{{c.DistributorRemark}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnView " data-userid="{{c.DistributorUserId}}"><i class="layui-icon"></i>查看</a>
+                        {{if c.DistributorState==1 ||  c.DistributorState==10 }}
+                        <a class="layui-btn  layui-btn-sm btnEdit" data-userid="{{c.DistributorUserId}}" data-state="{{c.DistributorState}}"><i class="iconfont icon-edit"></i>编辑</a>
+                        {{/if}}
+                        {{if c.DistributorState !=20}}
+                        <a class="layui-btn  layui-btn-danger layui-btn-sm btnDel" data-userid="{{c.DistributorUserId}}" data-state="{{c.DistributorState}}" data-name="{{c.TransportSupplierName}}"><i class="layui-icon"></i>作废</a>
+                        {{/if}}
+                        {{ if c.DistributorState==1 }}
+                        <a class="layui-btn  layui-btn-danger layui-btn-sm btnSubmit" data-userid="{{c.DistributorUserId}}" data-state="{{c.DistributorState}}"><i class="layui-icon"></i>提交</a>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer', 'laydate', 'jquery'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate, $ = layui.jquery;
+            
+            $('.seltimes').each(function () {
+                laydate.render({
+                    elem: this,
+                    type: 'date',
+                });
+            }); 
+            $('.isInitValueTimes').each(function () {
+                laydate.render({
+                    elem: this
+                   , type: 'date'
+                    , value: getDate()
+                    , isInitValue: true
+                });
+            });
+           
+
+        });
+
+        // 设置默认日期
+        function getDate() {
+            var date = new Date();
+            var year = date.getFullYear() + "";
+            var month = (date.getMonth() + 1) + "";
+            if (month < 10)
+                month = "0" + month;
+            var day = date.getDate();
+            if (day < 10)
+                day = "0" + day;
+            // 获取当前日期
+            var begin = year + "-" + month + "-" + day;
+            return begin;
+        }
+        
+        var pageIndex = 0;//页码编号 首页
+        var pageSize = 8;//每页行数 8行
+        var flagCount = 0;//总行数
+        var pageCount = 0;//当前页的行数
+        var types = 0;//是否首次查询
+        $(function ()//页面加载
+        {
+            inits();//填充页面数据
+            $(document).on('click', '#btnSearch', function () {//查询事件
+                types = 1;
+                search();
+            });
+            $(document).on('click', '#btnAdd', function () { // 新增
+                AddData();
+            });
+            $(document).on('click', '#btnExport', function () {//导出事件
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraDistributor/Export',
+                    {
+                        "name": $("#iSuppName").val(),//运输供应商名称
+                        "state": $("#comState").val(),//状态
+                        "createstarttime": $("#iCreateStartTime").val(),//创建时间的开始
+                        "createendtime": $("#iCreateEndtime").val(),//创建时间的结束
+                        "submittarttime": $("#iSubmitTimeStartTime").val(),//运作开始时间的开始
+                        "submitendtime": $("#iSubmitTimeEndtime").val(),//运作开始时间的结束
+                        "deltarttime": $("#iDelTimeStartTime").val(),//运作结束时间的开始
+                        "delendtime": $("#iDelTimeEndtime").val(),//运作结束时间的结束
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'ok') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=配送人员信息";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            $(document).on('click', '.btnEdit', function () { // 编辑
+                var tuserid = $(this).data("userid");
+                var tState = $(this).data("state");
+                EditData(tuserid, tState);
+            });
+            $(document).on('click', '.btnDel', function () { // 作废
+                var tuserid = $(this).data("userid");
+                var tState = $(this).data("state");
+                DelData(tuserid, tState);
+            });
+            $(document).on('click', '.btnSubmit', function () { // 提交
+                var tuserid = $(this).data("userid");
+                var tState = $(this).data("state");
+                SubmitData(tuserid, tState);
+            });
+            $(document).on('click', '.btnView', function () { // 查看
+                var tuserid = $(this).data("userid");
+                View(tuserid);
+            });
+        }
+         )
+        function inits() {//inits方法
+            pageIndex = 0;
+            var createTimes = "";
+            if (types == 0) //types=0  页面首次加载
+                createTimes = getDate();
+            else
+                createTimes = $("#iCreateStartTime").val();
+            $("#userlist").html("<tr class='loadings' ><td colspan=15>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraDistributor/RowCount",
+                async: false,
+                data: {
+                    "name": $("#iSuppName").val(),//运输供应商名称
+                    "state": $("#comState").val(),//状态
+                    "createstarttime": createTimes,//创建时间的开始
+                    "createendtime": $("#iCreateEndtime").val(),//创建时间的结束
+                    "submittarttime": $("#iSubmitTimeStartTime").val(),//运作开始时间的开始
+                    "submitendtime": $("#iSubmitTimeEndtime").val(),//运作开始时间的结束
+                    "deltarttime": $("#iDelTimeStartTime").val(),//运作结束时间的开始
+                    "delendtime": $("#iDelTimeEndtime").val(),//运作结束时间的结束
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");//赋值（共**页）
+                }
+            });
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function ArrangeTabel() {
+            pageIndex = 0;//页码编号 首页
+            flagCount = 0;//总行数
+            pageCount = 0;//当前页的行数
+            $(".pagedetail").text("共" + flagCount + "条记录");//赋值（共**页）
+            $("#userlist").html(template('temslist', { list: null }));
+            $("#pageinfos").hide();
+            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+        }
+        function RefreshTable(pageIndexs) {
+            $(".pagedetail").text("共" + flagCount + "条记录");//赋值（共**页）
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                name: $("#iSuppName").val(),//供应商名称
+                state: $("#comState").val(),//状态
+                createstarttime: $("#iCreateStartTime").val(),//创建时间的开始
+                createendtime: $("#iCreateEndtime").val(),//创建时间的结束
+                submittarttime: $("#iSubmitTimeStartTime").val(),//运作开始时间的开始
+                submitendtime: $("#iSubmitTimeEndtime").val(),//运作开始时间的结束
+                deltarttime: $("#iDelTimeStartTime").val(),//运作结束时间的开始
+                delendtime: $("#iDelTimeEndtime").val(),//运作结束时间的结束
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraDistributor/list',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        pageCount = 0;
+                    } else {
+                        if (data.length == 0) {
+                            $("#pageinfos").hide();
+                            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        }
+                        pageCount = data.length;
+                    }
+                }
+            });
+        }
+        function InitCusTable(pageIndexs) {
+            var createTimes = "";
+            if (types == 0) //types=0  页面首次加载
+                createTimes = getDate();
+            else
+                createTimes = $("#iCreateStartTime").val();
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                name: $("#iSuppName").val(),//供应商名称
+                state: $("#comState").val(),//状态
+                createstarttime: createTimes,//创建时间的开始
+                createendtime: $("#iCreateEndtime").val(),//创建时间的结束
+                submittarttime: $("#iSubmitTimeStartTime").val(),//运作开始时间的开始
+                submitendtime: $("#iSubmitTimeEndtime").val(),//运作开始时间的结束
+                deltarttime: $("#iDelTimeStartTime").val(),//运作结束时间的开始
+                delendtime: $("#iDelTimeEndtime").val(),//运作结束时间的结束
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraDistributor/list',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    //$(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        pageCount = 0;
+                    } else {
+                        if (data.length == 0) {
+                            $("#pageinfos").hide();
+                            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        }
+                        pageCount = data.length;
+                    }
+                }
+            });
+        }
+        // 新增
+        function AddData() {
+            location.href = '/Tra/TraDistributor/Add';
+        }
+        //查询
+        function search() {//查询具体执行代码
+            inits();
+        }
+        // 编辑
+        function EditData(tuserId, tState) {
+            if (tState == 1) {
+                location.href = '/Tra/TraDistributor/Edit?userId=' + tuserId;
+                RefreshTable(pageIndex);//刷新本页
+            }
+            else if (tState == 10) {
+                location.href = '/Tra/TraDistributor/EditState?userId=' + tuserId;
+                RefreshTable(pageIndex);//刷新本页
+            }
+            else {
+                top.layer.msg('本数据非新增状态，不允许修改！');
+                return;
+            }
+        }
+        // 查看
+        function View(tuserId) {
+            location.href = '/Tra/TraDistributor/View?userId=' + tuserId;
+        }
+        // 提交
+        function SubmitData(tuserid, tState) {
+            if (tState != '1') {
+                top.layer.msg('本数据非新增状态，不允许提交！');
+                return;
+            }
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraDistributor/SubmitState',
+                    data: { userid: tuserid },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            RefreshTable(pageIndex);//刷新本页
+                        } else {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+        // 作废
+        function DelData(tuserid, tState) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraDistributor/Del',
+                    data: { userId: tuserid, state: tState },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.msg(data.content);
+                            top.layer.closeAll();
+                            flagCount = flagCount - 1;//总行数减一
+                            pageCount = pageCount - 1;//本页行数减一
+                            if (pageCount == 0)//本页行数为0 页数减一
+                                pageIndex = pageIndex - 1;
+                            if (flagCount > 0) {
+                                RefreshTable(pageIndex);
+                            } else {
+                                ArrangeTabel();
+                            }
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }
+            );
+
+        }
+
+    </script>
+}
+
+

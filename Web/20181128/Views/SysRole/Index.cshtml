@@ -1,0 +1,226 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input value="" placeholder="请输入关键字" class="layui-input" type="text" id="ikeyWord">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-normal " id="btnAdd">添加角色</a>
+            </div>
+        </blockquote>
+
+
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>角色名称</th>
+                        <th>状态</th>
+                        <th>描述</th>
+                        <th>授权信息</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>               
+                    <td>{{c.RoleName}}{{if c.IsSystem==1}} <span class="layui-badge-dot" title="系统生成角色"></span> {{/if}}</td>
+                    <td><input name="show" lay-skin="switch" lay-text="是|否" data-val="{{c.RoleId}}" lay-filter="isShow" type="checkbox" {{#c.State==1?"checked":"" }}>  </td>
+                    <td>{{c.Remark}}</td>
+                    <td class="authtd" data-id="{{c.RoleId}}"></td>
+                    <td>
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.RoleId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDel" data-id="{{c.RoleId}}" data-issys="{{c.IsSystem}}"><i class="layui-icon"></i>删除</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnAuth" data-id="{{c.RoleId}}" data-name="{{c.RoleName}}" ><i class="layui-icon"></i>授权</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+     </div>
+</div>
+
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+
+            form.on('switch(isShow)', function (data) {
+                top.layui.layer.confirm('您确定更改角色状态吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/sysrole/changestate',
+                        dataType: 'json',
+                        data: { state: data.elem.checked ? 1 : 0, rid: $(data.elem).data("val") },
+                        success: function (datas) {
+                            if (datas.flag == 'ok') {
+                                top.layui.layer.closeAll();
+                                location.href = '/sysrole/index';
+                            }
+                            if (datas.flag == 'noauth') {
+                                $(data.elem).attr("checked", data.elem.checked ? false : true);
+                                form.render("checkbox");
+                                top.layui.layer.msg(datas.content);
+                            }
+                            if (datas.flag == 'fail') {
+                                top.layui.layer.msg('操作失败');
+                            }
+                          
+                        }
+                    });
+                }, function () {
+                    $(data.elem).attr("checked", data.elem.checked ? false : true);
+                    form.render("checkbox");
+                });
+            });
+        });
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '#btnAdd', function () {
+                adds();
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+
+            $(document).on('click', '.btnEdit', function () {
+                var ids = $(this).data("id");
+                modify(ids);
+            });
+
+            $(document).on('click', '.btnDel', function () {
+                var ids = $(this).data("id");
+                var issys = $(this).data("issys");
+                del(ids,issys);
+            });
+
+            $(document).on('click', '.btnAuth', function () {
+                var ids = $(this).data("id");
+                var names = $(this).data("name");
+                reset(ids,names);
+            });
+        });
+
+        function inits() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async:false,
+                data: { keyword: $("#ikeyWord").val() },
+                url: '/sysrole/rolelist',
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    layui.use('form', function () {
+                        layui.form.render("checkbox");
+                    });
+                }
+            });
+            roleauthstate();
+        }
+
+        function roleauthstate() {
+           
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                url: '/sysrole/authrolelist',
+                success: function (data) {
+                    $(".authtd").each(function () {
+                        var roleid = $(this).data("id");
+                        var flag = false;
+                        for (var i in data) {
+                            if (data[i] == roleid) {
+                                flag = true;
+                                break;
+                            }
+                        }
+
+                        if (flag) {
+                            $(this).html("已授权");
+                        }
+                        else {
+                            $(this).html("未授权");
+                        }
+
+                    });
+                }
+            });
+        }
+
+        function search() {
+            inits();
+
+
+        }
+
+        function reset(ids, names) {
+            location.href = '/sysrole/auth?id=' + ids + "&name=" + names;
+        }
+
+        function modify(ids) {
+            top.window.operate = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '修改角色',
+                content: '/sysrole/edit?ids=' + ids,
+                area: ['550px', '560px'],
+            });
+        }
+
+        function adds() {
+            top.window.operate = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '添加角色',
+                content: '/sysrole/add',
+                area: ['550px', '560px'],
+            });
+        }
+
+        function del(ids, issys) {
+            if (issys == '1') {
+                top.layer.msg('本角色由系统生成，不能删除！');
+                return;
+            }
+
+            top.layer.confirm('您确定删除此角色吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/sysrole/delete',
+                    data: { ids: ids },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "ok") {
+                            top.layer.closeAll();
+                            inits();
+                        }
+                        if (data.flag == "exist") {
+                            top.layer.msg("请先解除用户与此角色关联,然后再删除");
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg("删除失败");
+                        }
+                    }
+                });
+            }, function () {
+
+            });
+        }
+
+    </script>
+}

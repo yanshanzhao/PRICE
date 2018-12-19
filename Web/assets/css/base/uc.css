@@ -1,0 +1,39 @@
+﻿body,html,div{margin:0px;padding:0px;}
+
+.boxtitle{ margin:0px 20px;height:50px;line-height:50px;border-bottom:2px solid #ececec;font-size:18px;}
+.boxtitle .tool{width:60px;line-height:35px;height:35px;border:1px solid #f2f2f2;text-align:center;display:inline-block;cursor:pointer;float:right;font-size:14px;margin-top:5px;padding:0px 10px;background-color:#1CB177;color:white;border-radius:5px;}
+
+.uclist   {list-style:none; margin:10px 60px;}
+.uclist li{padding:10px 5px; border-bottom:1px solid #f0f0f0; clear:both;display:block;}
+.uclist li .ucboxs{clear:both;overflow:hidden;}
+.uclist li .ucboxl{width:380px;overflow:hidden;float:left; }
+.uclist li .ucboxm{overflow:hidden;float:left;font-size:15px;color:#1CB177;}
+.uclist li .ucboxm.overdate{color:#eb4448;}
+.uclist li .ucboxr .uctimebox{float:left;margin-top:3px;background-color:#1CB177;color:white;height:35px;margin-left:10px;line-height:35px;padding:0px 15px;}
+.uclist li .ucboxr .uctimebox.overdate{background-color:#eb4448;}
+.uclist li .ucboxr .uctimebox span{margin:0px 5px;font-size:18px;}
+.uclist li .ucboxr{overflow:hidden;float:right;}
+.uclist li .btn{width:60px;line-height:30px;height:30px;border:1px solid #f2f2f2;text-align:center;display:inline-block;cursor:pointer;margin-top:5px;}
+.uclist li .btn:hover{background-color:#1CB177;color:white;border:1px solid #1CB177;}
+.uclist li .tips{display:inline-block;padding:0px 5px; height:20px;background-color:#1CB177;border-radius:3px;color:white;margin-left:5px;margin-top:0px;font-size:10px;text-align:center;}
+.uclist li .tips.overdate{background-color:#eb4448;}
+.uclist li .tips.nocheck{background-color:#999;}
+.uclist .ucschool{font-size:14px;font-weight:bold;height:21px;line-height:21px;}
+.uclist .ucschool:hover{cursor:pointer;color:#1CB177;}
+.uclist .ucschooldetail{font-size:14px;color:#999; margin-top:10px;}
+
+.pagebox{position:relative;}
+.pagination{text-align:center;line-height:normal;}
+.pagedetail{position:absolute;right:60px;font-size:14px;color:#333;top:5px;}
+
+.loadings{text-align: center;}
+.wrap{padding:10px 15px;}
+.wrap form{margin-left:50px;}
+
+.layui-form-item .layui-form-label em{color:#eb4448;font-size:14px;margin-top:3px;}
+.forzenbox{position:relative;}
+.normaltable { width: 100%; overflow-x: auto; position: relative; }
+.normaltable th,.normaltable td { white-space: nowrap; }
+.normaltable td.fixed{overflow: hidden;text-overflow:ellipsis;white-space: nowrap;}
+
+.searchbox .layui-inline{margin-bottom:5px;}

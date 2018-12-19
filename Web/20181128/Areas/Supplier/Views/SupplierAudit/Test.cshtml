@@ -1,0 +1,72 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<style type="text/css">
+    table {
+        font-size: 12px;
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+
+        table tr {
+            height: 20px;
+            line-height: 20px;
+        }
+
+            table tr td {
+                text-align: center;
+                width: 200px;
+            }
+</style>
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table border="1">
+            <tr>
+                <td><input type='checkbox' data-id="0"> 
+                <td>1 
+                <td>2 
+            </tr>
+            <tr>
+                <td><input type='checkbox' data-id="1"> 
+                <td>3 
+                <td>4 
+            </tr>
+            <tr>
+                <td><input type='checkbox' data-id="2"> 
+                <td>5 
+                <td>6 
+            </tr>
+        </table>
+        <input type=button value='确定'>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 绑定事件
+        $(function () { 
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            $("input[type=button]").click(function () { 
+                var arrID = [];
+                $("table input[type=checkbox]:checked").each(function () {
+                    if ($(this).attr("checked") == "checked") {
+                       arrID.push($(this).data("id"));
+                   }
+               }) 
+               var ids = arrID.join(",")
+               alert(ids);
+            })
+
+        });
+
+    </script>
+}

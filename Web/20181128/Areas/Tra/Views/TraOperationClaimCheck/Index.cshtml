@@ -1,0 +1,286 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    培训主题：
+                    <div class="layui-input-inline">
+                        <input type="text" name="Theme" lay-verify="required" placeholder="" class="layui-input" id="txtTheme">
+                    </div>
+                    &nbsp;&nbsp;
+                    培训计划起始时间：
+                    <div class="layui-input-inline">
+                        <input id="txtBeginTimes" type="text" placeholder="培训计划开始时间" class="layui-input">
+                    </div> -
+                    <div class="layui-input-inline">
+                        <input id="txtEndTimes" type="text" placeholder="培训计划开始时间" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    提交状态：
+                    <div class="layui-input-inline">
+                        <select name="State" lay-verify="" placeholder="" class="layui-select" id="txtState">
+                            <option></option>
+                            <option value="0">未提交</option>
+                            <option value="1">已提交</option>
+                            <option value="10">作废</option>
+                            <option value="20">删除</option>
+                        </select>
+                    </div>
+                    <br />
+                    <br />
+                    &nbsp;&nbsp;
+                    创建时间：
+                    <div class="layui-input-inline">
+                        <input type="text" name="CreateTime" lay-verify="required" placeholder="" class="layui-input" id="txtCreateTime">
+                    </div>
+                    <a class="layui-btn" id="btnSearch">查询</a> 
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">运作编号</th>
+                                <th>培训主题</th>
+                                <th>培训负责人</th>
+                                <th>培训目的</th>
+                                <th>培训方式</th>
+                                <th>培训计划开始时间</th>
+                                <th>培训计划结束时间</th>
+                                <th>状态</th>
+                                <th>使用方式</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TraOperationClaimChecklist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.OperationNumber}}</td>
+                    <td>{{c.Theme}}</td>
+                    <td>{{c.RectificationUser}}</td>
+                    <td>{{c.Destination}}</td>
+                    <td>{{c.TypeText}}</td>
+                    <td>{{c.BeginTimes}}</td>
+                    <td>{{c.EndTimes}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.EmployTypeName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td> 
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.OperationClaimId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}"> 
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.OperationClaimId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证开始时间
+            laydate.render({
+                elem: '#txtCreateTime'
+            });
+
+            // 开始日期
+            var insStart = laydate.render({
+                elem: '#txtBeginTimes',
+                done: function (value, date) {
+                    // 更新结束日期的最小日期
+                    insEnd.config.min = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+
+                    // 自动弹出结束日期的选择器
+                    insEnd.config.elem[0].focus();
+                }
+            });
+
+            // 结束日期
+            var insEnd = laydate.render({
+                elem: '#txtEndTimes',
+                min: 0,
+                btns: ['clear', 'confirm'],
+                done: function (value, date) {
+                    //更新开始日期的最大日期
+                    insStart.config.max = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+                }
+            });
+
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                var beginDate = $("#txtBeginTimes").val();
+                var endDate = $("#txtEndTimes").val();
+
+                if (beginDate == "" && endDate != "") {
+                    layui.layer.msg('请选择创建起时间！');
+                    $("#txtBeginTimes").focus();
+                    return false;
+                } else if (beginDate
+                    != "" && endDate == "") {
+                    layui.layer.msg('请选择创建迄时间！');
+                    $("#txtEndTimes").focus();
+                    return false;
+                }
+                SearchData();
+            });
+          
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");//运作要求id
+                ShowData(tId);
+            });
+        }); 
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraOperationClaimChecklist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraOperationClaimCheck/TraOperationClaimCheckCount",
+                async: false,
+                data: {
+                    theme: $("#txtTheme").val()//培训主题
+                      , beginTimes: $("#txtBeginTimes").val()//开始时间
+                      , endTimes: $("#txtEndTimes").val()//结束时间
+                      , state: $("#txtState").val() //提交状态
+                      , createTime: $("#txtCreateTime").val() //创建时间
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                theme: $("#txtTheme").val()//培训主题
+                      , beginTimes: $("#txtBeginTimes").val()//开始时间
+                      , endTimes: $("#txtEndTimes").val()//结束时间
+                      , state: $("#txtState").val() //提交状态
+                      , createTime: $("#txtCreateTime").val() //创建时间
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraOperationClaimCheck/TraOperationClaimCheckList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraOperationClaimChecklist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraOperationClaimChecklist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+         
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraOperationClaimCheck/Check?tId=' + tId;
+        }
+
+    </script>
+}

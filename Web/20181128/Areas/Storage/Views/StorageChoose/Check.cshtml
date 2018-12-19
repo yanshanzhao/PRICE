@@ -1,0 +1,222 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Storage.StorageChooseModel
+<form class="layui-form layui-form-pane" action="/Storage/StorageChoose/EditStorageChoose" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" type="text" name="ApplyUser" value="@Model.ApplyUser" class="layui-input" disabled>
+                    <input id="hdStorageChooseId" name="StorageChooseId" type="hidden" value="@Model.StorageChooseId" />
+                    <input name="AffirmStorageId" type="hidden" value="@Model.AffirmStorageId" />
+                    <input id="hdSupplierCounts" name="SupplierCounts" type="hidden" value="@Model.SupplierCounts" />
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.ApplyTime" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请内容</label>
+                <div class="layui-input-block">  
+                    <textarea id="txtApplyContent" name="ApplyContent" lay-verify="required" class="layui-textarea" maxlength="200" disabled>@Model.ApplyContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请备注</label>
+                <div class="layui-input-block">  
+                    <textarea id="txtApplyRemark" name="ApplyRemark"   class="layui-textarea" maxlength="200" disabled>@Model.ApplyRemark</textarea>
+                </div>
+            </div><div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">意向供应商</label>
+                <div class="layui-input-inline">
+                    <input id="txtAffirmStorageName" type="text" name="SupplierName" value="@Model.SupplierName" class="layui-input" disabled>
+                    <input id="hdAffirmStorageId" type="hidden" name="AffirmStorageId" />
+                    <input id="hdSupplierId" type="hidden" name="SupplierId" />
+                </div> 
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">意向供应商信息明细</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-card-body">
+                <div class="layui-form">
+                    <table class="layui-table" id="cominfos">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">仓储供应商编号</th>
+                                <th>供应商名称</th>
+                                <th>评估得分</th>
+                                <th>库房性质</th>
+                            </tr>
+                        </thead>
+                        <tbody id="StorageChooselist" style="min-height:400px;"></tbody>
+                    </table>
+                    <div id="pageinfos" class="pagebox">
+                        <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                    </div>
+                    <script type="text/html" id="temslist">
+                        {{each list as c}}
+                        <tr data-id="{{c.StorageId}}" data-type="{{c.SupplierName}}">
+                            <td>{{c.StorageNumber}}</td>
+                            <td>{{c.SupplierName}}</td>
+                            <td>{{c.AssessScore}}</td>
+                            <td>{{c.StorageNatureName}}</td>
+                        </tr>
+                        {{/each}}
+                    </script>
+                </div>
+                <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                    <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:180px;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证开始时间
+            laydate.render({
+                elem: '#txtApplyTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+            // 保存按钮
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Storage/StorageChoose/EditStorageChoose",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Storage/StorageChoose/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Storage/StorageChoose/Index';
+            });
+
+            //点击选择按钮
+            $(document).on('click', '#btnChoose', function () {
+                Choose();
+            });
+             
+        });
+
+        $(function () {
+
+            SearchData();
+
+        });
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#StorageChooselist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageChoose/StorageChoosedetaileditAmount",
+                async: false,
+                data: {
+                    checkSupplierChooseId: $("#hdStorageChooseId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                    $("#hdSupplierCounts").val(amount);
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checkSupplierChooseId: $("#hdStorageChooseId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageChoose/StorageChoosedetaileditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#StorageChooselist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#StorageChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#StorageChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+        // 选择供应商种类
+        function Choose() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商信息',
+                content: '/Storage/StorageChoose/StorageChooseDetail?url=/Storage/StorageChoose/Index&ids=' + $("#hdStorageChooseId").val() + '&type=edit',
+                area: ['700px', '580px'],
+            });
+        }
+    </script>
+}

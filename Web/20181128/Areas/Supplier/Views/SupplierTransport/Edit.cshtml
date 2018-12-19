@@ -1,0 +1,660 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@model  SRM.Model.Supplier.SupplierTransportModel
+<form class="layui-form layui-form-pane" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">基本信息</div>
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline" style="width:520px;">
+                    <input type="text" id="iSupplierName" placeholder="" class="layui-input" name="SupplierName" lay-verify="selsupp" style="width:512px;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">供应商编号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iSupplierNum" placeholder="" class="layui-input" disabled>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">供应商类型</label>
+
+                    <div class="layui-input-inline">
+                        <input type="text" id="iSupplierTypeName" placeholder="" class="layui-input" disabled>
+                        <input name="SupplierTypeName" id="hdSupplierType" type="hidden" />
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">法人姓名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iOwnerName" placeholder="" class="layui-input" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">企业性质</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iEnterpriseType" placeholder="" class="layui-input" disabled>
+                        <input id="hdEnterpriseType" type="hidden" />
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">证件类型</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iPapersTypes" placeholder="" class="layui-input" disabled>
+                        <input id="hdPapersTypes" type="hidden" />
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">证件编号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iPapersNumber" placeholder="" class="layui-input" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">企业地址</label>
+                <div class="layui-input-block">
+                    <input type="text" id="iEnterpriseAddresses" placeholder="" class="layui-input" style="width:834px;" disabled>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系人</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iContactsName" placeholder="" class="layui-input" disabled>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系人职位</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iContactsPosition" placeholder="" class="layui-input" disabled>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系人电话</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iContactsPhone" name="iContactsPhone" placeholder="" class="layui-input" disabled>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="layui-card">
+
+        <div class="layui-card-header">业务信息</div>
+        <div class="layui-card-body">
+            <input type="hidden" name="TransportId"  value="@Model.TransportId" />
+            <input type="hidden" name="SupplierId" id="hdsuppid" value="@Model.SupplierId" />
+            <input type="hidden" name="FatherId" id="hdfather" value="@Model.FatherId" />
+            <input type="hidden" name="FatherName" id="hdfathername" value="@ViewBag.pname" />
+            <div class="layui-form-item">
+                <label class="layui-form-label">上级供应商</label>
+                <div class="layui-input-inline" style="width:520px;">
+                    <input type="text" id="iSupplierNames" placeholder="" class="layui-input" disabled="disabled" value="@ViewBag.pname" style="width:512px;">
+                </div>
+                <div class="layui-input-inline" style="margin-left:5px;">
+                    <a class="layui-btn" id="btnSels" style="float:left;">选择</a>
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+
+                    <label class="layui-form-label">供应商种类<em>*</em></label>
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comSuppClass" class="select" lay-verify="selects" name="TransportKind" lay-filter="selvalues"></select>
+                            <input name="TransportKindName" id="hdTransportKindName" type="hidden" />
+                            <input type="hidden" id="hdTransportKind" value="@Model.TransportKind" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">供应商范围</label>
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comSuppScope" class="select" name="DistributionScope" lay-filter="selvalues"></select>
+                            <input name="DistributionScopeName" id="hdDistributionScopeName" type="hidden" />
+                            <input type="hidden" id="hdDistributionScope" value="@Model.DistributionScope" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">供应商层级</label>
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comSuppLevel" class="select" name="SupplierLevel" lay-filter="selvalues"></select>
+                            <input name="SupplierLevelName" id="hdSupplierLevelName" type="hidden" />
+                            <input type="hidden" id="hdSupplierLevel" value="@Model.SupplierLevel" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">合作意愿</label> 
+                        <div class="layui-input-inline">  
+                            <input type="checkbox" lay-skin="switch" lay-filter="CooperationType" lay-text="是|否" @(Html.Raw(Model.CooperationType == 1 ? "checked" : ""))>
+                            <input id="hdCooperationType" type="hidden" name="CooperationType" value="@Model.CooperationType" />
+                            <input id="hdCooperationTypeName" type="hidden" name="CooperationTypeName" value="@(Model.CooperationType==1?"是":"否")" /> 
+                        </div> 
+                </div> 
+                <div class="layui-inline">
+                    <label class="layui-form-label">需要考核</label>
+                    <div class="layui-input-inline">
+                        <input type="checkbox" lay-skin="switch" lay-filter="IsAssess" lay-text="是|否" @(Html.Raw(Model.IsAssess == 1 ? "checked" : ""))>
+                        <input id="hdIsAssess" type="hidden" name="IsAssess" value="@Model.IsAssess" />
+                        <input id="hdIsAssessName" type="hidden" name="IsAssessName" value="@(Model.IsAssess==1?"是":"否")" />
+                    </div>
+                </div> 
+                <div class="layui-inline">
+                    <label class="layui-form-label"><em>*</em>现场考察</label>
+                    <div class="layui-input-inline">
+                        <input type="checkbox" lay-skin="switch" lay-filter="LocaleInspect" lay-text="是|否" @(Html.Raw(Model.LocaleInspect == 1 ? "checked" : ""))>
+                        <input id="hdLocaleInspect" type="hidden" name="LocaleInspect" value="@Model.LocaleInspect" />
+                        <input id="hdLocaleInspectName" type="hidden" name="LocaleInspectName" value="@(Model.LocaleInspect==1?"是":"否")" />
+                    </div>
+                </div>
+
+                <div class="layui-inline" style="display:none">
+                    <label class="layui-form-label">运输线路</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="TransitLines" maxlength="50" placeholder="" class="layui-input" value="@Model.TransitLines">
+                    </div>
+                </div>
+
+                <div class="layui-inline" style="display:none">
+                    <label class="layui-form-label">发车时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="DepartureTime" maxlength="50" placeholder="" class="layui-input" value="@Model.DepartureTime">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display:none">
+                <div class="layui-inline">
+                    <label class="layui-form-label">到达时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ArrivalTime" maxlength="50" placeholder="" class="layui-input"  value="@Model.ArrivalTime">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">营业时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="BusinessHours" maxlength="50" placeholder="" class="layui-input" value="@Model.BusinessHours">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">运作时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="OperationTime" maxlength="50" placeholder="" class="layui-input" value="@Model.OperationTime">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item"> 
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="Remark" maxlength="100" placeholder="" class="layui-input" style="width:512px;" value="@Model.Remark">
+                    </div>
+                </div>
+            </div>
+
+            @*<div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">评价结果</label>
+                        <div class="layui-input-inline">
+                            <select id="comAssessResult" name="AssessResult" lay-filter="assessResult" class="select">
+                                <option value="-1">请选择评价结果</option>
+                                <option value="0">未评分</option>
+                                <option value="1">合格</option>
+                                <option value="2">不合格</option>
+                            </select>
+                                <input id="hdAssessResultName" type="hidden" name="AssessResultName"  />
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">评估分数</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="AssessScore" maxlength="50" placeholder="" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">不合格原因</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="DisqualificationCause" maxlength="200" placeholder="" class="layui-input">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+        </div>
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item"> 
+                <input type="hidden" id="hdfiles"  value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList"/>
+                <input type="hidden" id="hdfilelist" name="SuppFileList" /> 
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;"> 
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-primary" id="btnUpload"><em><i class="layui-icon layui-icon-upload-drag"></i></em>上传文件</div>
+                        </div>
+                    </div> 
+                    <input id="hdTemSelectData" name="TemSelectData" type="hidden" />
+                    <script type="text/html" id="temdictlist">
+                        {{each list as c}}
+                        <option value="{{c.id}}">{{c.name}}</option>
+                        {{/each}}
+                    </script>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table> 
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delfilelist('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script> 
+            </div> 
+            <div class="layui-form-item">
+                <div style="margin-left:10px;margin-top:30px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+
+            var filelist = [];
+            function initfiles() {
+                $("#filelist").html(template('temfilelist', { list: filelist }));
+                $("#hdfilelist").val(JSON.stringify(filelist));
+            }
+            function delfilelist(ids) {
+                var tem = [];
+                for (var i in filelist) {
+                    if (filelist[i].id != ids) {
+                        tem.push(filelist[i]);
+                    }
+                }
+
+                filelist = tem;
+                initfiles();
+            }
+            function setfilename(ids, names) {
+                for (var i in filelist) {
+                    if (filelist[i].id == ids) {
+                        filelist[i].filename = names;
+                    }
+                }
+                $("#hdfilelist").val(JSON.stringify(filelist));
+            }
+            function downfile(ids) {
+                for (var i in filelist) {
+                    if (filelist[i].id == ids) {
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                    }
+                }
+            }
+
+
+
+            layui.use(['form', 'element', 'laydate', 'upload', 'layer'], function () {
+                var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+                // 开关
+                form.on('switch(IsAssess)', function (data) {
+                    $("#hdIsAssess").val(data.elem.checked==true? "1" : "0");
+                    $("#hdIsAssessName").val(data.elem.checked == true ? "是" : "否");
+                });
+                form.on('switch(LocaleInspect)', function (data) {
+                    $("#hdLocaleInspect").val(data.elem.checked == true ? "1" : "0");
+                    $("#hdLocaleInspectName").val(data.elem.checked == true ? "是" : "否");
+                });
+                form.on('switch(CooperationType)', function (data) {
+                    $("#hdCooperationType").val(data.elem.checked == true ? "1" : "0");
+                    $("#hdCooperationTypeName").val(data.elem.checked == true ? "是" : "否");
+                }); 
+
+
+                laydate.render({
+                    elem: '#infotime'
+                                 , type: 'datetime'
+                                 , format: 'yyyy.MM.dd'
+                });
+
+                form.verify({
+                    selects: function (value, item) { //value：表单的值、item：表单的DOM对象
+                        if (value == -1) {
+                            return $(item).find("option").first().text();
+                        }
+                    }, selsupp: function (value) {
+                        if (value == '') {
+                            return '请先选择供应商信息';
+                        }
+                    }
+                });
+
+                ////文件上传
+                //layui.upload.render({
+                //    elem: '#btnUpload'
+                //   , url: '/index/upload?type=tra'
+                //   , accept: 'file'
+                //   , auto: true
+                //   , done: function (res) {
+                //       if (res.flag == "ok") {
+                //           filelist.push({ id: new Date().getTime(), path: res.path, filename: res.filename, ext: res.ext });
+                //           initfiles();
+                //       }
+                //       return false;
+                //   }
+                //});
+
+                form.on('select(selvalues)', function (data) {
+                    initsSelect();
+                });
+
+                form.on('submit(saveuser)', function (data) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/supplier/SupplierTransport/editinfo",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                top.layui.layer.msg('修改成功');
+                                location.href = '/supplier/SupplierTransport/index';
+                            }
+                            if (data.flag == "fail") {
+                                top.layui.layer.msg('修改失败');
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+            function savefile() {
+                alert(JSON.stringify(filelist));
+            }
+
+            //弹窗选择回调赋值
+            function setinfo(ids, names) {
+                if (window.dilogtype == 1) {
+                    getsuppifo(ids);
+
+                    $("#hdsuppid").val(ids);
+                }
+                else {
+                    $("#iSupplierNames").val(names);
+                    $("#hdfather").val(ids);
+					$("#hdfathername").val(names);
+                }
+
+            }
+
+            window.dilogtype = 1;
+            //弹窗选择供应商(type 1:仓储 2:运输)
+            function seltree() {
+                window.dilogtype = 1;
+                top.window.topdialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '选择供应商',
+                    content: '/supplier/supplier/select?url=/Supplier/SupplierTransport/Index&type=2',
+                    area: ['800px', '600px'],
+                });
+            }
+
+            //弹出选择父级供应商
+            function seltrees() {
+                window.dilogtype = 2;
+                top.window.topdialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '选择供应商',
+                    content: '/supplier/SupplierTransport/select?url=/Supplier/SupplierTransport/Index&type=2',
+                    area: ['800px', '600px'],
+                });
+            }
+
+
+            //文件上传弹窗（新增）
+            function selfiles() {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/files?url=/Supplier/SupplierTransport/Index&type=tra', //typetra可选值tra|storage|message|base
+                    area: ['400px', '400px'],
+                });
+            }
+            //文件上传重复判断(新增)
+            function ishasfiles(fns) {
+                for (var i in filelist) {
+                    if (filelist[i].filename == fns) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            //添加新文件(新增)
+            function setnewfiles(filename, path) {
+                filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+                initfiles();
+            }
+
+            $(function () {
+                 
+                $(document).on('click', '#btnUpload', function () {
+                    selfiles();
+                });
+                 
+                //返回
+                $(document).on('click', '#btnGoBack', function () {
+                    location.href = '/supplier/SupplierTransport/index';
+                });
+
+                $(document).on('click', '#btnSel', function () {
+                    seltree();
+                });
+                $(document).on('click', '#btnSels', function () {
+                    seltrees();
+                });
+                //字典初始化
+                dictinits();
+                //下拉字典赋值
+                $("#comSuppClass").val($("#hdTransportKind").val());
+                $("#comSuppScope").val($("#hdDistributionScope").val());
+                $("#comSuppLevel").val($("#hdSupplierLevel").val());
+                //供应商基本信息
+                getsuppifo($("#hdsuppid").val());
+
+                initsSelect();
+
+                //修改上传文件名称
+                $(document).on('click', '.modify', function () {
+                    var td = $(this);
+                    var txt = $.trim(td.text());
+                    var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                    input.width(td.width() + 10).height(td.height() + 10);
+                    td.html(input);
+                    input.click(function () { return false; });
+                    input.trigger("focus");
+                    input.blur(function () {
+                        var str = input.val().replace(/\n/g, '<br>')
+                        if (!str) {
+                            layui.layer.msg('文件名称不能为空');
+                            td.html(txt);
+                            return;
+                        }
+                        td.html(str);
+                        setfilename(td.data("id"), str);
+                    });
+
+                    return false;
+                });
+                filelist = JSON.parse($("#hdfiles").val());
+                initfiles();
+
+                var temlog = $("#comSuppClass").find("option:selected").text() + ",";
+                temlog += $("#comSuppScope").find("option:selected").text() + ",";
+                temlog += $("#comSuppLevel").find("option:selected").text()
+
+                $("#hdTemSelectData").val(temlog);
+            });
+
+            function getsuppifo(ids) {
+                $.ajax({
+                    type: "POST",
+                    url: '/supplier/supplier/infos',
+                    data: { ids: ids, type: 2 }, //(type 1:仓储 2:运输)
+                    dataType: "json",
+                    success: function (data) {
+                        if (data) {
+                            $("#iSupplierName").val(data.SupplierName);
+                            $("#iSupplierNum").val(data.SupplierNumber);
+                            $("#hdSupplierType").val(data.SupplierType);
+                            $("#iOwnerName").val(data.OwnerName);
+                            $("#hdEnterpriseType").val(data.EnterpriseType);
+                            $("#hdPapersTypes").val(data.PapersType);
+                            $("#iPapersNumber").val(data.PapersNumber);
+                            $("#iEnterpriseAddresses").val(data.EnterpriseAddresses);
+                            $("#iContactsName").val(data.ContactsName);
+                            $("#iContactsPosition").val(data.ContactsPosition);
+                            $("#iContactsPhone").val(data.ContactsPhone);
+
+                            reInits();
+                        }
+                    }
+                });
+            }
+
+            window.Dict_0 = [];
+            window.Dict_1 = [];
+            window.Dict_2 = [];
+            window.Dict_3 = [];
+            window.Dict_4 = [];
+            window.Dict_6 = []
+            window.Dict_9 = [];
+            window.Dict_11 = [];
+            function dictinits() {
+
+                Dict_1.push({ id: -1, name: "请选择供应商种类" });
+                Dict_2.push({ id: -1, name: "请选择供应商层级" });
+                Dict_3.push({ id: -1, name: "请选择供应商范围" });
+                Dict_4.push({ id: -1, name: "请选择供应商状态" });
+                Dict_9.push({ id: -1, name: "请选择企业性质" });
+                Dict_6.push({ id: -1, name: "无" });
+                Dict_11.push({ id: -1, name: "请选择配送供应商范围" });
+                $.ajax({
+                    type: "POST",
+                    url: '/supplier/SupplierTransport/dictlist',
+                    async: false,
+                    dataType: "json",
+                    success: function (data) {
+                        if (data) {
+                            for (var i in data) {
+                                if (data[i].Type == 0) {
+                                    Dict_0.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 1) {
+                                    Dict_1.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 2) {
+                                    Dict_2.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 3) {
+                                    Dict_3.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 6) {
+                                    Dict_6.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 9) {
+                                    Dict_9.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 4) {
+                                    Dict_4.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                                else if (data[i].Type == 11) {
+                                    Dict_11.push({ id: data[i].Id, name: data[i].Name });
+                                }
+                            }
+                        }
+                    }
+                });
+
+                $("#comSuppClass").html(template('temdictlist', { list: Dict_1 }));
+                $("#comSuppLevel").html(template('temdictlist', { list: Dict_2 }));
+                $("#comSuppScope").html(template('temdictlist', { list: Dict_3 }));
+                //$("#comSuppState").html(template('temdictlist', { list: Dict_4 }));
+                layui.use('form', function () {
+                    layui.form.render("select");
+                });
+            }
+
+            function reInits() {
+                for (var i in Dict_0) {
+                    if ($("#hdSupplierType").val() == Dict_0[i].id) {
+                        $("#iSupplierTypeName").val(Dict_0[i].name);
+                    }
+                }
+
+                for (var i in Dict_9) {
+                    if ($("#hdEnterpriseType").val() == Dict_9[i].id) {
+                        $("#iEnterpriseType").val(Dict_9[i].name);
+                    }
+                }
+                for (var i in Dict_6) {
+                    if ($("#hdPapersTypes").val() == Dict_6[i].id) {
+                        $("#iPapersTypes").val(Dict_6[i].name);
+                    }
+                }
+            }
+
+            function initsSelect() {
+                $("#hdTransportKindName").val($("#comSuppClass").find("option:selected").text());
+                $("#hdDistributionScopeName").val($("#comSuppScope").find("option:selected").text());
+                $("#hdSupplierLevelName").val($("#comSuppLevel").find("option:selected").text());
+				//$("#hdAssessResultName").val($("#comAssessResult").find("option:selected").text());
+            }
+    </script>
+}

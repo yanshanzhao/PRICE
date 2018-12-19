@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C7219C28-5246-467E-905A-28042E38F27F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SRM.Model</RootNamespace>
+    <AssemblyName>SRM.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Basis\BasisAuditRelationModel.cs" />
+    <Compile Include="Basis\BasisDictionaryModel.cs" />
+    <Compile Include="Basis\BasisIntercalateModel.cs" />
+    <Compile Include="Basis\BasisKeyNodeModel.cs" />
+    <Compile Include="Basis\BasisLineModel.cs" />
+    <Compile Include="Basis\BasisMessageAdjunctModel.cs" />
+    <Compile Include="Basis\BasisMessageAuditModel.cs" />
+    <Compile Include="Basis\BasisMessageModel.cs" />
+    <Compile Include="Basis\CMSSchoolInfoModel.cs" />
+    <Compile Include="Car\CarOrderModel.cs" />
+    <Compile Include="Car\CarOrderQueryModel.cs" />
+    <Compile Include="Car\CarPackingModel.cs" />
+    <Compile Include="Car\CarPartModel.cs" />
+    <Compile Include="Car\CarSupplierModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sys\SysAdjunctTypeModel.cs" />
+    <Compile Include="Sys\SysAreasModel.cs" />
+    <Compile Include="Sys\SysCompanyModel.cs" />
+    <Compile Include="Sys\SysDepartmentModel.cs" />
+    <Compile Include="Sys\SysImportDetailModel.cs" />
+    <Compile Include="Sys\SysImportExcelModel.cs" />
+    <Compile Include="Sys\SysImportModel.cs" />
+    <Compile Include="Sys\SysLogModel.cs" />
+    <Compile Include="Sys\SysModuleModel.cs" />
+    <Compile Include="Sys\SysModuleOperateModel.cs" />
+    <Compile Include="Sys\SysOperateModel.cs" />
+    <Compile Include="Sys\SysRoleModel.cs" />
+    <Compile Include="Sys\SysRoleOperateModel.cs" />
+    <Compile Include="Sys\SysStencilAdjuncctModel.cs" />
+    <Compile Include="Sys\SysStencilModel.cs" />
+    <Compile Include="Sys\SysUserModel.cs" />
+    <Compile Include="Sys\TreeModel.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

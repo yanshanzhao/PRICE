@@ -1,0 +1,104 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraRelationModel
+<form class="layui-form layui-form-pane" action="/Tra/TraRelation/EditRelation" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">维护关系信息编辑</div>
+        <div class="layui-card-body">
+            <input name="RelationId" value="@Model.RelationId" type="hidden" />
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" value="@Model.SupplierName" type="text" class="layui-input" lay-verify="required" disabled> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtTransportNumber" value="@Model.TransportNumber" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>考核年</label>
+                <div class="layui-input-inline">
+                    <input id="txtCheckYear" value="@Model.CheckYear"  type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>服务等级名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSuppServiceName" value="@Model.SuppServiceName" type="text" class="layui-input" lay-verify="required" disabled> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtScore" value="@Model.Score" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>培养期望</label>
+                <div class="layui-input-inline">
+                    <input id="txtCultureContent" name="CultureContent" value="@Model.CultureContent" type="text" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>管理策略</label>
+                <div class="layui-input-block">
+                    <textarea id="txtManageContent" name="ManageContent" lay-verify="required" class="layui-textarea" style="width:95%;">@Model.ManageContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width:12%;">备注</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtRemark" name="Remark" maxlength="200" class="layui-textarea" style="width:95%;">@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:45%;margin:0 auto !important;">
+                    <div class="layui-btn" lay-submit="" lay-filter="btnSave">保存</div>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraRelation/EditRelation",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('编辑成功！');
+                            location.href = '/Tra/TraRelation/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息编辑失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraRelation/Index';
+            });
+        });
+
+        $(function () { 
+        }); 
+    </script>
+}

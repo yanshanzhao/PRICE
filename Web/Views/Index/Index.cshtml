@@ -1,0 +1,120 @@
+﻿@{
+    Layout = "~/Views/Shared/_layout.cshtml";
+}
+
+<style>
+    a:hover {
+        color: #d53030;
+        /*text-decoration: underline;*/
+    } 
+</style>
+<div style="background-color:#f6f6f6;padding:15px;">
+    <div class="layui-card">
+        <div class="layui-card-header">基本信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div style="float:left;width:100px;height:100px;overflow:hidden;margin-right:15px; margin-left:50px; border-radius:50%;border:1px solid #f2f2f2;">
+                <img src="/assets/img/avata.jpg" height="100" id="useravataimg">
+            </div>
+            <div style="float:left;overflow:hidden;border-left:1px solid #f2f2f2;padding:5px 15px;">
+                <div style="margin-top:10px;">
+                    <span id="usercomname" style="font-size:16px;font-weight:bold;"></span>
+                </div>
+                <div>
+                    部门：
+                    <span id="userdepname"></span>
+                </div>
+                <div>
+                    登录名：
+                    <span id="usernames"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">公司通知</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form">
+                <table>
+                    <tbody id="MessageList" style="min-height:400px;"></tbody>
+                </table>
+                <script type="text/html" id="tempMessageList">
+                    {{each list as c}}
+                    <tr style="font-size:13px;">
+                        <td style="height:35px;font-weight:bold;padding-right:10px;">{{c.DictionaryName}}</td>
+                        {{if c.MessageTop==0}}
+                        <td style="border-bottom:1px solid #f2f2f2;padding-left:10px;"><a href="#">{{c.MessageTitle}}</a></td>
+                        {{/if}}                        
+                        {{if c.MessageTop==1}}
+                        <td style="border-bottom:1px solid #f2f2f2;padding-left:10px;"><label style="color:#d53030;">【置顶】</label><a href="#">{{c.MessageTitle}}</a></td>
+                        {{/if}}
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" style="display:none;">
+        <div class="layui-card-header">培训信息通知</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">需要待审核汇总信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div id="divCount"style="font-size:13px;"></div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(function () {
+            // 公司通知
+            SearchMessageList();
+
+            // 待审核消息通知
+            SearchAuditCount();
+
+            // 获取
+            $.post('/index/userinfo', function (data) {
+                if (data) {
+                    if (data.Photo) {
+                        $("#useravataimgs").attr("src", data.Photo);
+                        $("#useravataimg").attr("src", data.Photo);
+                    }
+                    $("#usercomname").text(data.CompanyName);
+                    $("#userdepname").text(data.DepartmentName);
+                    $("#usernames").text(data.TrueName || data.UserName)
+                }
+
+            }, 'json');
+        });
+
+        // 公司通知
+        function SearchMessageList() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Index/GetMessageList',
+                success: function (data) {
+                    $("#MessageList").html(template('tempMessageList', { list: data }));
+                    if (data.length == 0) {
+                        $("#MessageList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 待审核消息通知
+        function SearchAuditCount() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Index/GetAuditCount',
+                success: function (data) {
+                    $("#divCount").html("今天有 <strong>" + data + "</strong> 条待审核信息");
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,220 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraMonthCheck/AddMonthCheck" method="post"> 
+    <div class="layui-card">
+        <div class="layui-card-header">绩效考核评价信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>考核年</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selYear" name="CheckYear"></select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>考核月</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selMonth" name="CheckMonth">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+            </div> 
+            @*<div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>整改状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="isNorm" lay-text="需要|不需">
+                    <input id="hdIsNorm" name="IsNorm" type="hidden" value="1" />
+                </div>
+            </div>*@
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                @*<input type="hidden" id="hdScoreList" name="ScoreList" />
+                <input type="hidden" id="hdTotalScore" name="TotalScore" />
+                <input type="hidden" id="hdAdjunctList" name="AdjunctList" />*@
+                <label class="layui-form-label"><em>*</em>考核类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtCheckType" name="CheckType" lay-filter="checkType" lay-verify="required" class="select">
+                        <option value="">请选择</option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option> 
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:12%;">
+                <div class="layui-btn" id="btnChooseTransport" style="width:100%;" title="点击选择运输供应商">选择运输供应商</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" maxlength="100" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdCheckFromId" type="hidden" name="CheckFromId"/>
+                    <input id="hdTransportId" type="hidden" name="TransportId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierNumber" type="text" maxlength="100" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:45%;margin:0 auto !important;">
+                    @*<div class="layui-btn" id="btnCheck" title="点击考核">考核</div>*@
+                    <div class="layui-btn" lay-submit="" lay-filter="btnSave">保存</div>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+              
+            // 开关
+            form.on('switch(isNorm)', function (data) {
+                $("#hdIsNorm").val(this.checked ? "1" : "0");
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                //if ($("#hdScoreList").val() == "") {
+                //    top.layer.msg('请先进行考核！');
+                //    return;
+                //}
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraMonthCheck/AddMonthCheck",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功！');
+                            location.href = '/Tra/TraMonthCheck/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 考核类型改变事件
+            form.on('select(checkType)', function (data) {
+                $("#txtSupplierName").val("");
+                $("#txtSupplierNumber").val("");
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraMonthCheck/Index';
+            });
+        });
+
+        $(function () {
+
+            // 考核年
+            GetYear();
+
+            // 考核月
+            var myDate = new Date();
+            var CurrentMonth = myDate.getMonth();
+            $("#selMonth").val(CurrentMonth);
+
+            // 选择运输供应商
+            $(document).on('click', '#btnChooseTransport', function () {
+                ChooseTransport();
+            });
+
+            //// 考核
+            //$(document).on('click', '#btnCheck', function () {
+            //    if ($("#txtSupplierName").val() == "") {
+            //        top.layer.msg('请选择运输供应商！');
+            //        return;
+            //    }
+            //    AddMonthCheckContent();
+            //});
+        });
+
+        // 考核年
+        function GetYear() {
+
+            // 时间
+            var myDate = new Date();
+
+            var CurrentYear = myDate.getFullYear();
+
+            // 起始年份
+            var startYear = CurrentYear - 1;
+
+            //结束年份
+            var endYear = CurrentYear + 1;
+
+            for (var i = startYear; i <= endYear; i++) {
+                $("#selYear").append(new Option(i, i));
+            }
+            $("#selYear").val(CurrentYear);
+        }
+
+        // 设置供应商信息
+        function setinfo(checkfromid, transportid, suppliername, suppliernumber) {
+            $("#hdCheckFromId").val(checkfromid);
+            $("#hdTransportId").val(transportid);
+            $("#txtSupplierName").val(suppliername);
+            $("#txtSupplierNumber").val(suppliernumber);
+        }
+
+        // 选择运输供应商
+        function ChooseTransport() {
+            if ($("#txtCheckType").val() == "") {
+                top.layer.msg('请选择考核类型！');
+                return;
+            }
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商',
+                content: '/Tra/TraMonthCheck/TransportDetail?url=/Tra/TraMonthCheck/Index&type=' + $("#txtCheckType").val(),
+                area: ['1000px', '600px'],
+            });
+        }
+         
+        // 获取考核内容
+        //function GetScoreList(scoreList, totalscore, temAdjunctList) {
+        //    $("#hdScoreList").val(scoreList);
+        //    $("#hdTotalScore").val(totalscore);
+        //    $("#hdAdjunctList").val(temAdjunctList);
+        //}
+
+        // 考核
+        //function AddMonthCheckContent() {
+        //    top.window.topdialog = top.layui.layer.open({
+        //        type: 2,
+        //        shade: 0.2,
+        //        title: '运输月度考核内容新增',
+        //        content: '/Tra/TraMonthCheckContent/Add?url=/Tra/TraMonthCheck/Index&checkFromId=' + $("#hdCheckFromId").val(),
+        //        area: ['1000px', '650px'],
+        //    });
+        //}
+         
+    </script>
+}

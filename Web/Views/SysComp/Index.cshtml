@@ -1,0 +1,251 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input value="" placeholder="请输入关键字" class="layui-input" type="text" id="ikeyWord">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-normal " id="btnAdd">添加客户</a>
+            </div>
+        </blockquote>
+
+
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">企业名称</th>
+                        <th>邮箱</th>
+                        <th>手机号</th>
+                        <th>电话</th>
+                        <th>省市县</th>
+                        <th>状态</th>
+                        <th>配置状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.CompanyName}}</td>
+                    <td>{{c.EmailAddress}}</td>
+                    <td>{{c.MobileNumber}}</td>
+                    <td>{{c.PhoneNumber}}</td>
+                    <td>{{c.Province}}{{c.City}}{{c.Village}}</td> 
+                    <td><input name="show" lay-skin="switch" lay-text="是|否" data-val="{{c.CompanyId}}" lay-filter="isShow" type="checkbox" {{#c.State==1?"checked":"" }} >  </td>
+                    <td>{{c.IsConfig==1?"已配置":"未配置"}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSet" data-id="{{c.CompanyId}}" data-config="{{c.IsConfig}}" data-deid="{{c.DepartmentId}}" ><i class="layui-icon"></i>配置</a>
+                        <a class="layui-btn layui-btn-sm btnEdit"  data-id="{{c.CompanyId}} " data-deid="{{c.DepartmentId}}" ><i class="iconfont icon-edit"></i>编辑</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm  btnDel" data-id="{{c.CompanyId}}" data-config="{{c.IsConfig}}"><i class="layui-icon"></i><em onclick="del('{{c.CompanyId}}','{{c.IsConfig}}')">删除</em></a>                  
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+
+            form.on('switch(isShow)', function (data) {
+
+                top.layui.layer.confirm('确定将企业状态和用户状态将进行级联变更？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/syscomp/changestate',
+                        dataType: 'json',
+                        data: { state: data.elem.checked ? 1 : 0, uid: $(data.elem).data("val") },
+                        success: function (datas) {
+                            if (datas.flag == 'ok') {
+                                top.layui.layer.closeAll();
+                                location.href = '/syscomp/index';
+                            }
+                            if (datas.flag == 'noauth') {
+                                $(data.elem).attr("checked", data.elem.checked ? false : true);
+                                form.render("checkbox");
+                                top.layui.layer.msg(datas.content);
+                            }
+                            if (datas.flag == 'fail') {
+                                top.layui.layer.msg('操作失败');
+                            }
+                        }
+                    });
+                }, function () {
+                    $(data.elem).attr("checked", data.elem.checked ? false : true);
+                    form.render("checkbox");
+                });
+            });
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        function changestate(state, uid) {
+            $.ajax({
+                type: "POST",
+                url: '/syscomp/changestate',
+                data: { state: data.elem.checked ? 1 : 0, uid: $(data.elem).data("val") },
+                success: function (data) {
+                    location.href = '/syscomp/index';
+                }
+            });
+        }
+
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '#btnAdd', function () {
+                adduser();
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+
+            $(document).on('click', '.btnSet', function () {
+                var ids = $(this).data("id");
+                var config = $(this).data("config");
+                var depId = $(this).data("deid");
+                set(ids, config, depId);
+            });
+
+            $(document).on('click', '.btnEdit', function () {
+                var ids = $(this).data("id");
+                modify(ids);
+            });
+
+            $(document).on('click', '.btnDel', function () {
+                var ids = $(this).data("id");
+                var config = $(this).data("config");
+                del(ids, config);
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=7>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/syscomp/count",
+                async: false,
+                data: { keyword: $("#ikeyWord").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                keyword: $("#ikeyWord").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/syscomp/list',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+
+                    layui.use('form', function () {
+                        layui.form.render("checkbox");
+                    });
+
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }
+        function adduser() {
+            location.href = '/syscomp/add';
+        }
+        function modify(ids) {
+            location.href = '/syscomp/edit?ids=' + ids;
+        }
+        function del(ids, isconfig) {
+
+            if (isconfig == '1') {
+                top.layer.msg('此客户已配置账号角色信息,不能删除！');
+                return;
+            } else {
+
+                top.layer.confirm('您确定删除此客户吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/syscomp/delcomp',
+                        data: { ids: ids },
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.flag == "ok") {
+                                top.layer.closeAll();
+                                inits();
+                            }
+                            if (data.flag == "noauth") {
+                                top.layer.msg(data.content);
+                            }
+                            if (data.flag == 'fail') {
+                                top.layer.msg('请先删除与此企业相关的用户角色机构等信息');
+                            }
+                        }
+                    });
+                }, function () {
+
+                });
+            }
+        }
+
+
+        function set(ids, isconfig, depId) {
+            location.href = '/syscomp/set?isconfig=' + isconfig + '&ids=' + ids + '&depId=' + depId;
+        }
+    </script>
+}
+
+

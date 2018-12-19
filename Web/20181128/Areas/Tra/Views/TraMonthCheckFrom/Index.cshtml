@@ -1,0 +1,362 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    自定义编号：
+                    <div class="layui-input-inline">
+                        <input id="txtCheckFromNumber" style="width:173px;" type="text" value="" placeholder="元件编号" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    绩效类型：
+                    <div class="layui-input-inline">
+                        <select class="select" id="txtCheckFromType">
+                            <option value="">请选择</option>
+                            <option value="0">调拨</option>
+                            <option value="1">配送(干线)</option>
+                            <option value="2">配送(终端)</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    状态：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selState">
+                            <option value="" selected>请选择</option>
+                            <option value="0">创建</option>
+                            <option value="10">提交</option> 
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    创建时间：
+                    <div class="layui-input-inline">
+                        <input id="txtCreateTime" style="width:173px;" type="text" placeholder="创建时间" class="layui-input">
+                    </div>
+                    <div class="layui-inline" style="margin:10px 0 0 10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a> 
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">自定义编号</th>
+                        <th>绩效类型</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="monthCheckFromList" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.CheckFromNumber}}</td> 
+                    <td>{{c.TypeName}}</td> 
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td>
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.CheckFromId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>                        
+                        {{if isFirstDay()}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.CheckFromId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>                        
+                        {{/if}}
+                        {{/if}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnInvalid" data-id="{{c.CheckFromId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>                        
+                        {{if c.State==10}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnAllot" data-id="{{c.CheckFromId}}">
+                            <i class="layui-icon"></i>分配
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnSort" data-id="{{c.CheckFromId}}">
+                            <i class="layui-icon"></i>排序
+                        </a>
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.CheckFromId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>  
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'laydate', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtCreateTime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+
+            // 查询
+            SearchData();
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraMonthCheckFrom/Export'
+                    , {
+                        checkFromNumber: $("#txtCheckFromNumber").val(),
+                        checkFromType: $("#txtCheckFromType").val(),
+                        state: $("#selState").val(),
+                        createTime: $("#txtCreateTime").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=绩效考核模板建立";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+
+            // 提交
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");
+                SubmitData(tId);
+            });
+
+            // 排序
+            $(document).on('click', '.btnAllot', function () {
+                var tId = $(this).data("id");
+                AllotData(tId);
+            });
+
+            // 作废
+            $(document).on('click', '.btnInvalid', function () {
+                var tId = $(this).data("id");
+                InvalidData(tId);
+            });
+
+            // 排序
+            $(document).on('click', '.btnSort', function () {
+                var tId = $(this).data("id");
+                SortData(tId);
+            });
+
+            // 查看
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+        });
+
+        // 当前日是否是1号?
+        template.helper('isFirstDay', function () {
+            var now = new Date();
+            var day = now.getDate(); 
+            if (parseInt(day) != 1) {
+                return false;
+            }
+            return true;
+        })
+
+        // 新增
+        function AddData() {
+            location.href = '/Tra/TraMonthCheckFrom/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#monthCheckFromList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckFrom/MonthCheckFromAmount",
+                async: false,
+                data: {
+                    checkFromNumber: $("#txtCheckFromNumber").val(),
+                    checkFromType: $("#txtCheckFromType").val(),
+                    state: $("#selState").val(),
+                    createTime: $("#txtCreateTime").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checkFromNumber: $("#txtCheckFromNumber").val(),
+                checkFromType: $("#txtCheckFromType").val(),
+                state: $("#selState").val(),
+                createTime: $("#txtCreateTime").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckFrom/MonthCheckFromList',
+                data: userjosn,
+                success: function (data) {
+                    $("#monthCheckFromList").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#monthCheckFromList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId, tState) {
+            location.href = '/Tra/TraMonthCheckFrom/Edit?tId=' + tId;
+        }
+
+        // 提交
+        function SubmitData(tId) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraMonthCheckFrom/SubmitState',
+                    data: { tId: tId},
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "exist") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 分配
+        function AllotData(tId) {
+            location.href = '/Tra/TraMonthCheckFrom/Allot?tId=' + tId;
+        }
+
+        // 作废
+        function InvalidData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraMonthCheckFrom/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 排序
+        function SortData(tId) { 
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '自定义元件排序',
+                content: '/Tra/TraMonthCheckFrom/ComponentDetail?tId=' + tId,
+                area: ['900px', '500px'],
+            });
+            //location.href = '/Tra/TraMonthCheckFrom/ComponentDetail?tId=' + tId;
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraMonthCheckFrom/View?tId=' + tId;
+        }
+    </script>
+}

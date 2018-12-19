@@ -1,0 +1,303 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    信息类型：
+                    <div class="layui-input-inline">
+                        <select id="iMessageType" class="select" lay-verify="selects" name="DictionaryId" lay-filter="selvalues"></select>
+                        <input name="DictionaryName" id="hdMessageType" type="hidden" />
+                    </div>
+                    &nbsp;&nbsp;
+                    信息状态：
+                    <div class="layui-input-inline">
+                        <select name="MessageState" lay-verify="" placeholder="" class="layui-select" id="txtMessageState">
+                            <option></option>
+                            <option value="1">提交</option>
+                            <option value="2">审核通过</option>
+                            <option value="3">审核未通过</option>
+                        </select>
+                    </div>
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">信息类型</th>
+                                <th>信息标题</th>
+                                <th>信息置顶</th>
+                                <th>有效期开始时间</th>
+                                <th>有效结束时间</th>
+                                <th>信息状态</th>
+                                <th>新增时间</th>
+                                <th>新增机构</th>
+                                <th>审核时间</th>
+                                <th>审核备注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="MessageAuditlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.DictionaryName}}</td>
+                    <td>{{c.MessageTitle}}</td>
+                    <td>{{c.MessageTopName}}</td>
+                    <td>{{c.BeginTime}}</td>
+                    <td>{{c.EndTime}}</td>
+                    <td>{{c.MessageStateName}}</td>
+                    <td>{{c.AddTime}}</td>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.ToTime}}</td>
+                    <td>{{c.ToRemark}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.MessageId}}" data-state="{{c.MessageState}}">
+                            <i class="layui-icon"></i>审核
+                        </a>
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.MessageId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.MessageId}}" data-state="{{c.MessageState}}">
+                                    <i class="layui-icon"></i>审核
+                                </a>
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.MessageId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+            form.verify({
+                selects: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (value == -1) {
+                        return $(item).find("option").first().text();
+                    }
+                }
+            });
+
+            form.on('select(selvalues)', function (data) {
+                initsSelect();
+            });
+        });
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            Search();
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                Search();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Basis/BasisMessageAudit/Export'
+                    , { MessageType: $("#iMessageType").val(), MessageState: $("#txtMessageState").val() }//信息类型和信息状态
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=信息预登记审核";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //审核按钮
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");//信息预登记id
+                var tState = $(this).data("state");//信息状态
+                ModifyState(tId, tState);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var Id = $(this).data("id");//信息预登记id
+                ShowData(Id);
+            });
+
+            //字典初始化
+            dictinits();
+
+            initsSelect();
+        });
+
+        //查询总记录数
+        function Search() {
+            var flagCount = 0;// 总记录数
+            pageIndex = 0;// 页面索引
+            $("#MessageAuditlist").html("<tr class='loadings' ><td colspan=3>数据加载中……<td></tr>"); // 等待时显示
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisMessageAudit/MessageAuditCount",
+                async: false,
+                data: { MessageType: $("#iMessageType").val(), MessageState: $("#txtMessageState").val() },//信息类型和信息状态
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<', //上一页按钮里text
+                next_text: '>',//下一页按钮里text
+                items_per_page: pageSize,//显示条数
+                num_display_entries: 6,//连续分页主体部分分页条目数
+                current_page: pageIndex,//当前页索引
+                num_edge_entries: 2 //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);//显示条数
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                MessageType: $("#iMessageType").val(),//信息类型
+                MessageState: $("#txtMessageState").val()//信息状态
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Basis/BasisMessageAudit/MessageAuditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#MessageAuditlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#MessageAuditlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        //获取字符串。
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+
+        // 审核
+        function ModifyState(tId, tState) {
+            if (tState != '1') {
+                top.layer.msg('只允许对已提交的信息进行审核！');
+                return;
+            }
+            location.href = '/Basis/BasisMessageAudit/Audit?tId=' + tId;
+        }
+
+        // 查询
+        function SearchData() {
+            Search();
+        }
+
+        // 查看
+        function ShowData(Id) {
+            location.href = '/Basis/BasisMessageAudit/Check?tId=' + Id;
+        }
+
+        window.Dict_1 = [];
+
+        function dictinits() {
+
+            Dict_1.push({ id: -1, name: "请选择信息类型" });
+
+            $.ajax({
+                type: "POST",
+                url: '/Basis/BasisMessage/MessageTypelist',
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 8) {
+                                Dict_1.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#iMessageType").html(template('temdictlist', { list: Dict_1 }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        function initsSelect() {
+            $("#hdMessageType").val($("#iMessageType").find("option:selected").text());
+        }
+    </script>
+}

@@ -1,0 +1,95 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+
+        <div id="userlist" style="overflow:hidden;"></div>
+        <script type="text/html" id="temslist">
+            {{each list as c}}
+            <div class="layui-form" style="margin:10px;float:left;">
+                <input type="checkbox" class="cklist" {{ sel(c.OperateId) }} name="kk" title="{{c.OperateName}}" data-id="{{c.OperateId}}">
+            </div>
+            {{/each}}
+        </script>
+        <div class="layui-form-item" style="margin-top:20px;clear:both;">
+            <div class="layui-input-block" style="text-align:center;margin-left:0px;">
+                <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                <a class="layui-btn" id="btnGoBack">关闭</a>
+            </div>
+        </div>
+        <input id="hdmoduleid" type="hidden" value="@ViewBag.moduleid" />
+    </div>
+    </div>
+    @section scripts{
+        <script>
+
+            layui.use(['form', 'element', ], function () {
+                var form = layui.form, ele = layui.element;
+                form.on('submit(saveuser)', function (data) {
+                    var tems = [];
+                    $('input:checkbox[name=kk]:checked').each(function () {
+                        tems.push($(this).data("id"));
+                    });
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        url: '/sysmodule/moduleoperate',
+                        data: { ids: tems.join(','), modid: $("#hdmoduleid").val() },
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                top.layui.layer.msg('保存成功');
+                                top.$.find('iframe[src="/sysmodule/index"]')[0].contentWindow.inits();
+                                top.layui.layer.close(top.window.modoperate);
+                            }
+                        }
+                    });
+
+                });
+            });
+
+
+            
+            $(function () {
+                inits();
+
+                $(function () {
+                    $(document).on('click', '#btnGoBack', function () {
+                        top.layui.layer.close(top.window.modoperate);
+                    });
+                });
+            });
+            window.sellist = [];
+            function inits() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '/sysoperate/OperateSelectList',
+                    data: { modid: $("#hdmoduleid").val() },
+                    success: function (data) {
+                        window.sellist.length = 0;
+                        window.sellist = data.sellist;
+                        $("#userlist").html(template('temslist', { list: data.list }));
+                        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+                            layui.form.render("checkbox");
+                        });
+
+                    }
+                });
+
+
+            }
+
+            template.helper('sel', function (id) {
+                for (var i = 0; i < window.sellist.length; i++) {
+                    if (window.sellist[i] == id) {
+                        return 'checked';
+                    }
+                }
+                return '';
+            })
+
+
+
+        </script>
+    }

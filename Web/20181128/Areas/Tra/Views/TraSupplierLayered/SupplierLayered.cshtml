@@ -1,0 +1,122 @@
+﻿@{
+    ViewBag.Title = "SupplierLayered";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                分层名称：
+                <div class="layui-input-inline">
+                    <input id="txtLayeredName" type="text" value="" placeholder="分层名称" class="layui-input">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table" id="cominfos">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">分层名称</th> 
+                    </tr>
+                </thead>
+                <tbody id="SupplierLayeredlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr data-layeredid="{{c.LayeredId}}" 
+                    data-layeredname="{{c.LayeredName}}"> 
+                    <td>{{c.LayeredName}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfos(
+                    $(this).data("layeredid"),
+                    $(this).data("layeredname")
+                    );
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                inits();
+            });
+
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#SupplierLayeredlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraSupplierLayered/SupplierLayeredCount",
+                async: false,
+                data: { layeredName: $("#txtLayeredName").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraSupplierLayered/SupplierLayeredList',
+                data: userjosn,
+                success: function (data) {
+                    $("#SupplierLayeredlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#SupplierLayeredlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

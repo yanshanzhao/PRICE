@@ -1,0 +1,212 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+@model SRM.Model.Supplier.SupplierServiceLevelModel
+<style>
+    label {
+        width: 210px !important;
+    }
+
+    .layui-input-inline {
+        width: 250px !important;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">编辑服务级别</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Supplier/SupplierServiceLevel/EditServiceLevel" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>供应商服务级别名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppServiceName" value="@Model.SuppServiceName" maxlength="30" lay-verify="required" placeholder="" class="layui-input">
+                    <input name="SuppServiceId" type="hidden" value="@Model.SuppServiceId" />
+                    <input name="CompanyId" type="hidden" value="@Model.CompanyId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>供应商规模级别名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppTurnoverName" value="@Model.SuppTurnoverName" maxlength="30" placeholder="" class="layui-input" disabled>
+                    <input name="SuppTurnoverId" type="hidden" value="@Model.SuppTurnoverId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>供应商规模服务类型</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppKindName" value="@Model.SuppKindName" maxlength="50" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>年限绩效</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.IsPerformance == 1 ? "checked" : "")) lay-skin="switch" lay-filter="isPerFormance" lay-text="是|否" disabled>
+                    <input id="hdIsPerformance" type="hidden" name="IsPerformance" value="@Model.IsPerformance" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>年限绩效下限（包含）</label>
+                <div class="layui-input-inline">
+                    <input id="txtPerformanceMin" name="PerformanceMin" value="@Model.PerformanceMin" type="text" lay-verify="required|performancemin" placeholder="" class="layui-input">
+                </div>
+                <label style="color:lightcoral;">❀存入数据库时只保留六位小数❀</label>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>年限绩效上限（不包含）</label>
+                <div class="layui-input-inline">
+                    <input id="txtPerformanceMax" name="PerformanceMax" value="@Model.PerformanceMax" type="text" lay-verify="required|performancemax" placeholder="" class="layui-input">
+                </div>
+                <label style="color:lightcoral;">❀存入数据库时只保留六位小数❀</label>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.SuppServiceState == 1 ? "checked" : "")) lay-skin="switch" lay-filter="suppServiceState" lay-text="有效|无效">
+                    <input id="hdSuppServiceState" type="hidden" name="SuppServiceState" value="@Model.SuppServiceState" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><em>*</em>培养期望</label>
+                    <div class="layui-input-block" style="margin-left:195px;width:70%;">
+                        <textarea placeholder="请输入培养期望" name="ExpectContent" maxlength="800" class="layui-textarea">@Model.ExpectContent</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><em>*</em>管理策略</label>
+                    <div class="layui-input-block" style="margin-left:210px;width:70%;">
+                        <textarea placeholder="请输入管理策略" name="ManageContent" maxlength="800" class="layui-textarea">@Model.ManageContent</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block" style="margin-left:210px;width:70%;">
+                        <textarea placeholder="请输入内容" name="Remark" maxlength="100" class="layui-textarea">@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn btnsave" style="margin-left:80px;" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#txtBeginTime'
+              , type: 'datetime'
+              , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+            laydate.render({
+                elem: '#txtEndTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            // 年限绩效
+            form.on('switch(isPerFormance)', function (data) {
+                $("#hdIsPerformance").val(this.checked ? "1" : "0");
+            });
+
+            // 状态
+            form.on('switch(suppServiceState)', function (data) {
+                $("#hdSuppServiceState").val(this.checked ? "1" : "0");
+            });
+
+            // blur事件
+            $(document).on('blur', '#txtPerformanceMin', function () {
+                var val = $(this).val();
+
+                // 验证
+                if (!new RegExp("^([0-9])[0-9]*(\\.\\w*)?$").test(val)) {
+                    layui.layer.msg('只能输入数字或小数！');
+                    return false;
+                }
+                var performanceMin = val.split('.');
+                var length = performanceMin[0].length;
+                if (length > 6) {
+                    layui.layer.msg('整数位数不得大于6位！'); 
+                    $(this).focus();
+                    return false;
+                }
+
+                // 获取最大年绩效上限
+                GetPerformanceMax();
+                if (parseFloat(val) < parseFloat(maxNum)) {
+                    layui.layer.msg('年绩效下限不得小于' + maxNum + '！');
+                    $(this).focus();
+                    return false;
+                }
+            }); 
+            $(document).on('blur', '#txtPerformanceMax', function () {
+                var val = $(this).val();
+
+                // 验证
+                if (!new RegExp("^([0-9])[0-9]*(\\.\\w*)?$").test(val)) {
+                    layui.layer.msg('只能输入数字或小数！');
+                    return false;
+                }
+                var performanceMax = val.split('.');
+                var length = performanceMax[0].length;
+                if (length > 6) {
+                    layui.layer.msg('整数位数不得大于6位！'); 
+                    $(this).focus();
+                    return false;
+                }
+
+                if (parseFloat(val) <= parseFloat($("#txtPerformanceMin").val())) {
+                    layui.layer.msg('年绩效上限须大于年绩效下限！');
+                    $(this).focus();
+                    return false;
+                }
+            });
+             
+            // 提交
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Supplier/SupplierServiceLevel/EditServiceLevel",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Supplier/SupplierServiceLevel/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 获取最大年绩效上限
+        function GetPerformanceMax() {
+            // 获取最大年绩效上限
+            $.ajax({
+                type: "POST",
+                url: "/Supplier/SupplierServiceLevel/GetMaxPerformance",
+                async: false,
+                success: function (data) {
+                    maxNum = data;
+                }
+            });
+        }
+
+        // 返回事件
+        $(function () {  
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Supplier/SupplierServiceLevel/Index';
+            });
+        });
+    </script>
+}

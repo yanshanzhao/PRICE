@@ -1,0 +1,283 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<link href="~/assets/js/treegrid/jquery.treegrid.css" rel="stylesheet" />
+
+<div class="layui-card">
+    <div class="layui-card-body">
+
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input value="" placeholder="请输入关键字" class="layui-input" type="text" id="ikeyWord">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-normal" id="btnAdd">添加机构</a>
+            </div>
+        </blockquote>
+
+
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">机构名称</th>
+                        <th>电话</th>
+                        <th>地址</th>
+                        <th>状态</th>
+                        <th>类型</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                {{if c.FatherId==0}}
+                <tr class="treegrid-{{c.DepartmentId}}">
+                    {{else}}
+                <tr class="treegrid-{{c.DepartmentId}} treegrid-parent-{{c.FatherId}}">
+                    {{/if}}
+                    <td><span data-id="dep{{c.DepartmentId}}"></span>{{c.DepartmentName}}</td>
+                    <td>{{c.Tel}}</td>
+                    <td>{{c.Address}}</td> 
+                    <td><input name="show" lay-skin="switch" lay-text="是|否" data-val="{{c.DepartmentId}}" lay-filter="isShow" type="checkbox" {{#c.State==1?"checked":"" }}>  </td>
+                    <td>{{c.DeparTypeName}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnAddSub" data-id="{{c.DepartmentId}}" data-name="{{c.DepartmentName}}"><i class="layui-icon"></i>添加子级</a>
+                        <a class="layui-btn layui-btn-sm  btnEdit"  data-id="{{c.DepartmentId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDel"  data-id="{{c.DepartmentId}}"><i class="layui-icon"></i>删除</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+
+            <script type="text/html" id="temslists">
+                {{each list as c}}
+
+                <tr class="treegrid-{{c.DepartmentId}}">
+
+                    <td><span data-id="dep{{c.DepartmentId}}"></span>{{c.DepartmentName}}</td>
+                    <td>{{c.Tel}}</td>
+                    <td>{{c.Address}}</td>
+                    <td><input name="show" lay-skin="switch" lay-text="是|否" data-val="{{c.DepartmentId}}" lay-filter="isShow" type="checkbox" {{#c.State==1?"checked":"" }}>  </td>
+                    <td>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnAddSub" data-id="{{c.DepartmentId}}" data-name="{{c.DepartmentName}}"><i class="layui-icon"></i>添加子级</a>
+                        <a class="layui-btn layui-btn-sm btnEdit"  data-id="{{c.DepartmentId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDel"  data-id="{{c.DepartmentId}}"><i class="layui-icon"></i>删除</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+ </div>
+       @section scripts{
+        <script src="~/assets/js/treegrid/jquery.treegrid.js"></script>
+        <script src="~/assets/js/treegrid/jquery.cookie.js"></script>
+        <script>
+            layui.use(['form', 'element', 'table', 'layer'], function () {
+                var form = layui.form, ele = layui.element, table = layui.table;
+
+                form.on('switch(isShow)', function (data) {
+                    top.layui.layer.confirm('您确定更改机构状态吗？', ['确定', '取消'], function () {
+                        $.ajax({
+                            type: "POST",
+                            url: '/sysdep/changestate',
+                            dataType: 'json',
+                            data: { state: data.elem.checked ? 1 : 0, did: $(data.elem).data("val") },
+                            success: function (datas) {
+                                if (datas.flag == 'ok') {
+                                    top.layui.layer.closeAll();
+                                    location.href = '/sysdep/index';
+                                }
+                                if (datas.flag == 'noauth') {
+                                    $(data.elem).attr("checked", data.elem.checked ? false : true);
+                                    form.render("checkbox");
+                                    top.layui.layer.msg(datas.content);
+                                }
+                                if (datas.flag == 'fail') {
+                                    top.layui.layer.msg('操作失败');
+                                }
+                            }
+                        });
+                    }, function () {
+                        $(data.elem).attr("checked", data.elem.checked ? false : true);
+                        form.render("checkbox");
+                    });
+
+                });
+            });
+
+            function changestate(state, uid) {
+                $.ajax({
+                    type: "POST",
+                    url: '/sysdep/changestate',
+                    data: { state: data.elem.checked ? 1 : 0, did: $(data.elem).data("val") },
+                    success: function (data) {
+                        location.href = '/sysuser/index';
+                    }
+                });
+            }
+
+
+            $(function () {
+                inits();
+
+                $(document).on('click', '.custree', function () {
+                    var id = $(this).data("id");
+                    if ($(this).hasClass("on")) {
+                        $(this).addClass("off").removeClass("on");
+                        $(this).parent().parent().siblings("." + id).hide();
+                    }
+                    else {
+                        $(this).addClass("on").removeClass("off");
+                        $(this).parent().parent().siblings("." + id).show();
+                    }
+                });
+
+                $(document).on('click', '#btnSearch', function () {
+                    search();
+                });
+
+                $(document).on('click', '#btnAdd', function () {
+                    adddep();
+                });
+
+                $(document).on('click', '.btnAddSub', function () {
+                    var ids = $(this).data("id");
+                    var names = $(this).data("name");
+                    addsub(ids, names);
+                });
+
+                $(document).on('click', '.btnEdit', function () {
+                    var ids = $(this).data("id");
+                    modify(ids);
+                });
+
+                $(document).on('click', '.btnDel', function () {
+                    var ids = $(this).data("id");
+                    del(ids);
+                });
+            });
+
+            var result = [];
+            var temdata = [];
+            function inits() {
+                var flagCount = 0;
+                $("#userlist").html("<tr class='loadings' ><td colspan=4>数据加载中……<td></tr>");
+
+                var userjosn = {
+                    keyword: $("#ikeyWord").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '/sysdep/list',
+                    data: userjosn,
+                    success: function (data) {
+                        temdata = data;
+                        result.length = 0;
+                        fnTree(data, 0);
+                        if (!$("#ikeyWord").val()) {
+                            $("#userlist").html(template('temslist', { list: result }));
+                        }
+                        else {
+                            $("#userlist").html(template('temslists', { list: data }));
+                        }
+
+
+                        $('.layui-table').treegrid({
+                            'initialState': 'collapsed',
+                            'saveState': true,
+                        });
+
+                        layui.use('form', function () {
+                            layui.form.render("checkbox");
+                        });
+                        if (data.length == 0) {
+                            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        }
+                        if (data.length == 0) {
+                            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        }
+                    }
+                });
+
+            }
+
+            function fnTree(data, pid) {
+                for (var i in data) {
+                    if (data[i].FatherId == pid) {
+                        result.push(data[i]);
+                        fnTree(data, data[i].DepartmentId);
+                    }
+                }
+            }
+
+            function treelast(ids) {
+                for (var i = 0; i < temdata.length; i++) {
+                    if (temdata[i].FatherId == ids) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function treeinfo(ids) {
+                for (var i = 0; i < result.length; i++) {
+                    if (result[i].DepartmentId == ids) {
+                        return result[i];
+                    }
+                }
+                return null;
+            }
+
+
+            function addsub(ids, names) {
+                location.href = '/sysdep/add?id=' + ids + '&name=' + escape(names);
+            }
+
+            function search() {
+                inits();
+            }
+            function adddep() {
+                location.href = '/sysdep/add';
+            }
+            function modify(ids) {
+                location.href = '/sysdep/edit?ids=' + ids;
+            }
+            function del(ids) {
+                top.layui.layer.confirm('您确定删除此机构吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/sysdep/DelDep',
+                        dataType: 'json',
+                        data: { ids: ids },
+                        success: function (data) {
+                            if (data.flag == "ok") {
+                                top.layui.layer.closeAll();
+                                inits();
+                            }
+                            if (data.flag == 'exsit') {
+                                top.layui.layer.closeAll();
+                                top.layui.layer.msg('此机构下含有用户,请确定');
+                            }
+
+                            if (data.flag == 'noauth') {
+                                top.layui.layer.msg(data.content);
+                            }
+
+                        }
+                    });
+                }, function () {
+
+                });
+            }
+
+        </script>
+    }
+
+

@@ -1,0 +1,353 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraYearCheckFrom/AddYearCheckFrom" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">年度评估模板建立新增</div>
+        <div class="layui-card-body"> 
+            <div class="layui-form-item">
+                <label class="layui-form-label">说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" maxlength="100" class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">自定义元件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <input type="hidden" id="hdComponentId" name="ComponentIdList" />
+            <div class="layui-form-item" style="width:12%;">
+                <div class="layui-btn" id="btnComponent" style="width:100%;" title="点击新增自定义元件">新增自定义元件</div>
+            </div>
+            <div class="layui-form"> 
+                <div class="forzenbox">
+                    <div class="normaltable ">
+                        <table class="layui-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">元件编号</th>
+                                    <th>项目</th>
+                                    <th>分类</th>
+                                    <th>考核项目</th>
+                                    <th>考核内容</th>
+                                    <th>考核办法</th>
+                                    <th>标准得分</th>
+                                    <th>评分最大值</th>
+                                    <th>评分最小值</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ComponentList" style="min-height:400px;"></tbody>
+                        </table> 
+                    </div>
+                    <div class="forzentable"></div>
+                </div>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.CheckComponentNumber}}</td>
+                        <td>{{c.CheckComponentTypeName}}</td>
+                        <td>{{c.Classify}}</td>
+                        <td>{{c.CheckProject}}</td>
+                        <td>{{c.ContentsDescribe}}</td>
+                        <td>{{c.CheckMethod}}</td>
+                        <td>{{c.StandardScore}}</td>
+                        <td>{{c.MaxScore}}</td>
+                        <td>{{c.MinScore}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnInvalid" data-id="{{c.CheckComponentId}}">
+                                <i class="iconfont icon-edit"></i>
+                                作废
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script> 
+                <script type="text/html" id="temslists">
+                    <div class="layui-table-fixed layui-table-fixed-r">
+                        <table class="layui-table">
+                            <thead>
+                                <tr>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody style="min-height:400px;">
+                                {{each list as c}}
+                                <tr>
+                                    <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                        <a class="layui-btn layui-btn-sm btnInvalid" data-id="{{c.CheckComponentId}}">
+                                            <i class="iconfont icon-edit"></i>
+                                            作废
+                                        </a>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </script>
+            </div>
+                </div>
+            </div>
+    <div class="layui-card">
+        <div class="layui-card-header">模版附件类型信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:14%;">
+                <input type="hidden" id="hdAdjunctType" name="AdjunctList" />
+                <div class="layui-btn" id="btnAdjunctType" style="width:100%;" title="点击新增模版附件类型">新增模版附件类型</div>
+            </div>
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>附件名称</th>
+                        <th>附件唯一</th>
+                        <th>说明</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="AdjunctTypeList"></tbody>
+            </table>
+            <script type="text/html" id="temfilelist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.AdjunctName}}</td>
+                    <td>{{c.AdjunctOnlyName}}</td>
+                    <td>{{c.Remark}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm" onclick="DelAdjunctType('{{c.CheckFromAdjunctId}}')">
+                            作废
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+
+        // 元件ID数组
+        var componentIds = [];
+
+        // 附件类型数组
+        var adjunctTypeList = [];
+
+        // 新增模板附件类型
+        function AddAdjunctType() {
+            $("#AdjunctTypeList").html(template('temfilelist', { list: adjunctTypeList }));
+            $("#hdAdjunctType").val(JSON.stringify(adjunctTypeList));
+        }
+
+        // 删除模板附件类型
+        function DelAdjunctType(tId) {
+            var tem = [];
+            for (var i in adjunctTypeList) {
+                if (adjunctTypeList[i].CheckFromAdjunctId != tId) {
+                    tem.push(adjunctTypeList[i]);
+                }
+            }
+            adjunctTypeList = tem;
+            AddAdjunctType();
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 新增自定义元件
+            $(document).on('click', '#btnComponent', function () {
+                if ($("#txtCheckFromType").val() == "") {
+                    layui.layer.msg('请选择考核类型！');
+                    return false;
+                }
+                GetComponent();
+            });
+
+            // 新增模版附件类型
+            $(document).on('click', '#btnAdjunctType', function () {
+                GetAdjunctType();
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraYearCheckFrom/AddYearCheckFrom",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('保存成功！');
+                            location.href = '/Tra/TraYearCheckFrom/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('保存失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraYearCheckFrom/Index';
+            });
+        });
+
+        $(function () {
+
+            // 删除元件
+            $(document).on('click', '.btnInvalid', function () {
+                var tId = $(this).data("id");
+                var index = componentIds.indexOf(tId);
+                componentIds.splice(index, 1);
+                $("#hdComponentId").val(componentIds.join(","));
+                var ids = $("#hdComponentId").val();
+                SearchData(ids);
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData(tId) {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ComponentList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraYearCheckFrom/ComponentCount",
+                async: false,
+                data: {
+                    tIds: tId
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tIds: $("#hdComponentId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraYearCheckFrom/ComponentList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ComponentList").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 获取元件ID
+        function ComponentSetinfo(ids) {
+            if ($("#hdComponentId").val() == "") {
+                $("#hdComponentId").val(ids);
+            }
+            else {
+                var tId = $("#hdComponentId").val();
+                $("#hdComponentId").val(tId+ "," + ids);
+            }
+
+           var tempComponentIds = $("#hdComponentId").val().split(',');
+           componentIds = tempComponentIds.map(function (data) {
+                return +data;
+            });
+            SearchData($("#hdComponentId").val());
+        }
+
+        // 新增自定义元件
+        function GetComponent() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '自定义元件新增',
+                content: '/Tra/TraYearCheckFrom/Component?url=/Tra/TraYearCheckFrom/Index&tId=' + $("#hdComponentId").val() + "&tType=add",
+                area: ['1000px', '600px'],
+            });
+        }
+
+        // 新增模版附件类型
+        function GetAdjunctType() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade:0.2,
+                title: '新增模版附件类型',
+                content: '/Tra/TraYearCheckFrom/AdjunctType?url=/Tra/TraYearCheckFrom/Index&checkFromId=0' + '&type=add',
+                area: ['600px', '400px'],
+            });
+        }
+
+        // 模版附件类型附件名称重复判断
+        function isRename(adjunctName) {
+            for (var i in adjunctTypeList) {
+                if (adjunctTypeList[i].AdjunctName == adjunctName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 添加新模版附件类型
+        function SaveAdjunctType(adjunctName, adjunctOnly, remark) {
+            adjunctTypeList.push({ CheckFromAdjunctId: new Date().getTime(), AdjunctName: adjunctName, AdjunctOnlyName: adjunctOnly, Remark: remark });
+            AddAdjunctType();
+        }
+    </script>
+}

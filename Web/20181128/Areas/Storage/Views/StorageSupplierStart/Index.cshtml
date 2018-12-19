@@ -1,0 +1,367 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-form">
+                    供应商名称：
+                    <div class="layui-input-inline">
+                        <input type="text" name="SupplierName" lay-verify="required" placeholder="" class="layui-input" id="txtSupplierName">
+                    </div>&nbsp;&nbsp;
+                    签订合同：
+                    <div class="layui-input-inline">
+                        <select name="SignContract" lay-verify="" placeholder="" class="layui-select" id="txtSignContract">
+                            <option></option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    参与培训：
+                    <div class="layui-input-inline">
+                        <select name="IsCultivate" lay-verify="" placeholder="" class="layui-select" id="txtIsCultivate">
+                            <option></option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    状态：
+                    <div class="layui-input-inline">
+                        <select name="State" lay-verify="" placeholder="" class="layui-select" id="txtState">
+                            <option></option>
+                            <option value="0">初始</option>
+                            <option value="10">启用</option>
+                        </select>
+                    </div><br /><br />
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">仓储供应商编号</th>
+                                <th>供应商名称</th>
+                                <th>库房性质</th>
+                                <th>库区面积</th>
+                                <th>库区托盘</th>
+                                <th>正式运作时间</th>
+                                <th>签订合同</th>
+                                <th>合同编号</th>
+                                <th>合同开始时间</th>
+                                <th>合同结束时间</th>
+                                <th>参与培训</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="StorageSupplierStartlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.SCMNumber}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.StorageNatureName}}</td>
+                    <td>{{c.TotalArea}}</td>
+                    <td>{{c.TotalTray}}</td>
+                    <td>{{c.OfficialTime}}</td>
+                    <td>{{c.SignContractName}}</td>
+                    <td>{{c.ContractNumber}}</td>
+                    <td>{{c.ContractBeginTimes}}</td>
+                    <td>{{c.ContractEndTimes}}</td>
+                    <td>{{c.IsCultivateName}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.StorageStartId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnStart" data-id="{{c.StorageStartId}}">
+                            <i class="layui-icon"></i>启用
+                        </a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.StorageStartId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.StorageStartId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if c.State==0}}
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.StorageStartId}}" >
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnStart" data-id="{{c.StorageStartId}}" >
+                                    <i class="layui-icon"></i>启用
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.StorageStartId}}">
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.StorageStartId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Storage/StorageSupplierStart/Export'
+                    , {
+                        SupplierName: $("#txtSupplierName").val() //供应商名称
+                      , SignContract: $("#txtSignContract").val() //签订合同
+                      , IsCultivate: $("#txtIsCultivate").val() //参与培训
+                      , State: $("#txtState").val() //状态
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=仓储启用登记";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //编辑按钮
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ModifyData(tId);
+            });
+
+            //启用按钮
+            $(document).on('click', '.btnStart', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                StartData(tId);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                DeleteData(tId);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ShowData(tId);
+            });
+        });
+
+        // 新增
+        function AddData() {
+            location.href = '/Storage/StorageSupplierStart/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#StorageSupplierStartlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageSupplierStart/StorageSupplierStartCount",
+                async: false,
+                data: {
+                    SupplierName: $("#txtSupplierName").val() //供应商名称
+                      , SignContract: $("#txtSignContract").val() //签订合同
+                      , IsCultivate: $("#txtIsCultivate").val() //参与培训
+                      , State: $("#txtState").val() //状态
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                SupplierName: $("#txtSupplierName").val() //供应商名称
+                      , SignContract: $("#txtSignContract").val() //签订合同
+                      , IsCultivate: $("#txtIsCultivate").val() //参与培训
+                      , State: $("#txtState").val() //状态
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageSupplierStart/StorageSupplierStartList',
+                data: userjosn,
+                success: function (data) {
+                    $("#StorageSupplierStartlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#StorageSupplierStartlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Storage/StorageSupplierStart/Edit?tId=' + tId;
+        }
+
+        // 启用
+        function StartData(tId) {
+            top.layer.confirm('您确定启用此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Storage/StorageSupplierStart/StartStorageSupplierStart',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 作废
+        function DeleteData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Storage/StorageSupplierStart/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Storage/StorageSupplierStart/Check?tId=' + tId;
+        }
+    </script>
+}

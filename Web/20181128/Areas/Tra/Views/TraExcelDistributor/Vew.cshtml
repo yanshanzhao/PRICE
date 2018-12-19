@@ -1,0 +1,175 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<input id="hdExcelId" type="hdExcelId" value="@ViewBag.ExcelId" />
+<div class="layui-card-body">
+    <blockquote class="layui-elem-quote">
+        <!-- 查询条件  -->
+        <div class="layui-form">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input placeholder="请输入供应商名称" class="layui-input" type="text" id="iSuppName"> 
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input placeholder="请输入配送员姓名" class="layui-input" type="text" id="iUserName">
+                </div>
+            </div>
+            <!-- 操作按钮 -->
+            <div class="layui-inline">
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn " id="btnExport">导出</a>
+            </div>
+        </div>
+    </blockquote>
+    <div class="layui-form">
+        <div class="forzenbox">
+            <div class="normaltable">
+                <table class="layui-table" id="tablelist">
+                    <thead>
+                        <tr>
+                            <th>RDC代码<th>
+                            <th>RDC名称<th>
+                            <th>运输目的地卸货地址<th>
+                            <th>是否终端卸货地址<th>
+                            <th>路由地点<th>
+                            <th>提货方式<th>
+                            <th>所属供应商代码<th>
+                            <th>所属供应商<th>
+                            <th>配送员ID<th>
+                            <th>配送员姓名<th>
+                            <th>性别<th>
+                            <th>年龄<th>
+                            <th>联系电话<th>
+                            <th>开始运作时间<th>
+                            <th>是否配送发料<th>
+                            <th>当前星级<th>
+                            <th>结束运作时间<th>
+                            <th>异常说明<th>
+                        </tr>
+                    </thead>
+                    <tbody id="userlist" style="min-height:400px;"></tbody>
+                </table> 
+            </div>
+            @*<div class="forzentable">
+                </div>*@
+        </div>
+
+        <div id="pageinfos" class="pagebox">
+            <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+        </div>
+
+        <script type="text/html" id="temslist">
+            {{each list as c}}
+            <tr>
+                <td>{{c.DeotNo}}</td>
+                <td>{{c.DepartmentName}}</td>
+                <td>{{c.Unloading}}</td>
+                <td>{{c.ISUnloading}}</td>
+                <td>{{c.Route}}</td>
+                <td>{{c.ExtractType}}</td>
+                <td>{{c.SupplierNumber}}</td>
+                <td>{{c.SupplierName}}</td>
+                <td>{{c.DistributorNumber}}</td>
+                <td>{{c.DistributorName}}</td>
+                <td>{{c.DistributorSex}}</td>
+                <td>{{c.DistributorAge}}</td>
+                <td>{{c.DistributorContact}}</td>
+                <td>{{c.SubmitTime}}</td>
+                <td>{{c.StoreIssue}}</td>
+                <td>{{c.Grade}}</td>
+                <td>{{c.EndTime}}</td>
+                <td>{{c.ProvingRemark}}</td>
+            </tr>
+            {{/each}}
+        </script> 
+    </div> 
+    <script type="text/html" id="temdictlist">
+        {{each list as c}}
+        <option value="{{c.id}}">{{c.name}}</option>
+        {{/each}}
+    </script>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+        var pageIndex = 0;//页码编号 首页
+        var pageSize = 20;//每页行数 20行
+        $(function()//页面加载
+        {
+            inits();//填充页面数据  
+            $(document).on('click', '#btnSearch', function () {//查询事件
+                search();
+            });
+        }
+         )       
+        function inits() {//inits方法
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=15>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraExcelDistributor/ExcelDistributorRowCount",
+                async: false,
+                data: {
+                    "name": $("#iSuppName").val(),//供应商名称
+                    "userName": $("#iUserName").val(),//配送员
+                    "excelId": $("#hdExcelId").val()//导入PC id
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");//赋值（共**页）
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+            function PageCallbackOfCus(indexs, jq) {
+                pageIndex = indexs;
+                InitCusTable(indexs);
+            }
+            function InitCusTable(pageIndexs) {
+                var userjosn = {
+                    index: (pageIndex + 1),
+                    size: pageSize,
+                    name: $("#iSuppName").val(),//供应商名称
+                    userName: $("#iUserName").val(),//配送员
+                    excelId: $("#hdExcelId").val()//导入PC id 
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '/Tra/TraExcelDistributor/ExcelDistributorRow',
+                    data: userjosn,
+                    success: function (data) { 
+                        $("#userlist").html(template('temslist', { list: data })); 
+                        $("#pageinfos").show();
+                        if (data.length == 0) {
+                            $("#pageinfos").hide();
+                            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        }
+                    }
+                });
+
+            }
+
+        }
+        //查询
+        function search() {//查询具体执行代码
+            inits();
+        } 
+    </script>
+}
+

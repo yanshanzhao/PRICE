@@ -1,0 +1,258 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<form class="layui-form layui-form-pane" action="/Storage/StorageChoose/AddStorageChoose" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>申请负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" name="ApplyUser" type="text" placeholder="申请负责人" class="layui-input" lay-verify="required">
+                    <input id="hdStorageChooseId" type="hidden" name="StorageChooseId" />
+                    <input id="hdSupplierDetailName" type="hidden" name="SupplierDetailName" />
+                    <input id="hdSupplierCounts" type="hidden" name="SupplierCounts" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>申请时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ApplyTime" lay-verify="required" placeholder="申请时间" class="layui-input" id="txtApplyTime">
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label"><em>*</em>申请内容</label>
+                <div class="layui-input-block">
+                    <textarea id="txtApplyContent" placeholder="申请内容" name="ApplyContent" lay-verify="required" class="layui-textarea" maxlength="200"></textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtApplyRemark" placeholder="申请备注" name="ApplyRemark"  class="layui-textarea" maxlength="200"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>意向供应商 </label>
+                <div class="layui-input-inline">
+                    <input id="txtAffirmStorageName" name="AffirmStorageName" type="text" placeholder="意向供应商" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdAffirmStorageId" type="hidden" name="AffirmStorageId" />
+                    <input id="hdStorageChooseId" type="hidden" name="StorageChooseId" />
+                    <input id="hdSupplierId" type="hidden" name="SupplierId" />
+                </div>
+                <label style="color:lightcoral;">❀意向供应商从表格选择❀</label>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <input type="hidden" id="hdSupplierStorageId" name="StorageChooseIdList" />
+        <div class="layui-card-header">意向供应商信息明细（选择其中一条作为意向供应商）</div>  
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-btn" id="btnChoose">
+                选择意向供应商
+            </div>
+            <div class="layui-card-body">
+                <div class="layui-form">
+                    <table class="layui-table" id="cominfos">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">仓储供应商编号</th>
+                                <th>供应商名称</th>
+                                <th>评估得分</th>
+                                <th>库房性质</th>
+                            </tr>
+                        </thead>
+                        <tbody id="StorageChooselist" style="min-height:400px;"></tbody>
+                    </table>
+                    <div id="pageinfos" class="pagebox">
+                        <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                    </div>
+                    <script type="text/html" id="temslist">
+                        {{each list as c}}
+                        <tr data-id="{{c.StorageId}}" data-type="{{c.SupplierName}}">
+                            <td>{{c.StorageNumber}}</td>
+                            <td>{{c.SupplierName}}</td>
+                            <td>{{c.AssessScore}}</td>
+                            <td>{{c.StorageNatureName}}</td>
+                        </tr>
+                        {{/each}}
+                    </script>
+                </div>
+                <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                    <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:180px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form> 
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+   
+            //验证开始时间
+            laydate.render({
+                elem: '#txtApplyTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            // 保存按钮
+            form.on('submit(btnSave)', function (data) { 
+                $.ajax({
+                    type: "POST",
+                    url: "/Storage/StorageChoose/AddStorageChoose",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Storage/StorageChoose/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Storage/StorageChoose/Index';
+            });
+
+            //点击选择按钮
+            $(document).on('click', '#btnChoose', function () {
+                Choose();
+            });
+             
+            $(document).on('click', 'tr', function () {
+                $("#hdSupplierId").val($(this).data("id"));
+                $("#txtAffirmStorageName").val($(this).data("type"));
+            });
+        });
+
+        $(function () {
+
+            //点击后退按钮，清除文本框的值
+            $("#txtAffirmStorageName input").val("");
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData(tId) {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#StorageChooselist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageChoose/StorageChoosedetailaddAmount",
+                async: false,
+                data: {
+                    checkSupplierChooseId: tId
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                    $("#hdSupplierCounts").val(amount);
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checkSupplierChooseId: $("#hdSupplierStorageId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageChoose/StorageChoosedetailaddList',
+                data: userjosn,
+                success: function (data) {
+                    $("#StorageChooselist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#StorageChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#StorageChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+         
+        // 获取选择ID
+        function setinfo(ids) {
+            if ($("#hdSupplierStorageId").val() == "") {
+                $("#hdSupplierStorageId").val(ids);
+            }
+            else {
+                var tId = $("#hdSupplierStorageId").val();
+                $("#hdSupplierStorageId").val(tId + "," + ids);
+            }
+            //var idList = ids.split(',');
+            //$("#hdSupplierCounts").val(idList.length);
+
+            var tempSupplierStorageIds = $("#hdSupplierStorageId").val().split(',');
+            TraChooseIds = tempSupplierStorageIds.map(function (data) {
+                return +data;
+            });
+            SearchData($("#hdSupplierStorageId").val());
+        }
+
+        // 选择运输供应商
+        function Choose() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商信息', 
+                content: '/Storage/StorageChoose/StorageChooseDetail?url=/Storage/StorageChoose/Index&ids=' + $("#hdSupplierStorageId").val()+'&type=add',
+                area: ['700px', '580px'],
+            });
+        }
+    </script>
+}

@@ -1,0 +1,271 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+@model SRM.Model.Supplier.SupplierStorageModel
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-header">供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">  
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline" style="width:346px;">
+                    <input id="txtSupplierName" type="text" value="@Model.SupplierName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">企业地址</label>
+                <div class="layui-input-inline" style="width:356px;">
+                    <input id="txtEnterpriseAddresses" type="text" value="@Model.EnterpriseAddresses" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierNumber" type="text" value="@Model.SupplierNumber" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商类别</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierTypeName" type="text" value="@Model.SupplierTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">企业性质</label>
+                <div class="layui-input-inline">
+                    <input id="txtEnterpriseTypeName" type="text" value="@Model.EnterpriseTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">证件类型</label>
+                <div class="layui-input-inline">
+                    <input id="txtPapersTypeName" type="text" value="@Model.PapersTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">证件号码</label>
+                <div class="layui-input-inline">
+                    <input id="txtPapersNumber" type="text" value="@Model.PapersNumber" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">联系人</label>
+                <div class="layui-input-inline">
+                    <input id="txtContactsName" type="text" value="@Model.ContactsName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">联系人职位</label>
+                <div class="layui-input-inline">
+                    <input id="txtContactsPosition" type="text" value="@Model.ContactsPosition" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">联系电话</label>
+                <div class="layui-input-inline">
+                    <input id="txtContactsPhone" type="text" value="@Model.ContactsPhone" name="ContactsPhone" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">仓储供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;"> 
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px">仓储供应商编号</label>
+                <div class="layui-input-inline" style="width:326px;">
+                    <input id="txtStorageNumber" type="text" value="@Model.StorageNumber" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">仓库详细地址</label>
+                <div class="layui-input-inline" style="width:356px;">
+                    <input id="txtAddress" type="text" value="@Model.Address" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">仓库名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtStorageName" type="text" name="StorageName" maxlength="100" class="layui-input" value="@Model.StorageName"  disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">仓库业主</label>
+                <div class="layui-input-inline">
+                    <input id="txtStorageOwner" type="text" name="StorageOwner" maxlength="100" class="layui-input" value="@Model.StorageOwner"  disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">仓库性质</label>
+                <div class="layui-input-inline">
+                    <input id="txtStorageNatureName" type="text" value="@Model.StorageNatureName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:125px">库区总面积(平方)</label>
+                <div class="layui-input-inline" style="width:175px">
+                    <input id="txtTotalArea" type="text" value="@Model.TotalArea" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:125px">库区总托盘数量</label>
+                <div class="layui-input-inline" style="width:175px">
+                    <input id="txtTotalTray" type="text" value="@Model.TotalTray" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:125px">拟租房面积(平米)</label>
+                <div class="layui-input-inline" style="width:175px">
+                    <input id="txtRentArea" type="text" value="@Model.RentArea" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">拟租托盘数量</label>
+                <div class="layui-input-inline">
+                    <input id="txtRentTray" type="text" value="@Model.RentTray" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">空闲面积</label>
+                <div class="layui-input-inline">
+                    <input id="txtLeisureArea" type="text" value="@Model.LeisureArea" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合作意愿</label>
+                <div class="layui-input-inline">
+                    <input id="txtCooperationType" type="text" value="@Model.CooperationTypeName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">现场考察</label>
+                <div class="layui-input-inline">
+                    <input id="txtLocaleInspect" type="text" value="@Model.LocaleInspectName" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:116px">同行业运作经验</label>
+                <div class="layui-input-inline" style="width:973px; margin-right:0 !important">
+                    <textarea id="txtOperationExperience" class="layui-textarea" disabled>@Model.OperationExperience</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">发展潜力</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCapacity" class="layui-textarea" disabled>@Model.Capacity</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtRemark" class="layui-textarea" disabled>@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+                <input type="hidden" id="hdfilelist" name="SuppFileList" /> 
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a></td> 
+                    </tr>
+                    {{/each}}
+                </script> 
+            </div>  
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:30%;margin:0 auto !important;"> 
+                    <button class="layui-btn" lay-submit="" lay-filter="btnAssessment" style="display:none;">考核</button>
+                    <button class="layui-btn" lay-submit="" lay-filter="btnFinance" style="display:none;">财务</button>
+                    <button class="layui-btn" lay-submit="" lay-filter="btnAudit" style="display:none;">审核</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script> 
+        // initfiles/setfilename/downfile 附件上传/更改名称/下载
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) { 
+                    if (filelist[i].path.lastIndexOf('.') != -1) {
+                        var lastnum = filelist[i].path.lastIndexOf('.');
+                        var exts = filelist[i].path.substring(lastnum + 1); 
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                    } 
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+             
+        });
+
+        $(function () {
+            //修改上传文件名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+
+                return false;
+            });
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Supplier/SupplierStorage/Index';
+            });
+        });
+    </script>
+}

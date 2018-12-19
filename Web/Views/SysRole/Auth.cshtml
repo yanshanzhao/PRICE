@@ -1,0 +1,286 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<link href="~/assets/js/treegrid/jquery.treegrid.css" rel="stylesheet" />
+<div class="layui-card">
+    <div class="layui-card-header">当前角色：@ViewBag.rolename</div>
+    <div class="layui-card-body">
+        <input id="hdroleid" type="hidden" value="@ViewBag.roleid" />
+
+        <div class="layui-form">
+            <table class="layui-table  moduletable">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;width:300px;">菜单名称</th>
+                        <th style="width:80px;">是否显示</th>
+                        <th>权限明细</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                {{if c.ParentId==0}}
+                <tr class="treegrid-{{c.ModuleId}}">
+                    {{else}}
+                <tr class="treegrid-{{c.ModuleId}} treegrid-parent-{{c.ParentId}}">
+                    {{/if}}
+                    <td>
+                        <span data-id="dep{{c.ModuleId}}"></span>{{c.ModuleName}}
+                        {{if c.IsAdmin==1}}<span class="layui-badge-dot" title="后台菜单"></span>
+                        {{/if}}
+                    </td>
+                    <td><input class="ckmodulenode" name="show" lay-skin="primary" lay-text="是|否" data-val="{{c.ModuleId}}" data-vals="{{c.ParentId}}"  lay-filter="isShow" type="checkbox" title="选择" >  </td>                            
+                    <td data-id="{{c.ModuleId}}" class="selmodoperlist"></td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <script type="text/html" id="selmodlist">
+            {{each list as c}}
+            <input name="show" lay-skin="primary" data-id="{{c.id}}" subid="oper{{c.pid}}{{c.id}}"  type="checkbox" title="{{c.name}}"> 
+            {{/each}}
+        </script>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin-left:0px;margin-top:10px;">
+                <div class="layui-btn" lay-submit="" lay-filter=""><em onclick="saverole()">保存</em></div>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section scripts{
+    <script src="~/assets/js/treegrid/jquery.treegrid.js"></script>
+    <script src="~/assets/js/treegrid/jquery.cookie.js"></script>
+
+    <script>
+
+        var result = [];
+        var temdata = [];
+        var childlist = [];
+        var parentlist = [];
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+            form.on('checkbox(isShow)', function (data) {
+                childlist.length = 0;
+                parentlist.length = 0;
+                var id = $(data.elem).data("val");
+                var pid = $(data.elem).data("vals");
+
+                setCurNode(id, data.elem.checked);
+                getChildNode(id);
+                setChildNode(data.elem.checked);
+
+                getParentNode(pid);
+                setParentNode(data.elem.checked);
+
+                layui.form.render("checkbox");
+            });
+        });
+
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/sysrole/index';
+            });
+        });
+
+        function goback() {
+            location.href = '/sysrole/index';
+        }
+
+        function saverole() {
+
+           
+
+            var selmodlist = [];
+            var selmodoperlist = [];
+
+            $(".moduletable tr").each(function () {
+                var that=$(this);
+                var _modnode = that.find(".ckmodulenode").first();
+                
+                if (_modnode.attr("checked")) {
+                    selmodlist.push(_modnode.data("val"));
+
+                    var temoperarr = [];
+                    that.find(".selmodoperlist input").each(function () {
+                        if ($(this).attr("checked")) {
+                            temoperarr.push($(this).data("id"));
+                        }
+                    });
+
+                    if (temoperarr.length) {
+                        selmodoperlist.push({ id: _modnode.data("val"), child: temoperarr });
+                    }
+                }
+            });
+
+            //alert(JSON.stringify(selmodlist));
+           // alert(JSON.stringify(selmodoperlist));
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                data: { roleid: $("#hdroleid").val(), modlist:JSON.stringify(selmodlist), operlist:JSON.stringify( selmodoperlist) },
+                url: '/sysrole/saveauth',
+                success: function (data) {
+                    if (data.flag == 'ok') {
+                        top.layui.layer.msg('保存成功');
+                        goback();
+                    }
+                    else {
+                        top.layui.layer.msg('保存失败');
+                    }
+                }
+            });
+        }
+
+        function inits() {
+            $("#userlist").html("<tr class='loadings' ><td colspan=3>数据加载中……<td></tr>");
+            var userjosn = {
+                keyword: $("#ikeyWord").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                url: '/sysmodule/authlist',
+                data: userjosn,
+                success: function (data) {
+                    temdata = data;
+                    result.length = 0;
+                    fnTree(data, 0);
+                    if (!$("#ikeyWord").val()) {
+                        $("#userlist").html(template('temslist', { list: result }));
+                    }              
+                    $('.moduletable').treegrid({
+                        'saveState': true
+                    });
+
+                    if (data.length == 0) {
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+            operatelist();
+        }
+
+        function getParentNode(ids) {
+            for (var i in result) {
+                if (result[i].ModuleId == ids) {
+                    parentlist.push(result[i].ModuleId);
+                    getParentNode(result[i].ParentId);
+                }
+            }
+        }
+        function setParentNode(states) {
+            if (states) {
+                for (var i in parentlist) {
+                    $(".treegrid-" + parentlist[i]).find("input[name='show'].ckmodulenode").attr("checked", true);
+                }
+            }         
+        }
+
+        function getChildNode(ids) {
+            for (var i in result) {
+                if (result[i].ParentId == ids) {
+                    childlist.push(result[i].ModuleId);
+                    getChildNode(result[i].ModuleId);
+                }
+            }
+        }
+
+        function setCurNode(ids, states) {
+            $(".treegrid-" +ids).find("input[name='show']").attr("checked", states);
+        }
+
+
+        function setChildNode(states) {                    
+           for (var i in childlist) {
+               $(".treegrid-" + childlist[i]).find("input[name='show']").attr("checked",states);
+           }         
+        }
+
+        function fnTree(data, pid) {
+            for (var i in data) {
+                if (data[i].ParentId == pid) {
+                    result.push(data[i]);
+                    fnTree(data, data[i].ModuleId);
+                }
+            }
+        }
+
+        function treeinfo(ids) {
+            for (var i = 0; i < result.length; i++) {
+                if (result[i].ModuleId == ids) {
+                    return result[i];
+                }
+            }
+            return null;
+        }
+      
+        function operatelist() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async:false,
+                url: '/sysmodule/SelModOperLists',
+                success: function (data) {
+                    $(".selmodoperlist").each(function () {
+                        var ids = $(this).data("id");
+
+                        var temlist = [];
+                        for (var i = 0; i < data.length; i++) {
+                            if (data[i].pid == ids) {
+                                temlist.push(data[i]);
+                            }
+                        }
+
+                        $(this).html(template('selmodlist', { list: temlist }));
+                    })
+                }
+            });
+
+            authalllist();
+        }
+
+        function authalllist() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                async: false,
+                url: '/sysrole/authalllist',
+                data:{rid:$("#hdroleid").val()},
+                success: function (data) {
+                    setauthmodinfo(data.modlist);
+                    setauthmodoperinfo(data.operlist);
+                }
+            });
+        }
+
+        function setauthmodinfo(objs) {
+            for (var i in objs) {
+                $(".treegrid-" + objs[i]).find("input[name='show']").attr("checked", true);
+            }
+        }
+
+        function setauthmodoperinfo(objs) {
+
+            $(".selmodoperlist input").attr("checked", false);
+
+            for (var i in objs) {
+                $(".selmodoperlist input[subid='oper" + objs[i].modid + objs[i].operid + "']").attr("checked", true);
+            }
+        }
+
+    </script>
+}

@@ -1,0 +1,623 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<style>
+    /*.layui-table {
+        text-align: left;
+    }*/
+
+    .normaltable th, .normaltable td {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .layui-table {
+        table-layout: fixed !important;
+    }
+
+        .layui-table th {
+            text-align: center;
+            background-color: #f2f2f2;
+        }
+
+        .layui-table th, .layui-table td {
+            padding: 7px 7px !important;
+        }
+
+            .layui-table td input {
+                border: 1px solid #fff;
+                padding-left: 0px;
+            }
+
+    .col {
+        text-align: left !important;
+    }
+
+    .layui-table td.tdscore {
+        width: 60px;
+        padding-left: 0px;
+        padding-right: 0px;
+        padding: 0px;
+    }
+
+        .layui-table td.tdscore input {
+            border: 1px solid #fff;
+            padding-left: 0px;
+        }
+</style>
+
+@model  SRM.Web.Areas.Supplier.Controllers.StorageAssess
+<form class="layui-form layui-form-pane" action="/Supplier/SupplierStorage/AddSupplierStorage" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">评估信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form">
+                <input id="hdStorageId" type="hidden" name="StorageId" class="layui-input" value="@ViewBag.StorageId">
+                <input id="hdStorageAssessId" type="hidden" name="StorageAssessId" class="layui-input" value="@ViewBag.StorageAssessId">
+                <input id="hdFromId" type="hidden" name="FromId" class="layui-input" value="@ViewBag.FromId">
+                <input id="hdStandardScore" type="hidden" name="StandardScore" class="layui-input" value="@ViewBag.StandardScore">
+                <input id="hdAdoptMin" type="hidden" class="layui-input" value="@ViewBag.AdoptMin">
+                <table class="layui-table">
+                    <tr>
+                        <th>
+                            机构名称
+                        </th>
+                        <td><input class="layui-input" value="@ViewBag.DepartmentName" readonly></td>
+                        <th>
+                            供应商
+                        </th>
+                        <td><input class="layui-input" value="@ViewBag.SupplierName" readonly></td>
+                        <th>
+                            仓库名称
+                        </th>
+                        <td><input class="layui-input" value="@ViewBag.StorageName" readonly></td>
+                    </tr>
+                </table>
+                <table class="layui-table">
+                    <tr class="col">
+                        <td colspan="9"><strong>仓库基本情况</strong></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            仓库业主名称
+                        </th>
+                        <td colspan="2"><input class="layui-input" value="@ViewBag.StorageOwner" readonly></td>
+                        <th>
+                            企业性质（国有、私营）
+                        </th>
+                        <td colspan="2"><input class="layui-input" value="@ViewBag.EnterpriseTypeName" readonly></td>
+                        <th>
+                            联系人
+                        </th>
+                        <td colspan="2"><input class="layui-input" value="@ViewBag.ContactsName" readonly></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            仓库详细地址
+                        </th>
+                        <td colspan="5"><input class="layui-input" value="@ViewBag.Address" readonly></td>
+                        <th>
+                            联系电话
+                        </th>
+                        <td colspan="2"><input class="layui-input" value="@ViewBag.ContactsPhone" readonly></td>
+                    </tr>
+                    <tr>
+                        <th style="width:122px !important;">
+                            库区总仓储面积
+                        </th>
+                        <td><input class="layui-input" value="@ViewBag.TotalArea" readonly></td>
+                        <td>平方米</td>
+                        <th>
+                            如是立体库
+                        </th>
+                        <td>
+                            <input class="layui-input" value="@ViewBag.StorageNature" readonly>
+                        </td>
+                        <th>
+                            托盘位
+                        </th>
+                        <th>
+                            空闲面积/托盘位
+                        </th>
+                        <td colspan="2"><input class="layui-input" value="@ViewBag.LeisureArea" readonly></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            拟租库房总面积
+                        </th>
+                        <td><input class="layui-input" value="@ViewBag.RentArea" readonly></td>
+                        <td>平方米</td>
+                        <th>
+                            如是立体库
+                        </th>
+                        <td><input class="layui-input" value="@ViewBag.StorageNature" readonly></td>
+                        <th>
+                            托盘位
+                        </th>
+                        <td colspan="3"><input class="layui-input" value="@ViewBag.RentTray" readonly></td>
+                    </tr>
+                </table>
+                <div class="forzenbox">
+                    <div class="normaltable ">
+                        <table class="layui-table" style="text-align:left !important;">
+                            <tr class="col">
+                                <td colspan="7"><strong>仓储评估信息</strong><em style="color:red"> *移动鼠标查看全部内容及评估方法</em></td>
+                            </tr>
+                            <tr style="text-align:center !important;">
+                                <th style="text-align:left;">检查项目</th>
+                                <th>检查内容</th>
+                                <th>评估方法</th>
+                                <th>关键控制点</th>
+                                <th>标准分</th>
+                                <th>相符</th>
+                                <th>不适用</th>
+                            </tr>
+                            <tbody>
+                                @foreach (var item in Model.ComponentList)
+                                {
+                                    <tr style="background-color:#f2f2f2;" data-id="@item.ComponentId" data-pid="0" data-score="@item.StandardScore" class="comscore">
+                                        <td colspan="4">@item.AssessTypeName</td>
+                                        <td>@item.StandardScore</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    foreach (var items in Model.ComponentDetailList)
+                                    {
+                                        if (items.ComponentId == item.ComponentId)
+                                        {
+                                            <tr data-id="@items.ComponentDetailId" data-pid="@items.ComponentId" class="comscores">
+                                                <td>@items.InspectProject</td>
+                                                <td title="@items.InspectContent">@items.InspectContent</td>
+                                                <td title="@items.AssessMethod">@items.AssessMethod</td>
+                                                <td>@items.NodeValue</td>
+                                                <td class="tdscore">@items.StandardScore</td>
+                                                <td><input id="@("txtValue1"+items.ComponentDetailId)" data-componentdetailid="@items.ComponentDetailId" type="checkbox" lay-skin="switch" lay-filter="value1" class="txtvalue1" lay-text="是|否"><input id="@("hdValue1"+items.ComponentDetailId)" type="hidden" value="0" /></td>
+                                                <td><input id="@("txtValue2"+items.ComponentDetailId)" data-componentdetailid="@items.ComponentDetailId" type="checkbox" lay-skin="switch" lay-filter="value2" class="txtvalue2" lay-text="是|否"><input id="@("hdValue2"+items.ComponentDetailId)" type="hidden" value="0" /></td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                                <tr>
+                                    <td colspan="5" style="text-align:right;">
+                                        得分总计：
+                                    </td>
+                                    <td>
+                                        <span id="ApplicableScore">0</span>
+                                    </td>
+                                    <td>
+                                        <span id="NotApplicableScore">0</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <table class="layui-table">
+                    <tr>
+                        <th>
+                            评估结果
+                        </th>
+                        <th>
+                            评估得分
+                        </th>
+                        <td><input id="txtAssessScore" class="layui-input" name="AssessScore" lay-verify="required" value="@ViewBag.AssessScore" readonly></td>
+                        <th>
+                            评估结果
+                        </th>
+                        <td colspan="4">
+                            <input id="txtAssessResultName" class="layui-input" lay-verify="required" value="@ViewBag.AssessResultName" readonly>
+                            <input id="hdAssessResult" type="hidden" class="layui-input" name="AssessResult" value="@ViewBag.AssessResult">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            考察信息
+                        </th>
+                        <th>
+                            考察人：
+                        </th>
+                        <td colspan="3"><input class="layui-input" name="InspectUsers" lay-verify="required"value="@ViewBag.InspectUsers"></td>
+                        <th>
+                            考察日期：
+                        </th>
+                        <td colspan="2"><input id="txtInspectTime" class="layui-input" name="InspectTime" lay-verify="required"value="@ViewBag.InspectTime"></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            评估信息
+                        </th>
+                        <th>
+                            评估人：
+                        </th>
+                        <td colspan="3"><input class="layui-input" name="AssessUsers" lay-verify="required"value="@ViewBag.AssessUsers"></td>
+                        <th>
+                            评估日期：
+                        </th>
+                        <td colspan="2"><input id="txtAssessTime" class="layui-input" name="AssessTime" lay-verify="required"value="@ViewBag.AssessTime"></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            审核信息
+                        </th>
+                        <th>
+                            审核人：
+                        </th>
+                        <td colspan="3"><input class="layui-input" name="AuditingUsers" lay-verify="required"value="@ViewBag.AuditingUsers"></td>
+                        <th>
+                            审核日期：
+                        </th>
+                        <td colspan="2"><input id="txtAuditingTime" class="layui-input" name="AuditingTime" lay-verify="required"value="@ViewBag.AuditingTime"></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            评估意见
+                        </th>
+                        <td colspan="7"><input class="layui-input" name="AssessRemark" lay-verify="required"value="@ViewBag.AssessRemark"></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            备注
+                        </th>
+                        <td colspan="7"><input class="layui-input" name="Remark" lay-verify="required"value="@ViewBag.Remark"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" /> 
+                <input type="hidden" id="hdfilelist" name="SuppFileList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                    <script type="text/html" id="temfilelists">
+                        {{each list as c}}
+                        <div class="layui-btn-group" style="margin-bottom:5px;">
+                            <div class="layui-btn layui-btn-primary">
+                                <span class="modify" data-id="{{c.id}}">{{c.filename}}</span>{{c.ext}}
+                                <em onclick="downfile('{{c.id}}')"><i class="layui-icon layui-icon-download-circle"></i></em>
+                                <em onclick="delfilelist('{{c.id}}')"><i class="layui-icon layui-icon-close-fill"></i></em>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </script>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="width:150px !important">文件类型</th>
+                            <th>文件地址</th>
+                            <th style="width:150px !important">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delfilelist('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        // initfiles/delfilelist/setfilename/downfile 附件上传/删除/更改名称/下载
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtInspectTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            }); 
+            laydate.render({
+                elem: '#txtAssessTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+            laydate.render({
+                elem: '#txtAuditingTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            // 开关
+            form.on('switch(value1)', function (data) {
+                var checkIfKey = data.othis;
+                var parentTd = checkIfKey.parents("td");
+                parentTd.find(('input:eq(1)')).val(this.checked ? "1" : "0");
+                var nextTd = parentTd.next();
+
+                // 如果相符值为1 不适用值为0
+                if (parentTd.find(('input:eq(1)')).val() == 1) {
+                    nextTd.find(('input:eq(1)')).val("0");
+                    nextTd.find(('div:eq(0)')).html("<i></i><em>否</em>");
+                    nextTd.find(('div:eq(0)')).removeClass("layui-form-onswitch");
+                } else if (parentTd.find(('input:eq(1)')).val() == 0) {
+                    //nextTd.find(('input:eq(1)')).val("1");
+                    //nextTd.find(('div:eq(0)')).html("<i></i><em>是</em>");
+                    //nextTd.find(('div:eq(0)')).addClass("layui-form-onswitch");
+                }
+
+                // 计算得分
+                TotalScore();
+            }); 
+            form.on('switch(value2)', function (data) {
+                var checkIfKey = data.othis;
+                var parentTd = checkIfKey.parents("td");
+                parentTd.find(('input:eq(1)')).val(this.checked ? "1" : "0");
+                var prevTd = parentTd.prev();
+
+                // 如果相符值为1 不适用值为0
+                if (parentTd.find(('input:eq(1)')).val() == 1) {
+                    prevTd.find(('input:eq(1)')).val("0");
+                    prevTd.find(('div:eq(0)')).html("<i></i><em>否</em>");
+                    prevTd.find(('div:eq(0)')).removeClass("layui-form-onswitch");
+                } else if (parentTd.find(('input:eq(1)')).val() == 0) {
+                    //prevTd.find(('input:eq(1)')).val("1");
+                    //prevTd.find(('div:eq(0)')).html("<i></i><em>是</em>");
+                    //prevTd.find(('div:eq(0)')).addClass("layui-form-onswitch");
+                }
+
+                // 计算得分
+                TotalScore();
+            });
+
+            // 上传文件
+            $(document).on('click', '#btnUpload', function () {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/files?url=/Supplier/SupplierStorage/Index&type=assess',
+                    area: ['450px', '300px'],
+                });
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                // 元件明细
+                data.field.AssessContentList = ContentScore();
+
+                // 相符合计
+                data.field.value1Score = $("#ApplicableScore").html();
+
+                // 不适用合计
+                data.field.value2Score = $("#NotApplicableScore").html();
+
+                // 文件List
+                data.field.SuppFileList = $("#hdfilelist").val();
+                 
+                // ajax地址
+                var assessUrl = "";
+
+                if ($("#hdStorageAssessId").val() == "") {
+                    assessUrl = "/Supplier/SupplierStorage/AddStorageAssess";
+                }else {
+                    assessUrl = "/Supplier/SupplierStorage/EditStorageAssess";
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: assessUrl,
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            top.layui.layer.msg('仓储评估保存成功！');
+                            location.href = '/Supplier/SupplierStorage/Index';
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('仓储评估保存失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Supplier/SupplierStorage/Index';
+            });
+        });
+
+        //添加新文件(新增)
+        function setnewfiles(filename, path) {
+            filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+            initfiles();
+        }
+
+        $(function () {
+            // 修改上传上级名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+                return false;
+            });
+             
+            filelist = JSON.parse($("#hdfiles").val());
+            setscores();
+        });
+
+        // 赋值得分
+        function setscores() {
+            $.ajax({
+                type: "POST",
+                url: "/supplier/SupplierStorage/SupplierStorageAssessContentList",
+                data: { storageAssessId: $("#hdStorageAssessId").val() },
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+
+                        // 相符值(隐藏)
+                        $("#hdValue1" + data[i].ComponentDetailId).val(data[i].value1);
+                        $("#hdValue2" + data[i].ComponentDetailId).val(data[i].value2);
+
+                        // 相符值开关(显示)
+                        var parentTd1 = $("#txtValue1" + data[i].ComponentDetailId).parents("td");
+                        if ($("#hdValue1" + data[i].ComponentDetailId).val() == 0) {
+                            parentTd1.find(('div:eq(0)')).html("<i></i><em>否</em>");
+                            parentTd1.find(('div:eq(0)')).removeClass("layui-form-onswitch");
+                        }
+                        else if ($("#hdValue1" + data[i].ComponentDetailId).val() == 1) {
+                            $("#txtValue1" + data[i].ComponentDetailId).get(0).checked = true;
+                            $("#txtValue1" + data[i].ComponentDetailId).prop("checked", true);
+                            $("#txtValue1" + data[i].ComponentDetailId).checked = true; 
+                        }
+
+                        var parentTd2 = $("#txtValue2" + data[i].ComponentDetailId).parents("td");
+                        if ($("#hdValue2" + data[i].ComponentDetailId).val() == 0) {
+                            parentTd2.find(('div:eq(0)')).html("<i></i><em>否</em>");
+                            parentTd2.find(('div:eq(0)')).removeClass("layui-form-onswitch");
+                        }
+                        else if ($("#hdValue2" + data[i].ComponentDetailId).val() == 1) { 
+                            $("#txtValue2" + data[i].ComponentDetailId).get(0).checked = true;
+                            $("#txtValue2" + data[i].ComponentDetailId).prop("checked", true);
+                            $("#txtValue2" + data[i].ComponentDetailId).checked = true; 
+                        }
+                    }
+
+                    // 计算得分
+                    TotalScore();
+                }
+            });
+        }
+         
+        // 计算相符值/不适用值
+        function ContentScore() {
+            var AssessList = [];
+
+            $(".txtvalue1").each(function () {
+                var parentTd = $(this).parents("td");
+                AssessList.push({ componentDetailId: $(this).data("componentdetailid"), applicable: parentTd.find(('input:eq(1)')).val(), notApplicable: 0 });
+            });
+
+            for (var i in AssessList) {
+                $(".txtvalue2").each(function () {
+                    if (AssessList[i].componentDetailId == $(this).data("componentdetailid")) {
+                        var parentTd = $(this).parents("td");
+                        AssessList[i].notApplicable = parentTd.find(('input:eq(1)')).val();
+                    }
+                });
+            }
+
+            return JSON.stringify(AssessList);
+        }
+
+        // 计算总得分
+        function TotalScore() {
+            var ApplicableScore = 0;
+            $(".txtvalue1").each(function () {
+                var parentTd = $(this).parents("td");
+                var prev = parentTd.prev();
+                if (parentTd.find(('input:eq(1)')).val() == 1) {
+                    ApplicableScore += parseFloat(prev.html());
+                }
+            });
+            $("#ApplicableScore").html(ApplicableScore);
+
+            var NotApplicableScore = 0;
+            $(".txtvalue2").each(function () {
+                var parentTd = $(this).parents("td");
+                var prev = parentTd.prev().prev();
+                if (parentTd.find(('input:eq(1)')).val() == 1) {
+                    NotApplicableScore += parseFloat(prev.html());
+                }
+            });
+            $("#NotApplicableScore").html(NotApplicableScore);
+
+            var applicablescore = parseInt($("#ApplicableScore").html());
+            var notApplicableScore = parseInt($("#NotApplicableScore").html());
+            var total = applicablescore + notApplicableScore;
+            var assessScore = ((applicablescore / (total - notApplicableScore))*100).toFixed(6);
+
+            if (!isNaN(assessScore)) {
+                // 评估得分
+                $("#txtAssessScore").val(assessScore);
+                var adoptMin =  parseFloat($("#hdAdoptMin").val());
+
+                if (assessScore > adoptMin) {
+                    $("#txtAssessResultName").val("合格");
+                    $("#hdAssessResult").val("1");
+                }
+                else {
+                    $("#txtAssessResultName").val("不合格");
+                    $("#hdAssessResult").val("0");
+                }
+            } else {
+                $("#txtAssessScore").val("");
+                $("#txtAssessResultName").val("");
+            }
+        }
+    </script>
+}

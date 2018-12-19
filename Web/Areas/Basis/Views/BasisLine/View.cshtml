@@ -1,0 +1,51 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model Model.Basis.BasisLineModel
+<div class="layui-card">
+    <div class="layui-card-header">查看线路维护</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Basis/BasisLine/AddKeyNode" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">起始位置</label>
+                <div class="layui-input-inline">
+                    <input id="txtBeginName" type="text" value="@ViewBag.BeginName" lay-verify="required" class="layui-input" style="width:220px;" readonly> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">结束位置</label>
+                <div class="layui-input-inline">
+                    <input id="txtEndName" type="text" value="@ViewBag.EndName " lay-verify="required" class="layui-input" style="width:220px;" readonly> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">线路名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtLineName" type="text" name="LineName" value="@Model.LineName" maxlength="200" lay-verify="required" class="layui-input" style="width:400px;" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+        });
+
+        // 页面加载
+        $(function () {
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisLine/Index';
+            });
+        }); 
+    </script>
+}

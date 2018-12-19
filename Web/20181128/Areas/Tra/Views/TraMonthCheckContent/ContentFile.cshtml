@@ -1,0 +1,123 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">附件名称</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selAdjunctName" lay-filter="adjunctName"></select>
+                    <input type="hidden" id="hdCheckFromAdjunctId" />
+                </div>
+            </div> 
+            <label style="color:lightcoral;">温馨提示：仅支持以下文件格式❀xls|xlsx|docx|png|pdf|jpg❀</label>
+            <div class="layui-form-item" style="margin-left:140px;margin-top:10px;">
+                <a class="layui-btn layui-btn-normal " id="btnUpload">上传</a>&nbsp;&nbsp;
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </form>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.value}}">{{c.text}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+<input id="hdId" type="hidden" value="@ViewBag.Id" />
+<input id="hdUrl" type="hidden" value="@ViewBag.url" />
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+             
+            //文件上传
+            layui.upload.render({
+                elem: '#btnUpload',
+                url: '/index/upload?type=monthCheck',
+                accept: 'file',
+                auto: true,
+                exts: 'xls|xlsx|docx|png|pdf|jpg',
+                before: function () {
+                    var flag = isAdjunctOnly($("#selAdjunctName").val());
+                    if (flag) {
+                        if (top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.isHasAdjunctName($("#selAdjunctName").val())) {
+                            top.layui.layer.msg('此附件名称只需上传一份附件，请确认！');
+                            return false;
+                        }
+                    }
+                },
+                done: function (res) {
+                    if (res.flag == "ok") {
+
+                        var flag = isAdjunctOnly($("#selAdjunctName").val());
+                        if (flag) {
+                            if (!top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.isHasAdjunctName($("#selAdjunctName").val())) {
+                                top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.addNewAdjunct($("#selAdjunctName").val(), res.path);
+                                top.layui.layer.close(top.window.AdjunctDialog);
+                            }
+                        }
+                        else {
+                            top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.addNewAdjunct($("#selAdjunctName").val(), res.path);
+                            top.layui.layer.close(top.window.AdjunctDialog);
+                        } 
+                    }
+                    return false;
+                }
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.AdjunctDialog);
+            });
+        });
+
+        // 页面加载
+        $(function () {
+
+            // 获取附件名称
+            GetAdjunctName(); 
+        });
+
+        // 附件List
+        window.AdjunctList = [];
+
+        // 附件名称数组
+        window.AdjunctNameList = [];
+         
+        // 附件名称
+        function GetAdjunctName() { 
+            $.ajax({
+                type: 'POST',
+                url: '/Tra/TraMonthCheckFrom/MonthCheckFromAdjunctList',
+                data: { tId: $("#hdId").val() },
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    AdjunctList = data; 
+                    if (data) {
+                        for (var i in data) {
+                            AdjunctNameList.push({ text: data[i].AdjunctName, value: data[i].AdjunctName});
+                        }
+                    }
+                }
+            });
+
+            $("#selAdjunctName").html(template('temdictlist', { list: AdjunctNameList })); 
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        function isAdjunctOnly(names) {
+            for (var i = 0; i < AdjunctList.length; i++) {
+                if (AdjunctList[i].AdjunctName == names) {
+                    return AdjunctList[i].AdjunctOnly;
+                }
+            }
+            return 0;
+        } 
+    </script>
+}

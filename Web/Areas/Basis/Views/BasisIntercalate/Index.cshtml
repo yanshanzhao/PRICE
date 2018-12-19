@@ -1,0 +1,214 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    机构名称：
+                    <div class="layui-input-inline">
+                        <input id="txtDepartmentName" value="" type="text" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    状态：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selState">
+                            <option value="">请选择</option>
+                            <option value="0">无效</option>
+                            <option value="1">有效</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline" style="margin-left:10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">机构名称</th>
+                        <th>考核最后日期</th>
+                        <th>创建时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="IntercalateList" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.Days}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>
+                        {{if c.State==1}}
+                        {{if isGreaterThan(c.Days)}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.IntercalateId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Basis/BasisIntercalate/Export'
+                    , {
+                        departmentName: $("#txtDepartmentName").val(),
+                        state: $("#selState").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=部门考核设置";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+        });
+
+        // 考核最后日期大于当前日期(日)?
+        template.helper('isGreaterThan', function (days) {
+            var CurentDate = new Date();
+            if (days < CurentDate.getDate()) {
+                return false;
+            }
+            return true;
+        })
+
+        // 新增
+        function AddData() {
+            location.href = '/Basis/BasisIntercalate/Add';
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Basis/BasisIntercalate/Edit?tId=' + tId;
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#IntercalateList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisIntercalate/IntercalateCount",
+                async: false,
+                data: {
+                    departmentName: $("#txtDepartmentName").val(),
+                    state: $("#selState").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                departmentName: $("#txtDepartmentName").val(),
+                state: $("#selState").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Basis/BasisIntercalate/IntercalateList',
+                data: userjosn,
+                success: function (data) {
+                    $("#IntercalateList").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#IntercalateList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#IntercalateList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

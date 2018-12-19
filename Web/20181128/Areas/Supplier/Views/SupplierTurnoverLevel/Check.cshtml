@@ -1,0 +1,93 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<style>
+    label {
+        width: 150px !important;
+    }
+
+    .layui-input-inline {
+        width: 250px !important;
+    }
+
+    .layui-input-block {
+        margin-left: 180px !important;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">添加供应商规模级别维护典</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Supplier/SupplierTurnoverLevel/EditSupplierTurnoverLevel" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商规模级别名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppTurnoverName" value="@Model.SuppTurnoverName" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                    <input name="SuppTurnoverId" type="hidden" value="@Model.SuppTurnoverId" />
+                    <input id="hdCompanyID" type="hidden" name="CompanyId" value="@Model.CompanyId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商种类</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="DictionaryName" value="@Model.DictionaryName" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">营业额限制</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" @(Html.Raw(Model.IsTurnover == 1 ? "checked" : "")) lay-skin="switch" lay-filter="isTurnover" lay-text="是|否" disabled>
+                    <input id="hdisTurnover" type="hidden" name="IsTurnover" value="@Model.IsTurnover" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">营业额上限</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="TurnoverMax" value="@Model.TurnoverMax" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">营业额下限</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="TurnoverMin" value="@Model.TurnoverMin" maxlength="30"  placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Remark" value="@Model.Remark" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" @(Html.Raw(Model.SuppTurnoverState == 1 ? "checked" : "")) lay-skin="switch" lay-filter="suppTurnoverState" lay-text="启用|禁用" disabled>
+                    <input id="hdsuppTurnoverState" type="hidden" name="SuppTurnoverState" value="@Model.SuppTurnoverState" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'upload'], function () { 
+            var form = layui.form, ele = layui.element;
+            form.on('switch(isTurnover)', function (data) {
+                $("#hdisTurnover").val(this.checked ? "1" : "0");
+            });
+            form.on('switch(suppTurnoverState)', function (data) {
+                $("#hdsuppTurnoverState").val(this.checked ? "1" : "0");
+            });
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Supplier/SupplierTurnoverLevel/Index';
+            });
+        });
+         
+    </script>
+}

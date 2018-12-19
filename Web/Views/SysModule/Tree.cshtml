@@ -1,0 +1,52 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+
+<div class="wrap">
+   <ul id="deptree"></ul>
+</div>
+<input id="hdpagetype" type="hidden"  value="@ViewBag.url"/>
+@section scripts{
+ <script>
+     layui.use([ 'element', 'tree'], function () {
+         var ele = layui.element;    
+     });
+
+
+     $(function () {
+         $.ajax({
+             type: "POST",
+             dataType: "json",
+             url: '/sysmodule/TreeList',
+             success: function (data) {
+                 layui.use([ 'tree'], function () {
+                     layui.tree({
+                         elem: '#deptree'
+                    , nodes: fnTree(data, 0)
+                    , click: function (node) {
+                        top.$.find('iframe[src="'+$("#hdpagetype").val()+'"]')[0].contentWindow.setinfo(node.id, node.name);
+                        top.layui.layer.close(top.window.topdialog);
+                    }
+                     });
+                 });
+               
+             }
+         });
+     });
+
+     function fnTree(data, pid) {
+         var result = [], temp;
+         for (var i in data) {
+             if (data[i].pid == pid) {
+                 result.push(data[i]);
+                 temp = fnTree(data, data[i].id);
+                 if (temp.length > 0) {
+                     data[i].children = temp;
+                 }
+             }
+         }
+         return result;
+     }
+
+</script>
+}

@@ -1,0 +1,127 @@
+﻿@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model Model.Basis.BasisIntercalateModel 
+<div class="layui-card">
+    <div class="layui-card-header">编辑部门考核设置</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Basis/BasisIntercalate/EditIntercalate" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>机构名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@ViewBag.DepartmentName" class="layui-input" disabled>
+                    @*<label class="layui-label">@ViewBag.DepartmentName</label>*@
+                    <input type="hidden" name="IntercalateId" value="@Model.IntercalateId" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:120px;"><em>*</em>考核最后日期</label>
+                <div class="layui-input-inline" style="width:180px;">
+                    <input id="txtDays" type="text" name="Days" value="@Model.Days" lay-verify="required" class="layui-input">
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" lay-skin="switch" lay-filter="state" lay-text="是|否" @(Html.Raw(Model.State == 1 ? "checked" : ""))>
+                    <input id="hdState" type="hidden" name="State" value="@Model.State" />
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn btnsave" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+
+        // 查询条件变量
+        var nodeName = unescape(GetQueryString("nodeNameWhere"));
+        var companyName = unescape(GetQueryString("companyNameWhere"));
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开关 
+            form.on('switch(state)', function (data) {
+                $("#hdState").val(this.checked ? "1" : "0");
+            });
+
+            // blur事件
+            $(document).on('blur', '#txtDays', function () {
+                var val = $(this).val();
+
+                // 验证
+                var reg = /^[1-9]\d*$/;
+                if (!reg.test(parseInt(val))) {
+                    layui.layer.msg('文本框内只能输入正整数！');
+                    $(this).focus();
+                    return false;
+                }
+
+                if (parseInt(val) < 2) {
+                    layui.layer.msg('考核最后日期不得小于2！');
+                    $(this).focus();
+                    return false;
+                }
+
+                if (parseInt(val) > 16) {
+                    layui.layer.msg('考核最后日期不得大于16！');
+                    $(this).focus();
+                    return false;
+                }
+            });
+
+            // 提交
+            form.on('submit(btnSave)', function (data) {
+
+                var val = $("#txtDays").val();
+                if (parseInt(val) < 2) {
+                    layui.layer.msg('考核最后日期不得小于2！');
+                    $("#txtDays").focus();
+                    return false;
+                }
+
+                if (parseInt(val) > 16) {
+                    layui.layer.msg('考核最后日期不得大于16！');
+                    $("#txtDays").focus();
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Basis/BasisIntercalate/EditIntercalate",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功！');
+                            location.href = '/Basis/BasisIntercalate/Index';
+                        }
+                        if (data.flag == "exist") {
+                            layui.layer.msg('此机构已设置考核信息！');
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载
+        $(function () { 
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisIntercalate/Index';
+            });
+        }); 
+    </script>
+}

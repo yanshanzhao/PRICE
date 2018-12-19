@@ -1,0 +1,221 @@
+﻿@{
+    ViewBag.Title = "TraChooseDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<input id="hdType" type="hidden" value="@ViewBag.type" />
+<input id="hdIds" type="hidden" value="@ViewBag.ids" />
+<input id="hdIdss" type="hidden" value="@ViewBag.idss" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                供应商名称：
+                <div class="layui-input-inline">
+                    <input value="" placeholder="供应商名称" class="layui-input" type="text" id="txtSupplierName">
+                </div>&nbsp;&nbsp;
+                配送供应商范围
+                <div class="layui-input-inline">
+                    <select  name="DistributionScope" placeholder="" class="layui-select" id="selDistributionScope"> 
+                            <option>请选择</option>
+                            <option value="干线">干线</option>
+                            <option value="终端">终端</option>
+                            <option value="综合">综合</option>
+                            <option value="干线/综合">干线/综合</option>
+                            <option value="终端/综合">终端/综合</option>
+                        </select>
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <table class="layui-table" id="cominfos">
+                    <thead>
+                        <tr>
+                            <th><input lay-filter="allChoose" id="allChoose" type="checkbox" lay-skin="primary"></th>
+                            <th style="text-align:left;">运输供应商编号</th>
+                            <th>供应商名称</th>
+                            <th>评估得分</th>
+                            <th>运输供应商类型</th>
+                            <th>配送供应商范围</th>
+                            <th>合作意愿</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userlist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td><input id="ChxChoose" name="checked" lay-skin="primary" lay-filter="Choose" type="checkbox" class="cksel" subid="ck{{c.TransportId}}" data-id="{{c.TransportId}}"></td>
+                        <td>{{c.TransportNumber}}</td>
+                        <td>{{c.SupplierName}}</td>
+                        <td>{{c.AssessScore}}</td>
+                        <td>{{c.TransportKindName}}</td>
+                        <td>{{c.DistributionScopeName}}</td>
+                        <td>{{c.CooperationTypeName}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin-left:180px;">
+                <button class="layui-btn" lay-submit="" id="btnSave">保存</button>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['jquery', 'form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, $ = layui.$;
+            form.render(); //更新全部
+            form.on('checkbox(allChoose)', function (data) {
+                var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]:not([name="show"])');
+                child.each(function (index, item) {
+                    item.checked = data.elem.checked;
+                });
+                form.render('checkbox'); //刷新checkbox选择框渲染
+            }
+            );
+
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+            // 提交保存
+            $(document).on('click', '#btnSave', function () {
+
+                var temlist = [];
+                $(".cksel").each(function () {
+                    if ($(this).attr("checked")) {
+                        temlist.push($(this).data("id"));
+                    }
+                });
+                var ids = temlist.join(",");
+                if ($("#hdType").val() == "add") {
+                    top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo(ids);
+                    top.layui.layer.close(top.window.topdialog);
+                }
+                else if ($("#hdType").val() == "edit") {
+                    // 新增到数据库
+                    $.ajax({
+                        type: "POST",
+                        url: "/Tra/TraChoose/AddTraChooseDetails ",
+                        data: { chooseDetail: ids, checkSupplierChooseId: $("#hdIds").val() },
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'success') {
+                                layui.layer.msg('新增成功！');
+                                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.SearchData();
+                                top.layui.layer.close(top.window.topdialog);
+                            }
+                            if (data.flag == "fail") {
+                                layui.layer.msg('信息新增失败！');
+                            }
+                            if (data.flag == "error") {
+                                layui.layer.msg('选择的运输供应商数量不能超过10个！');
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+
+
+            $(document).on('click', '#btnSearch', function () {
+                inits();
+            });
+
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChoose/SupplierStorageAmount",
+                async: false,
+                data: {
+                    supplierName: $("#txtSupplierName").val(),
+                    distributionScope: $("#selDistributionScope").val(),
+                    type: $("#hdType").val(),
+                    ids: $("#hdIds").val(),
+                    idss: $("#hdIdss").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val(),
+                distributionScope: $("#selDistributionScope").val(),
+                type: $("#hdType").val(),
+                ids: $("#hdIds").val(),
+                idss: $("#hdIdss").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoose/SupplierStoragelist',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    $("#btnSave").show();
+
+                    layui.use('form', function () {
+                        layui.form.render('checkbox');
+                    });
+
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        $("#btnSave").hide();
+                    }
+                }
+            });
+        }
+
+    </script>
+}

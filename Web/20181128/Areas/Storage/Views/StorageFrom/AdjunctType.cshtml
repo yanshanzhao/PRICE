@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "AdjunctType";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">附件名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtAdjunctName" name="AdjunctName" type="text" maxlength="100" class="layui-input" lay-verify="required">
+                    <input id="hdFromId" name="FromId" type="hidden" value="@ViewBag.FromId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">附件唯一</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="adjunctOnly" lay-text="是|否">
+                    <input id="hdAdjunctOnly" name="AdjunctOnly" type="hidden" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" lay-verify="required" maxlength="100" class="layui-textarea" style="height:60px;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:180px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<input id="hdUrl" type="hidden" value="@ViewBag.url" />
+<input id="hdType" type="hidden" value="@ViewBag.type" />
+
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开关
+            form.on('switch(adjunctOnly)', function (data) {
+                $("#hdAdjunctOnly").val(this.checked ? "1" : "0");
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+
+                if ($("#hdType").val() == "add") {
+                    var adjunctOnly = "";
+                    if ($("#hdAdjunctOnly").val() == 1) {
+                        adjunctOnly = "是";
+                    }
+                    else {
+                        adjunctOnly = "否";
+                    }
+
+                    if (top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.isRename($("#txtAdjunctName").val())) {
+                        top.layui.layer.msg('已存在相同模版附件类型附件名称，请修改！');
+                        return false;
+                    }
+                    else {
+                        top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SaveAdjunctType($("#txtAdjunctName").val(), adjunctOnly, $("#txtRemark").val());
+                        top.layui.layer.close(top.window.topdialog);
+                    }
+                }
+                else if ($("#hdType").val() == "edit") {
+                    // 新增到数据库
+                    $.ajax({
+                        type: "POST",
+                        url: "/Storage/StorageFrom/AddStorageFromAdjunct",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'success') {
+                                layui.layer.msg('新增成功！');
+                                top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SearchAdjunctTypeData();
+                                top.layui.layer.close(top.window.topdialog);
+                            }
+                            if (data.flag == "fail") {
+                                layui.layer.msg('信息新增失败！');
+                            }
+                            if (data.flag == "exist") {
+                                top.layer.msg(data.content);
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        // 页面加载
+        $(function () {
+           
+        });
+    </script>
+}

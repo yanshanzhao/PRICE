@@ -1,0 +1,116 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@model  Model.Sys.SysAreasModel
+<div class="layui-card">
+    <div class="layui-card-header">修改区域</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">上级名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ParentName" id="hdnames" placeholder="" value="@Model.AreaPName" class="layui-input">
+                    <input type="hidden" name="ParentId" id="hdids" value="@Model.ParentId" />
+                    <input type="hidden" name="AreaId" value="@Model.AreaId" />
+                </div>
+                <div class="layui-input-inline"> <a class="layui-btn layui-btn-sm"><em onclick="seltree()">选择</em></a>  </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">区域名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="AreaName" maxlength="36" lay-verify="required" placeholder="" class="layui-input" value="@Model.AreaName">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">行政编码</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="AreaCode" maxlength="50" lay-verify="number" placeholder="" class="layui-input" value="@Model.AreaCode">
+                </div>
+            </div>
+        
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Sort" lay-verify="number" placeholder="" class="layui-input" value="@Model.Sort">
+                </div>
+                <div class="layui-input-inline"></div>数字越小越靠前
+            </div>
+
+            @*<div class="layui-form-item">
+                    <label class="layui-form-label">是否启用</label>
+                    <div class="layui-input-inline">
+                        <input type="checkbox" checked lay-skin="switch" lay-filter="state" @(Html.Raw(Model.State == 1 ? "checked" : "")) lay-text="启用|禁用">
+                        <input id="hdstate" type="hidden" name="State" value="@Model.State" />
+                    </div>
+                </div>*@
+
+            <input id="hdstate" type="hidden" name="State" value="@Model.State" />
+
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', ], function () {
+            var form = layui.form, ele = layui.element;
+
+            form.on('switch(state)', function (data) {
+                $("#hdstate").val(this.checked ? "1" : "0");
+            });
+
+            form.on('submit(saveuser)', function (data) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/sysareas/modifyareas",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'ok') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/sysareas/index'
+                        }
+                        if (data.flag == "exist") {
+                            layui.layer.msg('已存在此区域');
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/sysareas/index';
+            });
+        });
+
+        function setinfo(ids, names) {
+            if (ids == -1) { ids = 0; }
+            $("#hdids").val(ids);
+            $("#hdnames").val(names);
+        }
+
+        function seltree() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择区域',
+                content: '/sysareas/tree?url=/sysareas/index',
+                area: ['300px', '450px'],
+            });
+        }
+
+    </script>
+}

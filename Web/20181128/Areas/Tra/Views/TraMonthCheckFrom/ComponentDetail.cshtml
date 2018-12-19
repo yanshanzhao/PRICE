@@ -1,0 +1,189 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input id="hdCheckFromId" type="hidden" value="@ViewBag.CheckFromId" />
+<div class="layui-card">
+    <div class="layui-card-body"> 
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr> 
+                        <th style="text-align:left;">运输评估自定义编号</th>
+                        <th>运输月度考核元件编号</th> 
+                        <th>元件名称</th>
+                        <th>考核类型</th>
+                        <th>项目</th>
+                        <th>序号</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="ComponentList" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>  
+                    <td>{{c.CheckFromNumber}}</td>  
+                    <td>{{c.CheckComponentNumber}}</td>
+                    <td>{{c.CheckComponentName}}</td> 
+                    <td>{{c.TypeName}}</td>
+                    <td>{{c.ProjectName}}</td>
+                    <td>{{c.Sort}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnSort" data-id="{{c.CheckFromComponentId}}" data-sort="{{c.Sort}}">
+                            <i class="layui-icon"></i>排序
+                        </a> 
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="SortDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+        <div class="layui-form-item" style="margin-top:10px;">
+            <div class="layui-input-block" style="width:6%;margin:0 auto !important;"> 
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'laydate', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate;
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+
+            // 查询
+            SearchData();
+             
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+              
+            // 排序
+            $(document).on('click', '.btnSort', function () {
+                var tId = $(this).data("id");
+                var tSort = $(this).data("sort");
+                SortData(tId, tSort);
+            }); 
+        });
+         
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ComponentList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckFrom/MonthCheckFromComponentAmount",
+                async: false,
+                data: {
+                    tId: $("#hdCheckFromId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tId: $("#hdCheckFromId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckFrom/MonthCheckFromComponentList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ComponentList").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+ 
+        // 排序
+        function SortData(tId, tSort) {
+            $("#SortDialog").val(tSort);
+            layer = layui.layer;
+            window.resets = layer.open({
+                type: 1,
+                shade: 0,
+                title: '重置排序序号',
+                content: $("#SortDialog"),
+                btn: ['确定', '取消'],
+                yes: function () { 
+                    $.post('/Tra/TraMonthCheckFrom/ChangeSort', { tId: tId, tSort: escape($("#SortDialog").val()) }, function (data) {
+                        if (data.flag== "success") {
+                            layer.msg("重置排序序号成功！");
+                            layer.close(window.resets); 
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    },'json');
+                }, btn2: function () {
+                    layer.close(window.resets);
+                }
+            });
+        } 
+    </script>
+}
