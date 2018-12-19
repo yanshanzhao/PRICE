@@ -92,6 +92,8 @@ namespace Model.Car
         /// 状态名称
         /// </summary>
         public string States { get; set; }
+        #region MyRegion
 
+        #endregion
     }
 }
