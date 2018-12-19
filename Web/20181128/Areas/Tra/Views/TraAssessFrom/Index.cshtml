@@ -1,0 +1,354 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    <div>
+                        自定义编号：
+                        <div class="layui-input-inline">
+                            <input id="txtAssessFromNumber" style="width:173px;" type="text" value="" placeholder="自定义编号" class="layui-input">
+                        </div>
+                        &nbsp;&nbsp;
+                        状态：
+                        <div class="layui-input-inline">
+                            <div class="layui-input-inline">
+                                <select id="selState" class="select" lay-filter="transportkind">
+                                    <option></option>
+                                    <option value="0">创建</option>
+                                    <option value="1">使用</option>
+                                    <option value="10">作废</option>
+                                </select>
+                            </div>
+                        </div> 
+                        &nbsp;&nbsp;
+                        创建时间：
+                        <div class="layui-input-inline">
+                            <input id="txtCreateTime" style="width:173px;" type="text" value="" class="layui-input">
+                        </div>
+                        &nbsp;&nbsp;
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">自定义编号</th>
+                                <th>评估类型</th>
+                                <th>合格最小值</th>
+                                <th>分母</th>
+                                <th>分子</th>
+                                <th>乘数常量</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TraAssessFromlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.AssessFromNumber}}</td>
+                    <td>{{c.AssessFromTypeName}}</td>
+                    <td>{{c.AdoptMin}}</td>
+                    <td>{{c.Denominator}}</td>
+                    <td>{{c.Molecule}}</td>
+                    <td>{{c.Constant}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td>
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.AssessFromId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.AssessFromId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.AssessFromId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.AssessFromId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if c.State==0}}
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.AssessFromId}}">
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.AssessFromId}}">
+                                    <i class="layui-icon"></i>提交
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.AssessFromId}}">
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.AssessFromId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证申请时间
+            laydate.render({
+                elem: '#txtCreateTime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraComponent/Export'
+                    , {
+                        ApplyTime: $("#txtApplyTime").val()//申请时间
+                      , State: $("#txtState").val()//提交状态
+                      , UseState: $("#txtUseState").val() //审核状态
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=运输选择申请表";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //编辑按钮
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ModifyData(tId);
+            });
+
+            //提交按钮
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                SubmitData(tId);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                DeleteData(tId);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ShowData(tId);
+            });
+        });
+
+        // 新增
+        function AddData() {
+            location.href = '/Tra/TraAssessFrom/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChooselist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraAssessFrom/TraAssessFromAmount",
+                async: false,
+                data: {
+                    AssessFromNumber: $("#txtAssessFromNumber").val()//元件编号
+                    , State: $("#selState").val() //状态
+                    , CreateTime: $("#txtCreateTime").val() //创建时间
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                AssessFromNumber: $("#txtAssessFromNumber").val()//元件编号
+                , State: $("#selState").val() //状态
+                , CreateTime: $("#txtCreateTime").val() //创建时间
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraAssessFrom/Index',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraAssessFromlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraAssessFromlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Tra/TraAssessFrom/Edit?tId=' + tId;
+        }
+
+        // 提交
+        function SubmitData(tId) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraAssessFrom/SubmitTraAssessFrom',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 作废
+        function DeleteData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraAssessFrom/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraAssessFrom/Check?tId=' + tId;
+        }
+    </script>
+}

@@ -1,0 +1,104 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+
+        <div class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">文件类型</label>
+                <div class="layui-input-inline">
+                    <select id="comFileTypes" class="select" lay-filter="suppclass"></select>
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="text-align:center;">
+                <blockquote class="layui-elem-quote searchbox" style="text-align:left;">
+                    温馨提示：可支持以下文件格式  xls|xlsx|docx|png|pdf|jpg
+                </blockquote>
+                <a class="layui-btn layui-btn-normal " id="btnUpload">上传</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="temdictlist">
+    {{each list as c}}
+    <option value="{{c.AdjunctName}}">{{c.AdjunctName}}</option>
+    {{/each}}
+</script>
+<input type="hidden" id="hdassformid" value="@ViewBag.assformid" />
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload', 'layer'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+
+            //文件上传
+            layui.upload.render({
+                elem: '#btnUpload'
+               , url: '/index/upload?type=tra'
+               , accept: 'file'
+               , auto: true
+                 , exts: 'xls|xlsx|docx|png|pdf|jpg'
+               , before: function () {
+                   var flag = isonlyfile($("#comFileTypes").val());
+                   if (flag) {
+                       if (top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.ishasfiles($("#comFileTypes").val())) {
+                           top.layui.layer.msg('您已上传已文件类型，请确认');
+                           return false;
+                       }
+                   }
+               }
+               , done: function (res) {
+                   if (res.flag == "ok") {
+
+                       var flag = isonlyfile($("#comFileTypes").val());
+                       if (flag) {
+                           if (!top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.ishasfiles($("#comFileTypes").val())) {
+                               top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setnewfiles($("#comFileTypes").val(), res.path);
+                               top.layui.layer.close(top.window.filedialog);
+                           }
+                       }
+                       else {
+                           top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setnewfiles($("#comFileTypes").val(), res.path);
+                           top.layui.layer.close(top.window.filedialog);
+                       }
+                      
+                   }
+                   return false;
+               }
+            });
+        });
+        window.filelists = [];
+
+        function isonlyfile(names) {
+            for (var i = 0; i < filelists.length; i++) {
+                if (filelists[i].AdjunctName == names) {
+                    return filelists[i].AdjunctOnly;
+                }
+            }
+            return 0;
+        }
+
+        $(function () {
+            $.ajax({
+                type: "POST",
+                url: '/supplier/SupplierTransport/assessfiletypes',
+                data: { assessformid: $("#hdassformid").val() },
+                async:false,
+                dataType: "json",
+                success: function (data) {
+                    filelists = data;
+                    $("#comFileTypes").html(template('temdictlist', { list: data }));
+
+                    layui.use('form', function () {
+                        layui.form.render("select");
+                    });
+                }
+            });
+
+        });
+    </script>
+}

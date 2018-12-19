@@ -1,0 +1,315 @@
+﻿@{
+    ViewBag.Title = "Allot";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraOperationClaimModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraOperationClaim/EditTraOperationAllotClaim" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">培训计划维护</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">运作编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperationNumber" type="text" name="OperationNumber" value="@Model.OperationNumber" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdOperationClaimId" name="OperationClaimId" type="hidden" value="@Model.OperationClaimId" />
+                    <input id="hdSupperMatchingId" name="SupperMatchingId" type="hidden" value="@Model.SupperMatchingId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">培训负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtRectificationUser" type="text" name="RectificationUser" value="@Model.RectificationUser" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <label class="layui-form-label">培训主题</label>
+                <div class="layui-input-block">
+                    <textarea id="txtTheme" name="Theme" lay-verify="required" class="layui-textarea" disabled>@Model.Theme</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">培训目的</label>
+                <div class="layui-input-block">
+                    <textarea id="txtDestination" name="Destination" lay-verify="required" class="layui-textarea" disabled>@Model.Destination</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">培训方式</label>
+                <div class="layui-input-block">
+                    <textarea id="txtTypeText" name="TypeText" lay-verify="required" class="layui-textarea" disabled>@Model.TypeText</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtOperationClaimRemark" name="OperationClaimRemark"   class="layui-textarea" disabled>@Model.OperationClaimRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运作要求维护明细信息</div>
+        <div class="layui-card-body">
+            <blockquote class="layui-elem-quote">
+                <div class="layui-inline">
+                    <div class="layui-form">
+                        供应商名称：
+                        <div class="layui-input-inline">
+                            <input type="text" name="SupplierName"   placeholder="" class="layui-input" id="txtSupplierName">
+                        </div>
+                        &nbsp;&nbsp;
+                        状态：
+                        <div class="layui-input-inline">
+                            <select name="State" lay-verify="" placeholder="" class="layui-select" id="txtState">
+                                <option></option>
+                                <option value="0">作废</option>
+                                <option value="1">有效</option>
+                                <option value="2">已使用</option>
+                            </select>
+                        </div>
+                        &nbsp;&nbsp;
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    </div>
+                </div>
+            </blockquote>
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">供应商名称</th>
+                            <th>操作机构</th>
+                            <th>运作供应商状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="OperationClaimAllotlist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.SupplierName}}</td>
+                        <td>{{c.DepartmentName}}</td>
+                        <td>{{c.StateName}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.OperationSuppId}}" data-state="{{c.State}}">
+                                <i class="layui-icon"></i>作废
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block" style="margin-left:500px;">
+            <a class="layui-btn" id="btnGoBack">返回</a>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraOperationClaim/EditTraOperationAllotClaim",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Tra/TraOperationClaim/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+
+            $("#txtDatumType").val($("#hdDatumType").val());//资料类型
+            $("#txtClaimType").val($("#hdClaimType").val());//要求类型
+            $("#txtEmployType").val($("#hdEmployType").val());//使用类型
+
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                Choose();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                var tState = $(this).data("state");//状态
+                DeleteData(tId, tState);
+            });
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraOperationClaim/Index';
+            });
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#OperationClaimAllotlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraOperationClaim/OperationClaimAllotCount",
+                async: false,
+                data: {
+                    operationClaimId: $("#hdOperationClaimId").val(),//供应商名称
+                    supplierName: $("#txtSupplierName").val()//供应商名称
+                      , state: $("#txtState").val()//状态
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                operationClaimId: $("#hdOperationClaimId").val(),//供应商名称
+                supplierName: $("#txtSupplierName").val()//供应商名称
+                      , state: $("#txtState").val()//状态
+
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraOperationClaim/OperationClaimAllotList',
+                data: userjosn,
+                success: function (data) {
+                    $("#OperationClaimAllotlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#OperationClaimAllotlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+
+        // 作废
+        function DeleteData(tId, tState) {
+            if (tState != '1') {
+                top.layer.msg('只有初始状态的才能作废！');
+                return;
+            }
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraOperationClaim/InvalidAllotState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+
+        // 设置供应商信息
+        function setinfo(ids, idss) {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraOperationClaim/OperationClaimAllotList',
+                data: { ids: ids, idss: idss },
+                success: function (data) {
+                    $("#OperationClaimAllotlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#OperationClaimAllotlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 选择供应商种类
+        function Choose() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择供应商信息',
+                content: '/Tra/TraOperationClaim/AddDetail?url=/Tra/TraOperationClaim/Index&tId=' + $("#hdOperationClaimId").val(),
+                area: ['700px', '580px'],
+            });
+        }
+    </script>
+}

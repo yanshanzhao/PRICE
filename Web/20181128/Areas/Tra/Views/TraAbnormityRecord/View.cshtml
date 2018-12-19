@@ -1,0 +1,600 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraAbnormityRecordModel
+<form class="layui-form layui-form-pane" method="post">
+    <input id="hdAbnormityId" value="@Model.AbnormityId" name="AbnormityId" type="hidden" />
+    <input id="hdTransportId" value="@Model.TransportId" type="hidden" />
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商名称</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtSupplierName" value="@Model.SupplierName" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtTransportNumber" value="@Model.TransportNumber" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商类型</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtSupplierType" value="@Model.SupplierTypeName" type="text" class="layui-input" disabled />
+                </div>
+            </div>
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}" data-type="{{c.type}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">异常整改信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>整改类型</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <select class="select" id="selRectificationTypes" disabled>
+                        <option value="" selected>请选择</option>
+                        <option value="0">月绩效</option>
+                        <option value="1">巡查</option>
+                        <option value="2">综合</option>
+                        <option value="3">日常运作</option>
+                        <option value="10">其它</option>
+                    </select>
+                    <input id="hdRectificationTypes" value="@Model.RectificationTypes" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:13%;"><em>*</em>整改计划完成时间</label>
+                <div class="layui-input-inline" style="width:210px;">
+                    <input id="txtRectificationFinishTime" value="@Model.RectificationFinishTime" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>二次整改</label>
+                <div class="layui-input-block">
+                    <input @(Html.Raw(Model.TwoAbnormity == 1 ? "checked" : "")) type="checkbox" lay-skin="switch" lay-filter="twoAbnormity" lay-text="是|否" disabled>
+                    <input id="hdTwoAbnormity" type="hidden" value="@Model.TwoAbnormity" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>需整改事项</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRectificationContent" class="layui-textarea" disabled>@Model.RectificationContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>要求效果</label>
+                <div class="layui-input-block">
+                    <textarea id="txtEffect" class="layui-textarea" disabled>@Model.Effect</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtAbnormityRemark" class="layui-textarea" disabled>@Model.AbnormityRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="divMonthCheckList">
+        <div class="layui-card-header">月度绩效信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">考核年</th>
+                            <th>考核月</th>
+                            <th>考核类型</th>
+                            <th>考核得分</th>
+                        </tr>
+                    </thead>
+                    <tbody id="MonthCheckList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div id="pagedetail" class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfMC">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.CheckYear}}</td>
+                        <td>{{c.CheckMonth}}</td>
+                        <td>{{c.CheckMonth}}</td>
+                        <td>{{c.Score}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="divPatrolRecordList">
+        <div class="layui-card-header">巡查信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">巡查编号</th>
+                            <th>巡查类型</th>
+                            <th>巡查内容</th>
+                        </tr>
+                    </thead>
+                    <tbody id="PatrolRecordList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo1" class="pagebox">
+                    <div id="Pagination1" class="pagination"></div><div id="pagedetail1" class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfPR">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.PatrolNumber}}</td>
+                        <td>{{c.PatrolTypeName}}</td>
+                        <td>{{c.PatrolContent}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">整改措施</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>整改跟进人</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtUserRectification" value="@Model.UserRectification" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>计划完成日期</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtPlanEndTime" value="@Model.PlanEndTime" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>问题原因</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRectificationReason" class="layui-textarea" disabled>@Model.RectificationReason</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>整改措施</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRectificationMethod" class="layui-textarea" disabled>@Model.RectificationMethod</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">整改自评</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:13%;"><em>*</em>整改实际完成时间</label>
+                <div class="layui-input-inline" style="width:210px;">
+                    <input id="txtActualFinishTime" value="@Model.ActualFinishTime" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:120px;"><em>*</em>整改效果自评</label>
+                <div class="layui-input-inline" style="width:88%;">
+                    <textarea id="txtEffectEvaluation" class="layui-textarea" disabled>@Model.EffectEvaluation</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">整改评估</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>评估日期</label>
+                <div class="layui-input-inline">
+                    <input id="txtEvaluateTime" name="EvaluateTime" value="@ViewBag.EvaluateTime" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>跟进人</label>
+                <div class="layui-input-inline">
+                    <input id="txtRectificationUser" name="RectificationUser" value="@ViewBag.RectificationUser" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:11%;"><em>*</em>整改评估状态</label>
+                <div class="layui-input-inline" style="width:180px;">
+                    <select class="select" id="selEvaluateState" name="EvaluateState" disabled>
+                        <option value="" selected>请选择</option>
+                        <option value="1">整改通过</option>
+                        <option value="2">二次整改</option>
+                    </select>
+                    <input id="hdEvaluateState" value="@ViewBag.EvaluateState" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:120px;"><em>*</em>整改效果评估</label>
+                <div class="layui-input-inline" style="width:88%;">
+                    <textarea id="txtEffectEvaluate" name="EffectEvaluate" class="layui-textarea" disabled>@ViewBag.EffectEvaluate</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdfilelist" name="FileList" /> 
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+
+        // initfiles/delfilelist/setfilename/downfile 附件上传/删除/更改名称/下载
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    if (filelist[i].path.lastIndexOf('.') != -1) {
+                        var lastnum = filelist[i].path.lastIndexOf('.');
+                        var exts = filelist[i].path.substring(lastnum + 1);
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                    }
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtEvaluateTime'
+              , type: 'datetime'
+              , format: 'yyyy/MM/dd HH:mm:ss'
+            }); 
+        });
+
+        //添加新文件(新增)
+        function setnewfiles(filename, path) {
+            filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+            initfiles();
+        }
+
+        $(function () {
+             
+            // 整改类型
+            $("#selRectificationTypes").val($("#hdRectificationTypes").val());
+
+            // 二次整改
+            $("#selTwoAbnormity").val($("#hdTwoAbnormity").val());
+
+            // 整改评估状态
+            $("#selEvaluateState").val($("#hdEvaluateState").val());
+
+            if ($("#selRectificationTypes").val() == 0) {
+                $("#divMonthCheckList").show();
+                $("#divPatrolRecordList").hide();
+
+                // 月绩效列表
+                SearchMonthCheck();
+            }
+            else if ($("#selRectificationTypes").val() == 1) {
+                $("#divMonthCheckList").hide();
+                $("#divPatrolRecordList").show();
+
+                // 巡查列表
+                SearchPatrolRecord();
+            }
+            else if ($("#selRectificationTypes").val() == 2) {
+                $("#divMonthCheckList").show();
+                $("#divPatrolRecordList").show();
+
+                // 月绩效列表/巡查列表
+                SearchMonthCheck();
+                SearchPatrolRecord();
+            }
+            else {
+                $("#divMonthCheckList").hide();
+                $("#divPatrolRecordList").hide();
+            }
+
+            // 选择月绩效信息列表
+            $(document).on('click', '#btnChooseMonthCheck', function () {
+                ChooseMonthCheck();
+            });
+
+            // 作废月绩效信息
+            $(document).on('click', '.btnMonthCheckInvalid', function () {
+                var tId = $(this).data("id");
+                var tOtherId = $(this).data("otherid");
+                InvalidRecordDetail(tId, tOtherId, 0);
+            });
+
+            // 选择巡查信息列表
+            $(document).on('click', '#btnChoosePatrolRecord', function () {
+                ChoosePatrolRecord();
+            });
+
+            // 作废巡查信息
+            $(document).on('click', '.btnPatrolRecordInvalid', function () {
+                var tId = $(this).data("id");
+                var tOtherId = $(this).data("otherid");
+                InvalidRecordDetail(tId, tOtherId, 1);
+            });
+
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraAbnormityRecord/Index';
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 5;
+
+        // 选择月绩效信息列表
+        function ChooseMonthCheck() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择月绩效信息列表',
+                content: '/Tra/TraAbnormityRecord/MonthCheckDetail?tUrl=/Tra/TraAbnormityRecord/Index&tIds=' + $("#hdAbnormityId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tTwoAbnormity=" + $("#hdTwoAbnormity").val() + "&tType=edit",
+                area: ['550px', '550px'],
+            });
+        }
+
+        // 月绩效信息
+        // 查询总记录数
+        function SearchMonthCheck() {
+            // 页面索引
+            pageIndex = 0;
+
+            // 总条数
+            var count = 0;
+
+            // 等待时显示
+            $("#MonthCheckList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraAbnormityRecord/RecordDetailCount",
+                async: false,
+                data: {
+                    tAbnormityId: $("#hdAbnormityId").val(),
+                    tDetailType: 0
+                },
+                success: function (data) {
+                    count = data;
+                    $("#pagedetail").text("共" + count + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(count, {
+                callback: PageCallbackOfMC,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfMC(indexs) {
+            pageIndex = indexs;
+            InitMCTable(indexs);
+        }
+
+        // 查询数据
+        function InitMCTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tAbnormityId: $("#hdAbnormityId").val(),
+                tDetailType: 0
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraAbnormityRecord/RecordDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#MonthCheckList").html(template('temslistOfMC', { list: data }));
+                    $("#pageinfo").show();
+                    if (data == null) {
+                        $("#pageinfo").hide();
+                        $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo").hide();
+                        $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 选择巡查记录列表
+        function ChoosePatrolRecord() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择巡查记录列表',
+                content: '/Tra/TraAbnormityRecord/PatrolRecordDetail?tUrl=/Tra/TraAbnormityRecord/Index&tIds=' + $("#hdAbnormityId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tType=edit",
+                area: ['650px', '550px'],
+            });
+        }
+
+        // 巡查记录信息
+        // 查询总记录数
+        function SearchPatrolRecord() {
+
+            // 页面索引
+            pageIndex = 0;
+
+            var count = 0;
+
+            // 等待时显示
+            $("#PatrolRecordList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraAbnormityRecord/RecordDetailCount",
+                async: false,
+                data: {
+                    tAbnormityId: $("#hdAbnormityId").val(),
+                    tDetailType: 1
+                },
+                success: function (data) {
+                    count = data;
+                    $("#pagedetail1").text("共" + count + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination1").pagination(count, {
+                callback: PageCallbackOfPR,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfPR(indexs) {
+            pageIndex = indexs;
+            InitPRTable(indexs);
+        }
+
+        // 查询数据
+        function InitPRTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tAbnormityId: $("#hdAbnormityId").val(),
+                tDetailType: 1
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraAbnormityRecord/RecordDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#PatrolRecordList").html(template('temslistOfPR', { list: data }));
+                    $("#pageinfo1").show();
+                    if (data == null) {
+                        $("#pageinfo1").hide();
+                        $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo1").hide();
+                        $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 作废明细表信息
+        function InvalidRecordDetail(tAbnormityDetailId, tOtherId, tDetailType) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraAbnormityRecord/InvalidRecordDetail',
+                    data: {
+                        tAbnormityDetailId: tAbnormityDetailId,
+                        tOtherId: tOtherId,
+                        tDetailType: tDetailType
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+
+                            if (tDetailType == 0) {
+                                // 月绩效列表
+                                SearchMonthCheck();
+                            }
+                            else if (tDetailType == 1) {
+                                // 巡查记录
+                                SearchPatrolRecord();
+                            }
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+    </script>
+}

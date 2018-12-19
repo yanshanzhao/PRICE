@@ -1,0 +1,209 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Tra/TraOperateDetail/AddOperateDetail" method="post">
+            <input id="hdOperateId" name="OperateId" type="hidden" value="@ViewBag.OperateId" />
+            <input id="hdIsInterval" type="hidden" value="@ViewBag.IsInterval" />
+            <input id="hdIsNumber" type="hidden" value="@ViewBag.IsNumber" />
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>区间类型</label>
+                <div class="layui-input-inline">
+                    <select id="selIntervalTpye" name="IntervalTpye" lay-filter="intervalTpye" lay-verify="required" class="select">
+                        <option value="">请选择</option>
+                        <option value="0">否</option>
+                        <option value="1">上区间</option>
+                        <option value="2">下区间</option>
+                        <option value="3">上下间</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" id="divIntervalBegin">
+                <label class="layui-form-label"><em>*</em>区间上值</label>
+                <div class="layui-input-inline">
+                    <input id="txtIntervalBegin" type="text" name="IntervalBegin" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" id="divIntervalEnd">
+                <label class="layui-form-label"><em>*</em>区间下值</label>
+                <div class="layui-input-inline">
+                    <input id="txtIntervalEnd" type="text" name="IntervalEnd" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" id="divIntervalValue">
+                <label class="layui-form-label"><em>*</em>区间值</label>
+                <div class="layui-input-inline">
+                    <input id="txtIntervalValue" type="text" name="IntervalValue" maxlength="20" class="layui-input" lay-verify="isIntervalTpye">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>得分固定</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="isscore" lay-text="是|否">
+                    <input id="hdIsScore" name="IsScore" type="hidden" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item" id="divScore">
+                <label class="layui-form-label"><em>*</em>得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtScore" type="text" name="Score" class="layui-input" lay-verify="isScore">
+                </div>
+            </div>
+            <div class="layui-form-item" id="divRatio">
+                <label class="layui-form-label"><em>*</em>系数</label>
+                <div class="layui-input-inline">
+                    <input id="txtRatio" type="text" name="Ratio" class="layui-input" lay-verify="isRatio">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:25%;margin:0 auto !important;">
+                    <div class="layui-btn" lay-submit="" lay-filter="btnSave">保存</div>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 区间类型监听
+            form.on('select(intervalTpye)', function (data) {
+                if ($("#selIntervalTpye").val() == 0) {
+                    // 显示区间值,隐藏区间上下值并赋默认值0
+                    $("#divIntervalValue").show();
+                    $("#divIntervalBegin").hide();
+                    $("#txtIntervalBegin").val(0);
+                    $("#divIntervalEnd").hide();
+                    $("#txtIntervalEnd").val(0);
+                }
+                else {
+                    // 显示区间上下值,隐藏区间值
+                    $("#divIntervalBegin").show();
+                    $("#txtIntervalBegin").val("");
+                    $("#divIntervalEnd").show();
+                    $("#txtIntervalEnd").val("");
+                    $("#divIntervalValue").hide();
+                    $("#txtIntervalValue").val("");
+                }
+            })
+
+            // 验证
+            form.verify({
+                isIntervalTpye: function (value, item) {
+                    if ($("#selIntervalTpye").val() == 0) {
+                        if (!value) {
+                            return '请填充区间值栏位！';
+                        }
+                    }
+                },
+                isScore: function (value, item) {
+                    if ($("#hdIsScore").val() == 1) {
+                        if (!value) {
+                            return '请填充得分栏位！';
+                        }
+                    }
+                },
+                isRatio: function (value, item) {
+                    if ($("#hdIsScore").val() == 0) {
+                        if (!value) {
+                            return '请填充系数栏位！';
+                        }
+                    }
+                }
+            });
+
+            // 开关
+            form.on('switch(isscore)', function (data) {
+                $("#hdIsScore").val(this.checked ? "1" : "0");
+
+                if ($("#hdIsScore").val() == 0) {
+                    // 得分固定为否时填充系数
+                    $("#txtScore").val(0);
+                    $("#divScore").hide();
+                    $("#divRatio").show();
+                    $("#txtRatio").val("");
+                }
+                else if ($("#hdIsScore").val() == 1) {
+                    // 得分固定为是时填充得分
+                    $("#txtRatio").val(0);
+                    $("#divRatio").hide();
+                    $("#divScore").show();
+                    $("#txtScore").val("");
+                }
+            });
+
+            // 验证区间下值是否大于区间上值
+            $(document).on('blur', '#txtIntervalEnd', function () {
+                var val = $(this).val(); 
+                if (parseFloat(val) <= parseFloat($("#txtIntervalBegin").val())) {
+                    layui.layer.msg('区间下值须大于区间上值，请修改！');
+                    $(this).focus();
+                    return false;
+                }
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+
+                if ($("#selIntervalTpye").val() != 0) {
+                    // 验证区间下值是否大于区间上值
+                    if (parseFloat($("#txtIntervalEnd").val()) <= parseFloat($("#txtIntervalBegin").val())) {
+                        layui.layer.msg('区间下值须大于区间上值，请修改！');
+                        $(this).focus();
+                        return false;
+                    }
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraOperateDetail/AddOperateDetail",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功！');
+                            location.href = '/Tra/TraOperateDetail/Index?tOperateId=' + $("#hdOperateId").val() + '&tIsInterval=' + $("#hdIsInterval").val() + '&tIsNumber=' + $("#hdIsNumber").val();
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            // 若主表区间为否
+            if ($("#hdIsInterval").val() == 0 || $("#hdIsNumber").val() == 0) {
+
+                // 明细表区间类型为否且不可编辑
+                $("#selIntervalTpye").val(0);
+                $("#selIntervalTpye").attr("disabled", "disabled");
+
+                // 隐藏区间上下值并赋默认值0 
+                $("#divIntervalBegin").hide();
+                $("#txtIntervalBegin").val(0);
+                $("#divIntervalEnd").hide();
+                $("#txtIntervalEnd").val(0);
+            } else {
+                // 隐藏区间值 
+                $("#divIntervalValue").hide();
+            }
+
+            // 页面加载默认得分固定 显示得分隐藏系数 
+            $("#divRatio").hide();
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraOperateDetail/Index?tOperateId=' + $("#hdOperateId").val() + '&tIsInterval=' + $("#hdIsInterval").val() + '&tIsNumber=' + $("#hdIsNumber").val();
+            });
+        });
+    </script>
+}

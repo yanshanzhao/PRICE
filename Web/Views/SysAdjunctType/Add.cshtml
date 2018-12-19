@@ -1,0 +1,125 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/SysAdjunctType/AddSysAdjunctType" method="post"> 
+    <div class="layui-card">
+        <div class="layui-card-header">附件类型新增</div>
+        <div class="layui-card-body" style="overflow:visible;"> 
+            <div class="layui-form-item" >
+                <label class="layui-form-label"><em>*</em>附件名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtAdjunctName" type="text" name="AdjunctName" lay-verify="required" maxlength="100" class="layui-input">
+                </div>
+            </div> 
+            <div class="layui-form-item" >
+                <label class="layui-form-label"><em>*</em>附件类型</label>
+                <div class="layui-input-inline">
+                    @*<select id="selAdjunctType" name="AdjunctType" lay-verify="required" class="select">
+                        <option value="">请选择附件类型</option>
+                        <option value="0">运输供应商附件</option>
+                        <option value="1">仓储供应商附件</option>
+                        <option value="2">仓储启用附件</option>
+                        <option value="3">招标通知附件</option>
+                        <option value="4">供应商投标附件</option>
+                        <option value="5">运作要求附件</option>
+                        <option value="6">过程巡查附件</option>
+                        <option value="7">巡查记录附件</option>
+                        <option value="8">整改记录附件</option>
+                        <option value="9">激励措施附件</option>
+                        <option value="10">培训执行记录附件</option>
+                        <option value="11">仓储评估附件</option>
+                        <option value="12">运输选择申请附件</option>
+                        <option value="13">年度绩效结果附件</option>
+                    </select>*@ 
+                    <select id="selAdjunctType" name="AdjunctType" lay-verify="required" class="select"></select>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+        </div>
+    </div> 
+</form>
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+          
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+
+                $("#btnSave").attr("display", "none");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/SysAdjunctType/AddSysAdjunctType",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('保存成功！');
+                            location.href = '/SysAdjunctType/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('保存失败！');
+                            $("#btnSave").attr("display", "inline");
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+         
+        $(function () {
+            // 附件类型
+            SearchDictionaryList();
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/SysAdjunctType/Index';
+            }); 
+        });
+
+        // 类型数组
+        window.AdjunctType = [];
+
+        // 附件类型(系统字典表中获取)
+        function SearchDictionaryList() {
+
+            AdjunctType.push({ id: '', name: "请选择" }); 
+
+            $.ajax({
+                url: '/Supplier/Supplier/DictList',
+                type: 'POST',
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 12) {
+                                AdjunctType.push({ id: data[i].Number, name: data[i].Name });
+                            } 
+                        }
+                    }
+                }
+            });
+
+            $("#selAdjunctType").html(template('temdictlist', { list: AdjunctType }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+    </script>
+}

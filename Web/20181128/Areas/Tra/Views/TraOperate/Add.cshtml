@@ -1,0 +1,103 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-header">运营类型维护新增</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Tra/TraOperate/AddOperate" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>考核类型</label>
+                <div class="layui-input-inline">
+                    <select id="selCheckType" name="CheckType" lay-verify="required" class="select">
+                        <option value="">请选择</option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>项目</label>
+                <div class="layui-input-inline">
+                    <select id="selProject" name="Project" lay-verify="required" class="select">
+                        <option value="">请选择</option>
+                        <option value="0">基础项</option>
+                        <option value="1">加分项</option>
+                        <option value="2">扣分项</option>
+                        <option value="3">其他项</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:120px;"><em>*</em>运营类型名称</label>
+                <div class="layui-input-inline" style="width:180px;">
+                    <input id="txtOperateName" type="text" name="OperateName" maxlength="200" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>数值</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="isNumber" lay-text="是|否">
+                    <input id="hdIsNumber" name="IsNumber" type="hidden" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>区间</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="isInterval" lay-text="是|否">
+                    <input id="hdIsInterval" name="IsInterval" type="hidden" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:50%;">
+                    <div class="layui-btn" lay-submit="" lay-filter="btnSave">保存</div>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开关
+            form.on('switch(isNumber)', function (data) {
+                $("#hdIsNumber").val(this.checked ? "1" : "0");
+            });
+            form.on('switch(isInterval)', function (data) {
+                $("#hdIsInterval").val(this.checked ? "1" : "0");
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraOperate/AddOperate",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功！');
+                            location.href = '/Tra/TraOperate/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraOperate/Index';
+            });
+        });
+    </script>
+}

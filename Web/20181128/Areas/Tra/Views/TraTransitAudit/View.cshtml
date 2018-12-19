@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Supplier.SupplierAuditModel
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-header">运输运作审核</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:11%;">运输供应商名称</label>
+                <div class="layui-input-inline" style="width:20%;">
+                    <input id="txtSupplierName" value="@Model.SupplierName" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:11%;">运输供应商编号</label>
+                <div class="layui-input-inline" style="width:20%;">
+                    <input id="txtTransportNumber" value="@Model.TransportNumber" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:11%;">运输选择编号</label>
+                <div class="layui-input-inline" style="width:20%;">
+                    <input id="txtChooseNumber" value="@Model.TraChooseNumber" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" value="@Model.ApplyTime" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">运作时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtOfficialTime" value="@Model.OfficialTime" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">签订合同</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" lay-skin="switch" lay-filter="signContract" lay-text="是|否" @(Html.Raw(Model.SignContract == 1 ? "checked" : "")) disabled>
+                    <input id="hdSignContract" value="@Model.SignContract" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">合同编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractNumber" value="@Model.ContractNumber" type="text" maxlength="60" class="layui-input" lay-verify="Contract" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">押金金额</label>
+                <div class="layui-input-inline">
+                    <input id="txtDeposit" value="@Model.Deposit" type="text" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">参与培训</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" lay-skin="switch" lay-filter="isCultivate" lay-text="是|否" @(Html.Raw(Model.IsCultivate == 1 ? "checked" : "")) disabled>
+                    <input id="hdIsCultivate" value="@Model.IsCultivate" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">审核意见</label>
+                <div class="layui-input-block">
+                    <textarea id="txtAuditRemark" placeholder="审核意见" name="AuditRemark" class="layui-textarea" disabled>@Model.AuditRemark</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate; 
+        });
+
+        $(function () {
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraTransitAudit/Index';
+            });
+        });
+    </script>
+}

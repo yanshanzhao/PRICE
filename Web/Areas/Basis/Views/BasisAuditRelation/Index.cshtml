@@ -1,0 +1,414 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<style>
+
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    类型名称：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selAuditRelationType">
+                            <option value="0">请选择类型名称</option>
+                            <option value="1">仓储开发审核</option>
+                            <option value="2">仓储选择审核</option>
+                            <option value="3">运输开发审核</option>
+                            <option value="4">运输选择审核</option>
+                            <option value="5">运输选择评分审核</option>
+                            <option value="6">运输运作准备审核</option>
+                            <option value="7">配送人员审核</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    流程编号：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="流程序号" class="layui-input" type="text" id="txtAuditRelationNumber">
+                    </div>
+                    &nbsp;&nbsp;
+                    提起机构：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="提起机构" class="layui-input" type="text" id="txtDepartmentName" readonly>
+                        <input id="hdDepartmentId" type="hidden" />
+                    </div>
+                    <i class="layui-icon layui-icon-delete clearDepartmentName" title="点击清空提起机构"></i>
+                    &nbsp;&nbsp;
+                    审核机构：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="审核机构" class="layui-input" type="text" id="txtToDepartmentName" readonly>
+                        <input id="hdToDepartmentId" type="hidden" />
+                    </div>
+                    <i class="layui-icon layui-icon-delete clearToDepartmentName" title="点击清空审核机构"></i>
+                    <div class="layui-inline" style="margin-top:5px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">类型名称</th>
+                                <th>流程编号</th>
+                                <th>流程操作名称</th>
+                                <th>提起机构</th>
+                                <th>提起人员</th>
+                                <th>审核机构</th>
+                                <th>审核人员</th>
+                                <th>关键控制</th>
+                                <th>退回类型</th>
+                                <th>结束审核</th>
+                                <th>流程开始</th>
+                                <th>流程状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.AuditRelationTypeName}}</td>
+                    <td>{{c.AuditRelationNumber}}</td>
+                    <td>{{c.AuditRelationName}}</td>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.TrueName}}</td>
+                    <td>{{c.ToDepartmentName}}</td>
+                    <td>{{c.ToTrueName}}</td>
+                    <td>{{c.IsControlName}}</td>
+                    <td>{{c.ReturnTypeName}}</td>
+                    <td>{{c.EndAuditName}}</td>
+                    <td>{{c.BeginNodeName}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>
+                        {{if c.State==1}}
+                        {{if c.EndAudit==0}}
+                        <a class="layui-btn layui-btn-sm btnAppend" data-id="{{c.AuditRelationId}}">
+                            <i class="iconfont icon-edit"></i>追加
+                        </a>
+                        {{/if}}
+                        {{if c.BeginNode==0}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.AuditRelationId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{/if}}
+                        {{if c.BeginNode==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.AuditRelationId}}" data-number="{{c.AuditRelationNumber}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.AuditRelationId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div> 
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if c.State==1}}
+                                {{if c.EndAudit==0}}
+                                <a class="layui-btn layui-btn-sm btnAppend" data-id="{{c.AuditRelationId}}">
+                                    <i class="iconfont icon-edit"></i>追加
+                                </a>
+                                {{/if}}
+                                {{if c.BeginNode==0}}
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.AuditRelationId}}">
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a>
+                                {{/if}}
+                                {{if c.BeginNode==1}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.AuditRelationId}}" data-number="{{c.AuditRelationNumber}}">
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                                {{/if}}
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.AuditRelationId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        // 提起/审核
+        var name = "";
+
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 5;
+
+        // 绑定事件
+        $(function () {
+            // 加载查询
+            SearchData();
+
+            // 清除条件(提起机构)
+            $(document).on('click', '.clearDepartmentName', function () {
+                $("#txtDepartmentName").val("");
+                $("#hdDepartmentId").val("");
+            });
+
+            // 清除条件(审核机构)
+            $(document).on('click', '.clearToDepartmentName', function () {
+                $("#txtToDepartmentName").val("");
+                $("#hdToDepartmentId").val("");
+            });
+
+            // 新增审核流程
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询审核流程
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出审核流程
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Basis/BasisAuditRelation/Export'
+                    , { auditRelationTypeName: $("#selAuditRelationType").val(), auditRelationNumber: $("#txtAuditRelationNumber").val(), departmentId: $("#hdDepartmentId").val(), todepartmentId: $("#hdToDepartmentId").val() }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=机构关系(供应商审核流程)";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 追加审核流程
+            $(document).on('click', '.btnAppend', function () {
+                var tId = $(this).data("id"); 
+                AppendData(tId);
+            });
+
+            // 编辑审核流程
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+
+            // 作废审核流程
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");
+                var tNumber = $(this).data("number");
+                DeleteData(tId, tNumber);
+            });
+
+            // 查看审核流程明细
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+
+            // 提起机构(发起人所在机构)
+            $(document).on('click', '#txtDepartmentName', function () {
+                name = "initiate";
+                GetDepartmentName();
+            });
+
+            // 审核机构(审核人所在机构)
+            $(document).on('click', '#txtToDepartmentName', function () {
+                name = "audit";
+                GetDepartmentName();
+            });
+        });
+
+        // 设置部门
+        function setinfo(ids, names) {
+            if (name == "initiate") {
+                $("#hdDepartmentId").val(ids);
+                $("#txtDepartmentName").val(names);
+            }
+
+            if (name == "audit") {
+                $("#hdToDepartmentId").val(ids);
+                $("#txtToDepartmentName").val(names);
+            }
+        }
+
+        // 获取机构名称
+        function GetDepartmentName() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择机构',
+                content: '/sysdep/tree?url=/Basis/BasisAuditRelation/Index',
+                area: ['300px', '450px'],
+            });
+        }
+
+        // 新增
+        function AddData() {
+            location.href = '/Basis/BasisAuditRelation/Add';
+        }
+
+        // 查询审核流程总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisAuditRelation/AuditRelationCount",
+                async: false,
+                data: { auditRelationTypeName: $("#selAuditRelationType").val(), auditRelationNumber: $("#txtAuditRelationNumber").val(), departmentId: $("#hdDepartmentId").val(), todepartmentId: $("#hdToDepartmentId").val() },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询审核流程
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                auditRelationTypeName: $("#selAuditRelationType").val(),
+                auditRelationNumber: $("#txtAuditRelationNumber").val(),
+                departmentId: $("#hdDepartmentId").val(),
+                todepartmentId: $("#hdToDepartmentId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Basis/BasisAuditRelation/AuditRelationList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 追加审核流程
+        function AppendData(tId) { 
+            $.ajax({
+                type: "POST",
+                url: '/Basis/BasisAuditRelation/IsRelationByBeforeId',
+                data: { tId: tId },
+                dataType: "json",
+                success: function (data) {
+                    if (data.flag == "success") {
+                        location.href = '/Basis/BasisAuditRelation/Append?tId=' + tId;
+                    }
+                    if (data.flag == "exist") {
+                        top.layer.closeAll();
+                        layui.layer.msg('已对此审核流程追加过有效审核流程！');
+                    }
+                }
+            }); 
+        }
+
+        // 编辑审核流程
+        function ModifyData(tId) {
+            location.href = '/Basis/BasisAuditRelation/Edit?tId=' + tId;
+        }
+
+        // 作废审核流程
+        function DeleteData(tId, tNumber) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Basis/BasisAuditRelation/ChangeState',
+                    data: { tId: tId, tNumber: tNumber },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "exist") {
+                            top.layer.closeAll();
+                            layui.layer.msg('此审核流程被使用并未审核，不允许作废！');
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看审核流程明细
+        function ShowData(tId) {
+            location.href = '/Basis/BasisAuditRelation/View?tId=' + tId;
+        }
+    </script>
+}
+
+

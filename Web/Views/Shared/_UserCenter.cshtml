@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="baidu-site-verification" content="J7k3yqGR0y" />
+    <title>乐速科技-MVC4+三层</title>
+    @Styles.Render("~/bundles/css/uc")
+    
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    @Html.Partial("_Header")
+    <div class="page-main">
+        <div class="container">
+            
+            <div class="user-box">
+                <div class="user-left">
+                    <div class="user-head">
+                        <img src="~/assets/img/avata.jpg" alt="" />
+                        <p id="usernickname">乐速科技</p>
+                    </div>
+                    <ul class="user-nav-list">
+                        <li><a href="#"><i class="user-img-grzx"></i>学校列表</a></li>
+                        <li><a href="#"><i class="user-img-wycz"></i>无效链接</a></li>
+                        <li><a href="#"><i class="user-img-czjl"></i>无效链接</a></li>
+                        <li><a href="#"><i class="user-img-wdsc"></i>无效链接</a></li>
+                        <li><a href="#"><i class="user-img-woxx"></i>无效链接</a></li>
+                        <li class="clearfix"><a href="#"><i class="user-img-xgmm"></i>修改密码</a></li>
+                    
+                    </ul>
+                    <div class="user-other">
+                        <img src="/assets/img/user/link.png" />
+                        <p>工作时间：8：00-17：30</p>
+                      
+                    </div>
+                </div>
+                <div class="user-right">
+                    @RenderBody()
+                </div>
+            </div>     
+        </div>
+    </div>
+    @Html.Partial("_Footer")
+
+    @Scripts.Render("~/bundles/js/uc")
+    <script src="~/assets/js/layer/layer.js"></script>
+    <script>
+        $(function () {
+            $(".user-nav-list a").click(function () {
+                layer.msg('无效链接');
+            });
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

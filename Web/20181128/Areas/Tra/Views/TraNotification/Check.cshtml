@@ -1,0 +1,204 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraNotificationModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraNotification/EditTraNotification" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">选择申请</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请编号</label>
+                <div class="layui-input-inline">
+                    <input id="hdTraChooseId" type="hidden" name="TraChooseId" value="@Model.TraChooseId" />
+                    <input id="hdNotificationId" type="hidden" name="NotificationId" value="@Model.NotificationId" />
+                    <input type="text" name="TraChooseNumber" value="@Model.TraChooseNumber" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请机构</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="DepartmentName" value="@Model.DepartmentName" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" type="text" value="@Model.ApplyUser" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" value="@Model.ApplyTime" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">招标通知基本信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">通知编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtNotificationNumber" type="text" name="NotificationNumber" value="@Model.NotificationNumber" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"style="width:130px;">招标开始时间</label>
+                <div class="layui-input-inline"style="width:170px;">
+                    <input id="txtNotificationBeginTime" type="text" name="NotificationBeginTime" value="@Model.NotificationBeginTime" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"style="width:130px;">招标结束时间</label>
+                <div class="layui-input-inline"style="width:170px;">
+                    <input id="txtNotificationEndTime" type="text" name="NotificationEndTime" value="@Model.NotificationEndTime" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item"> 
+                <label class="layui-form-label" style="width:116px;"><em>*</em>暨邀请函名称</label>
+                <div class="layui-input-inline" style="width:973px; margin-right:0 !important">
+                    <textarea id="txtInvitationName" name="InvitationName" lay-verify="required" class="layui-textarea" disabled>@Model.InvitationName</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">公司简介</label>
+                <div class="layui-input-block">
+                    <textarea id="txtExpertise" name="Expertise" lay-verify="required" class="layui-textarea" disabled>@Model.Expertise</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">招标原因</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationCause" name="NotificationCause" lay-verify="required" class="layui-textarea" disabled>@Model.NotificationCause</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">招标线路</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationLines" name="NotificationLines" lay-verify="required" class="layui-textarea" disabled>@Model.NotificationLines</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">货量信息</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCargoVolume" name="CargoVolume" lay-verify="required" class="layui-textarea" disabled>@Model.CargoVolume</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">招标要求</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationDemand" name="NotificationDemand" lay-verify="required" class="layui-textarea" disabled>@Model.NotificationDemand</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">招标备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtNotificationRemark" name="NotificationRemark" lay-verify="required" class="layui-textarea" disabled>@Model.NotificationRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息 </div>
+        <div class="layui-form-item" style="margin-top:10px;">
+            <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+            <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+            <input type="hidden" id="hdfilelist" name="SuppNotificationFileList" />
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>文件类型</th>
+                        <th>文件地址</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="filelist"></tbody>
+            </table>
+            <script type="text/html" id="temfilelist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.filename}}</td>
+                    <td>{{c.path}}</td>
+                    <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a></td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="width:20%;margin:0 auto !important;"> 
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    if (filelist[i].path.lastIndexOf('.') != -1) {
+                        var lastnum = filelist[i].path.lastIndexOf('.');
+                        var exts = filelist[i].path.substring(lastnum + 1);
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                    }
+                }
+            }
+        }
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+        });
+
+        // 页面加载事件
+        $(function () {
+
+            //修改上传文件名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+
+                return false;
+            });
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+
+            // 关闭按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraNotification/Index';
+            });
+        });
+    </script>
+}

@@ -1,0 +1,397 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<style>
+   .custree{display:inline-block;width:21px;height:21px;cursor:pointer;margin-top:5px;}
+    .custree.on { background: url(/assets/img/tree/close.png) no-repeat; }
+    .custree.off { background: url(/assets/img/tree/open.png) no-repeat; }
+
+     .m2 { margin-left: 20px; }
+    .m3 { margin-left: 30px; }
+    .m4 { margin-left: 50px; }
+    .m5 { margin-left: 70px; }
+    .m5 { margin-left: 90px; }
+</style>
+<div class="wrap">
+
+    <blockquote class="layui-elem-quote">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <input value="" placeholder="请输入关键字" class="layui-input" type="text" id="ikeyWord">
+            </div>
+            <a class="layui-btn"><em onclick="search()">查询</em></a>
+        </div>
+        <div class="layui-inline">
+            <a class="layui-btn layui-btn-normal "><em onclick="adddep()">添加机构</em></a>
+        </div>
+    </blockquote>
+
+
+  
+        <div class="layui-elem-quote" style="float:left;width:220px;border-left:none;min-height:400px;">        
+            <ul id="deptree"></ul>
+        </div>
+        <div style="min-height:400px;float:left;">
+            <form class="layui-form layui-form-pane" method="post">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">上级名称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ParentName" id="hdnames" placeholder=""  class="layui-input">
+                        <input type="hidden" name="FatherId" id="hdpids"  />
+                        <input type="hidden" name="DepartmentId" id="hdids"/>
+                    </div>
+                    <div class="layui-input-inline"> <a class="layui-btn layui-btn-sm"><em onclick="seltree()">调整</em></a>  </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">机构名称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="idepname" name="DepartmentName" lay-verify="required" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">机构编号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="idepno" name="DeotNo" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">电话</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="itel" name="Tel" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">地址</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iaddress" name="Address" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">排序</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="Sort" id="isort" lay-verify="number" placeholder="" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline"></div>数字越小越靠前
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否启用</label>
+                    <div class="layui-input-inline">
+                        <input type="checkbox" checked lay-skin="switch" lay-filter="state" id="istates" lay-text="启用|禁用">
+                        <input id="hdstate" type="hidden" name="State"  value="1"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                        <a class="layui-btn"><em onclick="goback()">返回</em></a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        @*<table class="layui-table">
+            <thead>
+                <tr>             
+                    <th style="text-align:left;">机构名称</th>
+                    <th>电话</th>
+                    <th>地址</th>
+                    <th>状态</th>                        
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userlist" style="min-height:400px;"></tbody>
+        </table>
+        <script type="text/html" id="temslist">
+            {{each list as c}}
+            <tr class="{{c.class}}">  
+                {{if c.islast==1}}
+                <td><span class="custree m{{c.level}} on" data-id="dep{{c.DepartmentId}}"></span>{{c.DepartmentName}}</td>
+                {{else}}         
+                <td><span class="custree m{{c.level}} " data-id="dep{{c.DepartmentId}}"></span>{{c.DepartmentName}}</td>
+                {{/if}}
+             
+                <td>{{c.Tel}}</td>
+                <td>{{c.Address}}</td>
+                <td><input name="show" lay-skin="switch" lay-text="是|否" data-val="{{c.DepartmentId}}" lay-filter="isShow" type="checkbox" {{#c.State ==1 ? "checked" : ""}}>  </td>
+                <td>
+                    <a class="layui-btn layui-btn-danger layui-btn-sm"><i class="layui-icon"></i><em onclick="addsub('{{c.DepartmentId}}','{{c.DepartmentName}}')">添加子级</em></a>
+                    <a class="layui-btn layui-btn-sm"><i class="iconfont icon-edit"></i><em onclick="modify('{{c.DepartmentId}}')">编辑</em></a>
+                    <a class="layui-btn layui-btn-danger layui-btn-sm" data-id="2"><i class="layui-icon"></i><em onclick="del('{{c.DepartmentId}}')">删除</em></a>                
+                </td>
+            </tr>
+            {{/each}}
+        </script>*@
+  
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table','layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+            form.on('switch(state)', function (data) {
+                $("#hdstate").val(this.checked ? "1" : "0");
+            });
+
+            form.on('submit(saveuser)', function (data) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/sysdep/modifydep",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'ok') {
+                            layui.layer.msg('修改成功');
+                            newinits();
+                        }
+                        if (data.flag == "exist") {
+                            layui.layer.msg('已存在此机构');
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+
+
+
+            //form.on('switch(isShow)', function (data) {
+            //    top.layui.layer.confirm('您确定更改机构状态吗？', ['确定', '取消'], function () {
+            //        $.ajax({
+            //            type: "POST",
+            //            url: '/sysdep/changestate',
+            //            data: { state: data.elem.checked ? 1 : 0,did:$(data.elem).data("val") },
+            //            success: function (data) {
+            //                top.layui.layer.closeAll();
+            //                location.href = '/sysdep/index';
+
+            //            }
+            //        });
+            //    }, function () {
+            //        $(data.elem).attr("checked", data.elem.checked ? false : true);
+            //        form.render("checkbox");
+            //    });
+
+            //});
+        });
+
+        function changestate(state, uid) {
+            $.ajax({
+                type: "POST",
+                url: '/sysdep/changestate',
+                data: { state: data.elem.checked?1:0,did:$(data.elem).data("val") },
+                success: function (data) {
+                    location.href = '/sysuser/index';
+                }
+            });
+        }
+
+
+
+
+       function newinits(){
+           $.ajax({
+               type: "POST",
+               dataType: "json",
+               url: '/sysdep/TreeLists',
+               data: {  url: "" },
+               success: function (data) {
+                   $("#deptree").html("");
+                   layui.use(['tree'], function () {
+                       layui.tree({
+                           elem: '#deptree'
+                      , nodes: fnTree(data, 0)
+                      , click: function (node) {
+                          viewnode(node.id);
+                      }
+                       });
+                   });
+
+               }
+           });
+        }
+       function fnTree(data, pid) {
+           var result = [], temp;
+           for (var i in data) {
+               if (data[i].pid == pid) {
+                   result.push(data[i]);
+                   temp = fnTree(data, data[i].id);
+                   if (temp.length > 0) {
+                       data[i].children = temp;
+                   }
+               }
+           }
+           return result;
+       }
+
+       function viewnode(ids) {
+           $.ajax({
+               type: "POST",
+               url: '/sysdep/viewdep',
+               data: { ids: ids },
+               dataType:"json",
+               success: function (data) {
+                 
+                   if (data) {
+                       $("#hdnames").val(data.DepartmentPName);
+                       $("#hdids").val(data.DepartmentId);
+                       $("#hdpids").val(data.FatherId);
+                       $("#idepname").val(data.DepartmentName);
+                       $("#idepno").val(data.DeotNo);
+                       $("#itel").val(data.Tel);
+                       $("#iaddress").val(data.Address);
+                       $("#isort").val(data.Sort);
+                       if (data.State == 1) {
+                           $("#istates").attr("checked", true);
+                       }
+                       else {
+                           $("#istates").attr("checked", false);
+                       }
+                       layui.form.render("checkbox");
+                   }
+               }
+           });
+       }
+       function setinfo(ids, names) {
+           if (ids == -1) { ids = 0; }
+           $("#hdpids").val(ids);
+           $("#hdnames").val(names);
+       }
+
+       function seltree() {
+           top.window.topdialog = top.layui.layer.open({
+               type: 2,
+               shade: 0.2,
+               title: '选择机构',
+               content: '/sysdep/tree?url=/sysdep/index',
+               area: ['300px', '450px'],
+           });
+       }
+        $(function () {
+           // inits();
+            newinits();
+
+            //$(document).on('click', '.custree', function () {
+            //    var id = $(this).data("id");
+            //    if ($(this).hasClass("on")) {
+            //        $(this).addClass("off").removeClass("on");
+            //        $(this).parent().parent().siblings("." + id).hide();
+            //    }
+            //    else {
+            //        $(this).addClass("on").removeClass("off");
+            //        $(this).parent().parent().siblings("." + id).show();
+            //    }                        
+            //});
+        });
+
+        var result = [];
+        var temdata = [];
+        function inits() {
+            var flagCount = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=9>数据加载中……<td></tr>");
+
+            var userjosn = {
+                keyword: $("#ikeyWord").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/sysdep/list',
+                data: userjosn,
+                success: function (data) {
+                    temdata = data;
+                    result.length = 0;
+                    fnTree(data, 0);
+                    $("#userlist").html(template('temslist', { list:result }));
+                    layui.use('form', function () {
+                        layui.form.render('checkbox');
+                    });
+                    if (data.length == 0) { 
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>") 
+                    }
+                }
+            });
+        
+        }        
+       
+        function fnTrees(data, pid) {        
+            for (var i in data) {
+               
+                if (data[i].FatherId == pid) {
+                    if (pid == 0)
+                    {
+                        data[i].class ='dep' + data[i].DepartmentId;
+                        data[i].level=1;
+                    }
+                    else
+                    {
+                        var temitem = treeinfo(data[i].FatherId);
+                        data[i].class=temitem.class+'  dep' + data[i].DepartmentId;
+                        data[i].level=temitem.level+1;                   
+                    }
+                    data[i].islast =treelast(data[i].DepartmentId)==true?1:0;
+                    result.push(data[i]);
+                    fnTree(data, data[i].DepartmentId);
+                }              
+            }
+        }
+
+        function treelast(ids) {
+            for (var i = 0; i < temdata.length; i++) {
+                if (temdata[i].FatherId == ids) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function treeinfo(ids) {
+            for (var i = 0; i < result.length; i++) {
+                if (result[i].DepartmentId == ids) {
+                    return result[i];
+                }
+            }
+            return null;
+        }
+
+
+        function addsub(ids, names) {
+            location.href = '/sysdep/add?id='+ids+'&name='+escape(names);
+        }
+
+        function search() {
+            inits();
+        }
+        function adddep() {
+            location.href = '/sysdep/add';
+        }
+        function modify(ids) {
+            location.href = '/sysdep/edit?ids=' + ids;
+        }
+        function del(ids) {
+            top.layui.layer.confirm('您确定删除此机构吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/sysdep/DelDep',
+                    data: { ids: ids },
+                    success: function (data) {
+                        if (data == "yes") {
+                            top.layui.layer.closeAll();
+                            inits();
+                        }
+                        if (data == 'user') {
+                            top.layui.layer.closeAll();
+                            top.layui.layer.msg('此机构下含有用户,请确定');
+                        }
+                    }
+                });
+            }, function () {
+
+            });
+        }
+
+    </script>
+}

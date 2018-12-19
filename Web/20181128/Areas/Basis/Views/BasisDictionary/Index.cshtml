@@ -1,0 +1,260 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    系统字典名称：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="系统字典名称" class="layui-input" type="text" id="ikeyWord">
+                    </div>
+                    &nbsp;&nbsp;
+                    字典类型：
+                    <div class="layui-input-inline">
+                        <select name="DictionaryTypeName" lay-verify="" placeholder="" class="layui-select" id="txtDictionaryType">
+                            <option></option>
+                            <option value="0">供应商类别</option>
+                            <option value="1">供应商种类</option>
+                            <option value="2">合作层级</option>
+                            <option value="3">供应商服务类型</option>
+                            <option value="4">供应商状态</option>
+                            <option value="5">仓储供应商附件</option>
+                            <option value="6">仓储证件类型</option>
+                            <option value="7">培养期望</option>
+                            <option value="8">通知类型</option>
+                            <option value="9">企业性质</option>
+                            <option value="10">配送线路类型</option>
+                            <option value="11">不合格品类型</option>
+                        </select>
+                    </div>
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">字典名称</th>
+                        <th>字典编号</th>
+                        <th>字典类型</th>
+                        <th>字典排序</th>
+                        <th>字典状态</th>
+                        <th>使用类型</th>
+                        <th>公司名称</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="Dictionarylist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.DictionaryName}}</td>
+                    <td>{{c.DictionaryNumber}}</td>
+                    <td>{{c.DictionaryTypeName}}</td>
+                    <td>{{c.Sort}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.UseTypeName}}</td>
+                    <td>{{c.CompanyName}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.DictionaryId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{if c.DictionaryState==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.DictionaryId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.DictionaryId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            Search();//查询方法
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                Search();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Basis/BasisDictionary/Export'
+                    , { DictionaryName: $("#ikeyWord").val(), DictionaryTypeName: $("#txtDictionaryType").val() }//字典名称和字典类型查询
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=系统字典列表";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //编辑按钮
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");//字典id
+                ModifyData(tId);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var Id = $(this).data("id");//字典id
+                DeleteData(Id);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var Id = $(this).data("id");//字典id
+                ShowData(Id);
+            });
+        });
+
+        //查询总记录数
+        function Search() {
+            var flagCount = 0;// 总记录数
+            pageIndex = 0;// 页面索引
+            $("#Dictionarylist").html("<tr class='loadings' ><td colspan=3>数据加载中……<td></tr>"); // 等待时显示
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Basis/BasisDictionary/DictionaryCount",
+                async: false,
+                data: { DictionaryName: $("#ikeyWord").val(), DictionaryTypeName: $("#txtDictionaryType").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<', //上一页按钮里text
+                next_text: '>',//下一页按钮里text
+                items_per_page: pageSize,//显示条数
+                num_display_entries: 6,//连续分页主体部分分页条目数
+                current_page: pageIndex,//当前页索引
+                num_edge_entries: 2 //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                DictionaryName: $("#ikeyWord").val(),//字典名称
+                DictionaryTypeName: $("#txtDictionaryType").val()//字典类型
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Basis/BasisDictionary/Dictionarylist',
+                data: userjosn,
+                success: function (data) {
+                    $("#Dictionarylist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#Dictionarylist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        //获取字符串。
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+
+        // 新增
+        function AddData() {
+            location.href = '/Basis/BasisDictionary/add';
+        }
+
+        // 查询
+        function SearchData() {
+            Search();
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Basis/BasisDictionary/Edit?tId=' + tId;
+        }
+
+        // 作废
+        function DeleteData(Id) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Basis/BasisDictionary/DelDictionary',
+                    data: { Id: Id },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            Search();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(Id) {
+            location.href = '/Basis/BasisDictionary/Check?tId=' + Id;
+        }
+    </script>
+}

@@ -1,0 +1,353 @@
+﻿@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraChoiceComponentModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraChoiceComponent/EditTraChoiceComponentDetail" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">选择元件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">元件名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtChoiceName" type="text" name="ChoiceName" value="@Model.ChoiceName" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdChoiceId" name="ChoiceId" type="hidden" value="@Model.ChoiceId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">评分类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtChoiceType" name="ChoiceType" lay-filter="selchoicetypes" lay-verify="required" class="select" disabled>
+                        <option></option>
+                        <option value="0">选择条件</option>
+                        <option value="1">补充条件</option>
+                    </select>
+                    <input id="hdChoiceType" type="hidden" value="@Model.ChoiceType" />
+                </div>
+            </div>
+            <div id="divConditionContent">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">条件内容</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtConditionContent" name="ConditionContent" lay-verify="required" class="layui-textarea" disabled>@Model.ConditionContent</textarea>
+                    </div>
+                </div>
+            </div>
+            <div id="divChoiceProject">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择项目</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtChoiceProject" name="ChoiceProject" lay-verify="required" class="layui-textarea" disabled>@Model.ChoiceProject</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" class="layui-textarea" disabled>@Model.Remark</textarea>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">选择元件明细信息</div>
+            <div class="layui-card-body">
+                <blockquote class="layui-elem-quote">
+                    <div class="layui-inline">
+                        <div class="layui-form">
+                            选择内容：
+                            <div class="layui-input-inline">
+                                <input type="text" name="ChoiceContent" placeholder="" class="layui-input" id="txtChoiceContent">
+                            </div>
+                            &nbsp;&nbsp;
+                            <a class="layui-btn" id="btnSearch">查询</a>
+                            <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        </div>
+                    </div>
+                </blockquote>
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">选择内容</th>
+                                <th>标准分</th>
+                                <th>得分最大值</th>
+                                <th>得分最小值</th>
+                                <th>排序</th>
+                                <th>备注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TraChoiceComponentDetaillist" style="min-height:400px;"></tbody>
+                    </table>
+                    <div id="pageinfos" class="pagebox">
+                        <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                    </div>
+                    <script type="text/html" id="temslist">
+                        {{each list as c}}
+                        <tr>
+                            <td>{{c.ChoiceContent}}</td>
+                            <td>{{c.StandardScore}}</td>
+                            <td>{{c.MaxScore}}</td>
+                            <td>{{c.MinScore}}</td>
+                            <td>{{c.Sort}}</td>
+                            <td>{{c.Remark}}</td>
+                            <td>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnEdit" data-id="{{c.ChoiceDetailId}}">
+                                    <i class="layui-icon"></i>编辑
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.ChoiceDetailId}}" data-state="{{c.State}}">
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </script>
+                </div>
+                <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                    <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin-left:500px;">
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //初始化时让二次培训按钮隐藏
+            var recordresult = $("#txtChoiceType").val();
+            if (recordresult == 0) {
+                $("#divConditionContent").show();//选择内容
+                $("#divChoiceProject").hide();//选择项目
+            }
+            else if (recordresult == 1) {
+                $("#divChoiceProject").show();//选择项目
+                $("#divConditionContent").hide();//选择内容
+            }
+
+            //若培训达标是二次培训时，将二次培训按钮隐藏
+            form.on('select(selchoicetypes)', function (data) {
+                var recordresult = $("#txtChoiceType").val();
+                if (recordresult == 0) {
+                    $("#divConditionContent").show();//条件内容显示
+                    $("#txtConditionContent").val(""); //清空条件内容的值
+                    $("#divChoiceProject").hide();//选择项目显示
+                }
+                else if (recordresult == 1) {
+                    $("#divChoiceProject").show();//选择项目显示
+                    $("#txtChoiceProject").val(""); //清空选择项目
+                    $("#divConditionContent").hide();//条件内容显示
+                }
+                layui.form.render('select');
+            });
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraChoiceComponent/EditTraChoiceComponentDetail",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Tra/TraChoiceComponent/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+
+            $("#txtChoiceType").val($("#hdChoiceType").val()); //评分类型
+
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                Choose();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//id
+                var tState = $(this).data("state");//状态
+                DeleteData(tId, tState);
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraChoiceComponent/Index';
+            });
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChoiceComponentDetaillist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChoiceComponent/TraChoiceComponentDetailCount",
+                async: false,
+                data: {
+                    choiceId: $("#hdChoiceId").val(),//选择id
+                    choiceContent: $("#txtChoiceContent").val()//选择内容 
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                choiceId: $("#hdChoiceId").val(),//选择id
+                choiceContent: $("#txtChoiceContent").val()//选择内容 
+
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoiceComponent/TraChoiceComponentDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraChoiceComponentDetaillist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChoiceComponentDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 作废
+        function DeleteData(tId, tState) {
+            if (tState != '1') {
+                top.layer.msg('只有初始状态的才能作废！');
+                return;
+            }
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraChoiceComponent/InvalidDetailState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+
+        // 设置供应商信息
+        function setinfo(ids, idss) {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoiceComponent/ChoiceComponentList',
+                data: { ids: ids, idss: idss },
+                success: function (data) {
+                    $("#TraChoiceComponentDetaillist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChoiceComponentDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 新增
+        function Choose() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '添加选择元件明细信息',
+                content: '/Tra/TraChoiceComponent/AddDetail?url=/Tra/TraChoiceComponent/Index&tId=' + $("#hdChoiceId").val(),
+                area: ['700px', '580px'],
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId) { 
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '编辑选择元件明细信息',
+                content: '/Tra/TraChoiceComponent/EditDetail?url=/Tra/TraChoiceComponent/Index&tId=' + tId,
+                area: ['700px', '580px'],
+            });
+        }
+    </script>
+}

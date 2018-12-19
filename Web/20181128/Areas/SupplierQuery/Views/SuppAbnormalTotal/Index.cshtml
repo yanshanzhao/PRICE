@@ -1,0 +1,208 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    供应商名称：
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierName" type="text" value="" placeholder="供应商名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    运作起迄时间：
+                    <div class="layui-input-inline">
+                        <input id="txtStartTime" type="text" placeholder="运作起时间" class="layui-input">
+                    </div>  -
+                    <div class="layui-input-inline">
+                        <input id="txtEndTime" type="text" placeholder="运作迄时间" class="layui-input">
+                    </div>
+                    <div class="layui-inline" style="margin-left:10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">序号</th>
+                        <th>供应商名称</th>
+                        <th>承运票数</th>
+                        <th>异常票数</th>
+                        <th>异常率</th>
+                    </tr>
+                </thead>
+                <tbody id="AbnormalList" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.Number}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.CarryNumber}}</td>
+                    <td>{{c.AbnormalNumber}}</td>
+                    <td>{{c.AbnormalityRate}}</td>
+                    {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'laydate', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate;
+             
+            // 开始日期
+            var insStart = laydate.render({
+                elem: '#txtStartTime',
+                done: function (value, date) {
+                    // 更新结束日期的最小日期
+                    insEnd.config.min = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+
+                    // 自动弹出结束日期的选择器
+                    insEnd.config.elem[0].focus();
+                }
+            });
+
+            // 结束日期
+            var insEnd = laydate.render({
+                elem: '#txtEndTime',
+                min: 0, 
+                btns: ['clear', 'confirm'],
+                done: function (value, date) {
+                    //更新开始日期的最大日期
+                    insStart.config.max = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+                }
+            });
+
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            $(document).on('click', '#btnSearch', function () {
+
+                var beginDate = $("#txtStartTime").val();
+                var endDate = $("#txtEndTime").val();
+
+                if (beginDate == "" && endDate != "") {
+                    layui.layer.msg('请选择创建起时间！');
+                    $("#txtStartTime").focus();
+                    return false;
+                } else if (beginDate
+                    != "" && endDate == "") {
+                    layui.layer.msg('请选择创建迄时间！');
+                    $("#txtEndTime").focus();
+                    return false;
+                }
+                SearchData();
+            });
+
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/SupplierQuery/SuppAbnormalTotal/Export'
+                    , { supplierName: $("#txtSupplierName").val(), startTime: $("#txtStartTime").val(), endTime: $("#txtEndTime").val() }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=供应商异常信息汇总";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#AbnormalList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/SupplierQuery/SuppAbnormalTotal/SuppAbnormalTotalAmount",
+                async: false,
+                data: {
+                    supplierName: $("#txtSupplierName").val(), startTime: $("#txtStartTime").val(), endTime: $("#txtEndTime").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val(), startTime: $("#txtStartTime").val(), endTime: $("#txtEndTime").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/SupplierQuery/SuppAbnormalTotal/SuppAbnormalTotalList',
+                data: userjosn,
+                success: function (data) {
+                    $("#AbnormalList").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#AbnormalList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

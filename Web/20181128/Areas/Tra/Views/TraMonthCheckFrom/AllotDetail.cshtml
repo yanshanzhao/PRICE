@@ -1,0 +1,259 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    供应商名称：
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierName" type="text" value="" placeholder="供应商名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    供应商种类：
+                    <div class="layui-input-inline" style="width:137px;">
+                        <select id="selSupplierType" class="select"></select>
+                    </div>
+                    &nbsp;&nbsp;
+                    供应商范围：
+                    <div class="layui-input-inline" style="width:137px;">
+                        <select id="selSupplierScope" class="select"></select>
+                    </div>
+                    <a class="layui-btn" id="btnSearch" style="margin-left:10px;">查询</a>
+                </div> 
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table" id="cominfos">
+                <thead>
+                    <tr>
+                        <th><input lay-filter="allChoose" id="allChoose" type="checkbox" lay-skin="primary"></th>
+                        <th style="text-align:left;">机构名称</th>
+                        <th>供应商名称</th>
+                        <th>运输供应商编号</th>
+                        <th>供应商种类</th>
+                        <th>供应商范围</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td><input name="checked" lay-skin="primary" lay-filter="choose" type="checkbox" class="cksel" subid="ck{{c.TransportId}}" data-transportid="{{c.TransportId}}" data-departmentid="{{c.DepartmentId}}"></td>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.TransportNumber}}</td>
+                    <td>{{c.TransportKindName}}</td>
+                    <td>{{c.DistributionScopeName}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script> 
+        <div class="layui-form-item" style="margin-top:10px;">
+            <div class="layui-input-block" style="width:17%;margin:0 auto !important;">
+                <button class="layui-btn" id="btnSave">保存</button>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="hdCheckFromId" type="hidden" value="@ViewBag.CheckFromId" />
+<input id="hdUrl" type="hidden" value="@ViewBag.url" />
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+            form.render(); //更新全部
+            // 全选
+            form.on('checkbox(allChoose)', function (data) {
+                var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]:not([name="show"])');
+                child.each(function (index, item) {
+                    item.checked = data.elem.checked;
+                });
+                form.render('checkbox');
+            });
+
+            // 提交保存
+            $(document).on('click', '#btnSave', function () {
+                var TransportSupplierList = [];
+                $(".cksel").each(function () {
+                    if ($(this).attr("checked")) {
+                        TransportSupplierList.push({ transportId: $(this).data("transportid"), departmentId: $(this).data("departmentid") });
+                    }
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraMonthCheckFromDepar/AddTransportSupplierList",
+                    data: { transportSupplierList: JSON.stringify(TransportSupplierList), checkFromId: $("#hdCheckFromId").val() },
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg(data.content);
+                            top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SearchData();
+                            top.layui.layer.close(top.window.topdialog);
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg(data.content);
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            GetDictionary();
+
+            // 页面加载查询
+            SearchData();
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var flagCount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("数据加载中……");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckFromDepar/SupplierAmount",
+                async: false,
+                data: {
+                    checkFromId: $("#hdCheckFromId").val(),
+                    supplierName: $("#txtSupplierName").val(),
+                    supplierType: $("#selSupplierType").val(),
+                    supplierScope: $("#selSupplierScope").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,    
+                checkFromId: $("#hdCheckFromId").val(),
+                supplierName: $("#txtSupplierName").val(),
+                supplierType: $("#selSupplierType").val(),
+                supplierScope: $("#selSupplierScope").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckFromDepar/SupplierList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    $("#btnSave").show();
+
+                    layui.use('form', function () {
+                        layui.form.render('checkbox');
+                    });
+
+                    if (data.length == 0) {
+                        $("#btnSave").hide();
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+        // 供应商种类数组
+        window.SupplierType = [];
+
+        // 供应商范围数组
+        window.SupplierScope = [];
+
+        // 系统字典表中获取供应商种类,供应商范围
+        function GetDictionary() {
+
+            SupplierType.push({ id: '', name: "请选择供应商种类" });
+            SupplierScope.push({ id: '', name: "请选择供应商范围" });
+
+            $.ajax({
+                url: '/Supplier/Supplier/DictList',
+                type: 'POST',
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 1) {
+                                SupplierType.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            if (data[i].Type == 3) {
+                                SupplierScope.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#selSupplierType").html(template('temdictlist', { list: SupplierType }));
+
+            $("#selSupplierScope").html(template('temdictlist', { list: SupplierScope }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+    </script>
+}
+

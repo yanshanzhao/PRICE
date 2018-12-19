@@ -1,0 +1,161 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-header">添加系统字典</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>字典名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="DictionaryName" maxlength="30" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>字典编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="dictionaryNumber" name="DictionaryNumber" lay-filter="txtdictionaryNumber" maxlength="30" lay-verify="txtdictionaryNumber" placeholder="单字母加单数值方式" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">字典排序</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Sort" maxlength="50"   placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">字典类型</label>
+                <div class="layui-input-inline">
+                    <select type="text" name="DictionaryType" lay-verify="required" placeholder="" class="layui-input" id="txtDictionaryType">
+                        <option value="0">供应商类别</option>
+                        <option value="1">供应商种类</option>
+                        <option value="2">合作层级</option>
+                        <option value="3">供应商服务类型</option>
+                        <option value="4">供应商状态</option>
+                        <option value="5">仓储供应商附件</option>
+                        <option value="6">仓储证件类型</option>
+                        <option value="7">培养期望</option>
+                        <option value="8">通知类型</option>
+                        <option value="9">企业性质</option>
+                        <option value="10">配送线路类型</option>
+                        <option value="11">不合格品类型</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">使用类型</label>
+                <div class="layui-input-inline">
+                    <select class="select" name="UseType" id="txtUseType" lay-filter="selUseType">
+                        <option value="0">系统统一</option>
+                        <option value="1">公司使用</option>
+                    </select>若类型为公司使用，必须选择公司名称
+                </div>
+            </div>
+            <div class="layui-form-item" id="selectcompanyname">
+                <label class="layui-form-label">选择公司</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="CompanyName" lay-verify="" placeholder="" class="layui-input" disabled id="hdCompanyName">
+                    <input id="hdCompanyID" type="hidden" name="CompanyId" value="0" />
+                </div>
+                <div class="layui-input-inline" style="margin-top:3px;">
+                    <a class="layui-btn layui-btn-sm">
+                        <em onclick="seltree()">选择</em>
+                    </a>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="state" lay-text="启用|禁用">
+                    <input id="hdDictionaryState" type="hidden" name="DictionaryState" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="savedictionary">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'upload'], function () {
+            var form = layui.form, ele = layui.element;
+
+            //提交时给信息置顶赋值
+            form.on('switch(state)', function (data) {
+                $("#hdDictionaryState").val(this.checked ? "1" : "0");
+            });
+            //初始化时让选择公司按钮隐藏
+            $("#selectcompanyname").hide();
+
+            //若使用类型是系统统一，则将地点类型下拉框隐藏
+            form.on('select(selUseType)', function (data) {
+                var useType = $("#txtUseType").val();
+                if (useType == 0)
+                    $("#selectcompanyname").hide();//字典类型下拉框隐藏
+                else
+                    $("#selectcompanyname").show();//字典类型下拉框显示
+            });
+
+            //value：表单的值、item：表单的DOM对象
+            form.verify({
+                txtdictionaryNumber: function (value, item) {
+                    if (!/^[A-Z][0-9]$/.test(value)) {
+                        return '一个大写字母加一个数字的方式展示';
+                    }
+                }
+            });
+
+            //保存按钮
+            form.on('submit(savedictionary)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Basis/BasisDictionary/AddDictionary",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Basis/BasisDictionary/Index'
+                        }
+                        if (data.flag == "exist") {
+                            layui.layer.msg('已存在此字典编号');
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            //返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisDictionary/Index';
+            });
+        });
+
+        function setinfo(ids, names) {
+            $("#hdCompanyID").val(ids);//公司id
+            $("#hdCompanyName").val(names);//公司名称
+        }
+
+        //选择公司
+        function seltree() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择公司',
+                content: '/SysComp/Select?url=/Basis/BasisDictionary/Index',
+                area: ['300px', '450px'],
+            });
+        }
+    </script>
+}

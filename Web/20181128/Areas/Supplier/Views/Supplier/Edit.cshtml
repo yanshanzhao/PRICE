@@ -1,0 +1,258 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+
+@model  SRM.Model.Supplier.SupplierModel
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>供应商名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="SupplierName" maxlength="50" lay-verify="required" placeholder="" class="layui-input" style="width:500px;" value="@Model.SupplierName">
+                    <input type="hidden"  name="SupplierId" value="@Model.SupplierId" />
+                  </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">采购编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="OtherNumber" maxlength="50" placeholder="" class="layui-input"  value="@Model.OtherNumber">
+                </div>
+                @*</div>
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label"><em>*</em>供应商类型</label>
+
+                <div class="layui-input-inline">
+                    <select id="comSuppType" class="select" lay-verify="selects" name="SupplierType" lay-filter="selvalues" disabled></select>
+                    <input  type="hidden" id="hdSupplierType" value="@Model.SupplierType"/>
+                    <input name="SupplierTypeName" id="hdSupplierTypeName" type="hidden" />
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>法人姓名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="OwnerName" maxlength="50" lay-verify="required" placeholder="" value="@Model.OwnerName" class="layui-input">
+                </div>
+                @*</div>
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label"><em>*</em>企业性质</label>
+                <div class="layui-input-inline">
+                    <select id="comEnterpriseType" class="select" lay-verify="selects" name="EnterpriseType" lay-filter="selvalues"></select>
+                    <input type="hidden" id="hdEnterpriseType" value="@Model.EnterpriseType" />
+                    <input name="EnterpriseTypeName" id="hdEnterpriseTypeName" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>证件类型</label>
+                <div class="layui-input-inline">
+                    <select id="comPapersType" class="select" name="PapersType" lay-verify="required"  lay-filter="selvalues"></select>
+                    <input type="hidden" id="hdPapersType" value="@Model.PapersType" />
+                    <input name="PapersTypeName" id="hdPapersTypeName" type="hidden" />
+                </div>
+                @*</div>
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label"><em>*</em>证件编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="PapersNumber" maxlength="50" lay-verify="required"  placeholder="" class="layui-input" value="@Model.PapersNumber">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>企业地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="EnterpriseAddresses" maxlength="200" lay-verify="required" placeholder="" value="@Model.EnterpriseAddresses" class="layui-input" style="width:500px;">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>联系人</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ContactsName" maxlength="20" ay-verify="required" placeholder="" class="layui-input" value="@Model.ContactsName">
+                </div>
+                @*</div>
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label">联系人职位</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ContactsPosition" maxlength="30" placeholder="" class="layui-input" value="@Model.ContactsPosition">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>联系人电话</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ContactsPhone" maxlength="11" lay-verify="required|contactsphone"  placeholder="" class="layui-input" value="@Model.ContactsPhone">
+                </div>
+                @*</div>
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label">信息收集人</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="InformationUser" maxlength="20" placeholder="" class="layui-input" value="@Model.InformationUser">
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <label class="layui-form-label">信息收集方式</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="InformationType" maxlength="20" placeholder="" class="layui-input" value="@Model.InformationType">
+                </div>
+                @*</div>
+
+
+                    <div class="layui-form-item">*@
+                <label class="layui-form-label">信息收集时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="InformationTime" maxlength="20" placeholder="" class="layui-input" id="infotime" value="@Model.InformationTime">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">数据可见性</label>
+                <div class="layui-input-inline" disabled>
+                    <input type="radio" name="EmployType" value="1" title="公有" @(Html.Raw(Model.EmployType == 1 ? "checked" : "")) disabled>
+                    <input type="radio" name="EmployType" value="0" title="私有"  @(Html.Raw(Model.EmployType == 0 ? "checked" : "")) disabled>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                @*<div class="layui-input-block">*@
+                <div style="margin-left:110px;margin-top:30px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">关闭</a>
+                </div>
+                @*</div>*@
+            </div>
+            <input id="hdTemSelectData" name="TemSelectData" type="hidden"/>
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element','laydate' ], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#infotime'
+                             , type: 'datetime'
+                             , format: 'yyyy.MM.dd'
+            });
+
+            form.verify({
+                selects: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (value==-1) {
+                        return $(item).find("option").first().text();
+                    }
+                },
+                contactsphone: function (value, item) { //value：表单的值、item：表单的DOM对象   
+                    if (!new RegExp("^[1][3,4,5,7,8][0-9]{9}$").test(value)) {
+                        return '手机必须11位，只能是数字！！';
+                    }
+                }
+            });
+
+            form.on('select(selvalues)', function (data) {
+                initsSelect();
+            });
+
+            form.on('submit(saveuser)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/supplier/supplier/editinfo",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'ok') {
+                            top.layui.layer.msg('修改成功');
+                            top.$.find('iframe[src="/Supplier/Supplier/Index"]')[0].contentWindow.inits();
+                            top.layui.layer.close(top.window.operate);
+                        }
+                        if (data.flag == "exist") {
+                            layui.layer.msg('已存在此供应商名称！');
+                        }
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('修改失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+
+
+        $(function () {
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.operate);
+            });
+
+
+            dictinits();
+
+            $("#comSuppType").val($("#hdSupplierType").val());
+            $("#comEnterpriseType").val($("#hdEnterpriseType").val());
+            $("#comPapersType").val($("#hdPapersType").val());
+
+            initsSelect();
+          
+            var temlog = $("#comSuppType").find("option:selected").text()+",";
+            temlog += $("#comEnterpriseType").find("option:selected").text()+",";
+            temlog += $("#comPapersType").find("option:selected").text()
+
+            $("#hdTemSelectData").val(temlog);
+        });
+
+
+        window.Dict_0 = [];
+        window.Dict_6 = []
+        window.Dict_9 = [];
+        function dictinits() {
+
+            Dict_0.push({ id: -1, name: "请选择供应商类型" });
+            Dict_9.push({ id: -1, name: "请选择企业性质" });
+            Dict_6.push({ id: -1, name: "请选择证件类型" });
+
+            $.ajax({
+                type: "POST",
+                url: '/supplier/supplier/dictlist',
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 0) {
+                                Dict_0.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 6) {
+                                Dict_6.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 9) {
+                                Dict_9.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#comSuppType").html(template('temdictlist', { list: Dict_0 }));
+            $("#comEnterpriseType").html(template('temdictlist', { list: Dict_9 }));
+            $("#comPapersType").html(template('temdictlist', { list: Dict_6 }));
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        function initsSelect() {
+            $("#hdPapersTypeName").val($("#comPapersType").find("option:selected").text());
+            $("#hdEnterpriseTypeName").val($("#comEnterpriseType").find("option:selected").text());
+            $("#hdSupplierTypeName").val($("#comSuppType").find("option:selected").text());
+        }
+    </script>
+}
+
+

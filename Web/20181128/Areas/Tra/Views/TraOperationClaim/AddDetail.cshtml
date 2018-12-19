@@ -1,0 +1,193 @@
+﻿@{
+    ViewBag.Title = "AddDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                供应商名称：
+                <div class="layui-input-inline">
+                    <input value="" placeholder="供应商名称" class="layui-input" type="text" id="txtSupplierName">
+                    <input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+                    <input type="hidden" id="hdSupperMatchingIds" name="SupperMatchingIds" />
+                    <input type="hidden" id="hdTransportIds" name="TransportIds" />
+                    <input type="hidden" id="hdSupperMatchingId" name="SupperMatchingId" />
+                    <input type="hidden" id="hdOperationClaimId" value="@ViewBag.OperationClaimId" />
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+        <div class="layui-card-body">
+            <div class="layui-form">
+                <table class="layui-table" id="cominfos">
+                    <thead>
+                        <tr>
+                            <th><input lay-filter="allChoose" id="allChoose" type="checkbox" lay-skin="primary"></th>
+                            <th>供应商名称</th> 
+                            <th>操作机构</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userlist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td><input id="ChxChoose" name="checked" lay-skin="primary" lay-filter="choose" type="checkbox" class="cksel" subid="ck{{c.SupperMatchingId}}" data-id="{{c.SupperMatchingId}}"subids="ck{{c.TransportId}}" data-ids="{{c.TransportId}}"></td>
+                        <td>{{c.SupplierName}}</td> 
+                        <td>{{c.DepartmentName}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin-left:180px;">
+                @*<div class="layui-btn" lay-submit="" lay-filter="saveuser"><em onclick="saveinfo()">保存</em></div>*@
+                <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+            form.render(); //更新全部
+            form.on('checkbox(allChoose)', function (data) {
+                var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]:not([name="show"])');
+                child.each(function (index, item) {
+                    item.checked = data.elem.checked;
+                });
+                form.render('checkbox');
+            });
+
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+
+                var temlist = [];
+                $(".cksel").each(function () {
+                    if ($(this).attr("checked")) {
+                        temlist.push($(this).data("id"));
+                    }
+                });
+                var ids = temlist.join(",");  
+                $("#hdSupperMatchingIds").val(ids); 
+                var temlists = [];
+                $(".cksel").each(function () {
+                    if ($(this).attr("checked")) {
+                        temlists.push($(this).data("ids"));
+                    }
+                });
+                var idss = temlists.join(",");
+                $("#hdTransportIds").val(idss);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraOperationClaim/AddTraOperationSupp",
+                    data: { supperMatchingIds: $("#hdSupperMatchingIds").val(), transportIds: $("#hdTransportIds").val(), operationClaimId: $("#hdOperationClaimId").val() },
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('明细新增成功');
+                            top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo(ids,idss);
+                            top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.SearchData();
+                            top.layui.layer.close(top.window.topdialog);
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+            $(document).on('click', '#btnSearch', function () {
+                inits();
+            });
+
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraOperationClaim/OperationClaimDetailAmount",
+                async: false,
+                data: {
+                    supplierName: $("#txtSupplierName").val(),
+                    ids: $("#hdOperationClaimId").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val(),
+                ids: $("#hdOperationClaimId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraOperationClaim/OperationClaimDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    $("#btnSave").show();
+
+                    layui.use('form', function () {
+                        layui.form.render('checkbox');
+                    });
+
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>");
+                        $("#btnSave").hide();
+                    }
+                }
+            });
+        }
+
+    </script>
+}

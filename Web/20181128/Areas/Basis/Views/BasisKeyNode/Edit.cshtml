@@ -1,0 +1,191 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+@model SRM.Model.Basis.BasisKeyNodeModel
+<style>
+    label {
+        width: 210px !important;
+    }
+
+    .layui-input-inline {
+        width: 250px !important;
+    }
+
+    .layui-input-block {
+        margin-left: 180px !important;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">编辑关键节点</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Basis/BasisKeyNode/EditKeyNode" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>使用表名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Name" value="@Model.Name" maxlength="30" lay-verify="required" placeholder="" class="layui-input">
+                    <input name="Id" type="hidden" value="@Model.Id" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>字段名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Columns" value="@Model.Columns" maxlength="30" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>关键节点名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="NodeName" value="@Model.NodeName" maxlength="50" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>关键节点最小值(含)</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="MinValue" value="@Model.MinValue" lay-verify="minvalue" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>使用开始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="BeginTime" value="@Model.BeginTime" lay-verify="required" placeholder="" class="layui-input" id="txtBeginTime">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>使用结束时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="EndTime" value="@Model.EndTime" lay-verify="required" placeholder="" class="layui-input" id="txtEndTime">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>选择公司</label>
+                <div class="layui-input-inline">
+                    <input id="hdCompanyName" type="text" name="CompanyName" value="@Model.CompanyName" lay-verify="required" placeholder="" class="layui-input" disabled>
+                    <input id="hdCompanyID" type="hidden" name="CompanyId" value="@Model.CompanyId" />
+                </div>
+                <div class="layui-input-inline" style="margin-top:3px;">
+                    <a class="layui-btn layui-btn-sm">
+                        <em onclick="seltree()">选择</em>
+                    </a>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn btnsave" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>  
+        // 查询条件变量
+        var nodeName = unescape(GetQueryString("nodeNameWhere"));
+        var companyName = unescape(GetQueryString("companyNameWhere"));
+         
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 开始日期
+            var insStart = laydate.render({
+                elem: '#txtBeginTime',
+                format: 'yyyy/MM/dd HH:mm:ss',
+                done: function (value, date) {
+                    // 更新结束日期的最小日期
+                    insEnd.config.min = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+
+                    // 自动弹出结束日期的选择器
+                    insEnd.config.elem[0].focus();
+                }
+            });
+
+            // 结束日期
+            var insEnd = laydate.render({
+                elem: '#txtEndTime',
+                format: 'yyyy/MM/dd HH:mm:ss',
+                min: 0,
+                btns: ['clear', 'confirm'],
+                done: function (value, date) {
+                    //更新开始日期的最大日期
+                    insStart.config.max = lay.extend({}, date, {
+                        month: date.month - 1
+                    });
+                }
+            });
+
+            // 验证
+            form.verify({
+                minvalue: function (value, item) { //value：表单的值、item：表单的DOM对象  
+                    if (!new RegExp("^([0-9])[0-9]*(\\.\\w*)?$").test(value)) {
+                        return '只能输入数字或小数';
+                    }
+                }
+            });
+
+            // 提交
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Basis/BasisKeyNode/EditKeyNode",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功'); 
+                            location.href = '/Basis/BasisKeyNode/Index?nodeName=' + escape(nodeName) + '&companyName=' + escape(companyName); 
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载
+        $(function () {
+            // index页面条件
+            if (nodeName != "null" && nodeName.toString().length > 1) {
+                nodeName = nodeName;
+            }
+            else {
+                nodeName = null;
+            } 
+            if (companyName != "null" && companyName.toString().length > 1) {
+                companyName = companyName;
+            }
+            else { 
+                companyName = null;
+            }
+             
+            // 返回
+            $(document).on('click', '#btnGoBack', function () { 
+                location.href = '/Basis/BasisKeyNode/Index?nodeName=' + escape(nodeName) + '&companyName=' + escape(companyName); 
+            });
+        });
+
+        // 获取公司ID及名称
+        function setinfo(ids, names) {
+            $("#hdCompanyID").val(ids);
+            $("#hdCompanyName").val(names);
+        }
+
+        // 选择公司
+        function seltree() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择公司',
+                content: '/SysComp/Select?url=/Basis/BasisKeyNode/Index',
+                area: ['300px', '450px'],
+            });
+        }
+
+        // 解析参数
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+    </script>
+}

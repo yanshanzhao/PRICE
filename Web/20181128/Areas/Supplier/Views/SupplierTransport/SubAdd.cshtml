@@ -1,0 +1,163 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<form class="layui-form layui-form-pane" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">添加信息</div>
+        <div class="layui-card-body">
+            <input type="hidden" name="TransportId" id="hdsuppid" value="@ViewBag.suppid" />
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">运输线路<em>*</em></label>
+                    <div class="layui-input-inline">
+                        <input id="txtTransitLineNumber" type="text" name="TransitLineNumber" maxlength="50" placeholder="" class="layui-input" lay-verify="required">
+                        <input id="hdLineId" type="hidden" name="LineId" />
+                        <input id="hdbegin" type="hidden" name="TransitBeginId" value="-1"/>
+                        <input id="hdend" type="hidden" name="TransitEndId" value="-1"/>
+                    </div>
+                    <label style="color:lightcoral;">❀点击文本框选择运输线路❀</label>
+                </div>
+            </div>
+            @*<div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">开始位置<em>*</em></label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="TransitBeginName" maxlength="50" lay-verify="required" placeholder="" id="iTransitBeginName" class="layui-input" readonly>
+                        </div>
+                        <div class="layui-input-inline" style="margin-left:5px;">
+                            <a class="layui-btn" id="btnSel" style="float:left;">选择</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">结束位置<em>*</em></label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="TransitEndName" maxlength="50" lay-verify="required" placeholder="" class="layui-input" id="iTransitEndName" readonly>
+                        </div>
+                        <div class="layui-input-inline" style="margin-left:5px;">
+                            <a class="layui-btn" id="btnSels" style="float:left;">选择</a>
+                            <input type="hidden" name="TransitEndId" id="hdend" value="-1" />
+                        </div>
+                    </div>
+                </div>*@
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">发车时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="DepartureTime" maxlength="50" placeholder="" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">到达时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ArrivalTime" maxlength="50" placeholder="" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">营业时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="BusinessHours" maxlength="50" placeholder="" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">运作时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="OperationTime" maxlength="50" placeholder="" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-left:110px;margin-top:30px;">
+                <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', ], function () {
+            var form = layui.form, ele = layui.element;
+
+            form.on('switch(state)', function (data) {
+                $("#hdstate").val(this.checked ? "1" : "0");
+            });
+
+            form.on('submit(saveuser)', function (data) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/supplier/SupplierTransport/subaddinfo",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'ok') {
+                            top.layui.layer.msg('添加成功');
+                            location.href = '/supplier/SupplierTransport/sublist?suppid=' + $("#hdsuppid").val();
+                        }
+
+                        if (data.flag == "exist") {
+                            top.layui.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+
+
+        $(function () {
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/supplier/SupplierTransport/sublist?suppid=' + $("#hdsuppid").val();
+            });
+
+            $(document).on('click', '#txtTransitLineNumber', function () {
+                GetLineName(); 
+            });
+
+            //$(document).on('click', '#btnSel', function () {
+            //    GetAreaName("Begin");
+            //});
+            //$(document).on('click', '#btnSels', function () {
+            //    GetAreaName("End");
+            //});
+        });
+
+        // 标识
+        var flag = "";
+
+        // 设置线路名称
+        function setinfo(tLineId, tlinename, tBeginId, tEndId) {
+            $("#hdLineId").val(tLineId);
+            $("#txtTransitLineNumber").val(tlinename);
+            $("#hdbegin").val(tBeginId);
+            $("#hdend").val(tEndId);
+        }
+
+        // 获取位置
+        function GetLineName() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择线路',
+                content: '/Basis/BasisLine/LineName?url=/Supplier/SupplierTransport/Index',
+                area: ['800px', '500px'],
+            });
+        }
+    </script>
+}
+
+

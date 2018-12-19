@@ -1,0 +1,118 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@section Styles{
+    <link href="~/assets/js/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet" />
+}
+<div class="wrap" style="background-color:white;">
+    <ul id="deptree" class="ztree" style="margin-bottom:30px;"></ul>
+    <div style="width:100%;text-align:center">
+        <a class="layui-btn layui-btn-sm" onclick="saveinfo()">确定</a>
+    </div>
+</div>
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+
+<input id="hdid" type="hidden" />
+<input id="hdname" type="hidden" />
+@section scripts{
+    <script src="~/assets/js/ztree/jquery.ztree.all.min.js"></script>
+    <script>
+        layui.use(['element', 'tree'], function () {
+            var ele = layui.element;
+        });
+        var zTreeObj;
+        // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+        var setting = {
+            check: {
+                enable: false,
+
+                //nocheckInherit: false
+                //chkStyle: 'checkbox',
+
+                //chkboxType: { "Y": "ps", "N": "ps" }
+            },
+            view: {
+                selectedMulti: false,
+                showIcon: true,  //设置是否显示节点图标
+                showLine: true,  //设置是否显示节点与节点之间的连线
+                // fontCss: setFontCss
+            },
+            async: {
+                enable: true, // 设置 zTree是否开启异步加载模式  加载全部信息
+                url: "", // Ajax 获取数据的 URL 地址
+                autoParam: ["id"],    // 异步加载时自动提交父节点属性的参数,假设父节点 node = {id:1, name:"test"}，异步加载时，提交参数 zId=1
+                //dataFilter: filter
+            },
+            callback: {
+                onClick: zTreeOnOnClick//点击事件
+
+            },
+            data: { // 必须使用data
+                simpleData: {
+                    enable: true,
+                    idKey: "id", // id编号命名 默认
+                    pIdKey: "pid", // 父id编号命名 默认
+                    rootPId: 0 // 用于修正根节点父节点数据，即 pIdKey 指定的属性值
+                }
+            }
+        };
+
+
+        $(document).ready(function () {
+            //显示区域树
+            console.log('加载')
+            $.ajax({
+                type: "POST",
+                url: '/sysareas/TreesList',
+                data: {id:0},
+                dataType: "json",
+                success: function (data) {
+                    zTreeObj = $.fn.zTree.init($("#deptree"), setting, data);
+                }
+            });
+
+        });
+
+        function saveinfo() {
+            var treeObj = $.fn.zTree.getZTreeObj("deptree");
+            //1. 获取当前被选中的节点数据集合
+            var node = treeObj.getSelectedNodes();
+
+            top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo($("#hdid").val(),$("#hdname").val());
+            top.layui.layer.close(top.window.topdialog);
+        }
+
+        function zTreeOnOnClick(event, treeId, treeNode) {
+            var treeObj = $.fn.zTree.getZTreeObj(treeId);
+            var node = treeObj.getNodeByTId(treeNode.tId);
+
+            $("#hdid").val(treeNode.id);
+            $("#hdname").val(treeNode.name);
+            //没有子节点才去查询
+            if (node.children == null || node.children == "undefined") {
+                $.ajax({
+                    type: "POST",
+                    async: false,
+                    url: '/sysareas/TreesList',
+                    data: {
+                        id: treeNode.id
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data&&data.length) {
+                            //添加新节点
+                            newNode = treeObj.addNodes(node, data);
+                        }
+                    },
+                    error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+                        result = true;
+                        alert("请求失败!");
+                    }
+                });
+            }
+        }
+
+
+
+    </script>
+}

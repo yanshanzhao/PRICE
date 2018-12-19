@@ -1,0 +1,107 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+@model SRM.Model.Basis.BasisAuditRelationModel 
+<div class="layui-card">
+    <div class="layui-card-header">查看审核流程</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">类型名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@Model.AuditRelationTypeName"  class="layui-input" disabled> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">流程操作名称</label>
+                <div class="layui-input-inline"> 
+                    <input type="text" value="@Model.AuditRelationName" class="layui-input"  disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">流程编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@Model.AuditRelationNumber"  class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">提起机构</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@Model.DepartmentName" class="layui-input" disabled> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">提起人员</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@Model.TrueName" class="layui-input" disabled> 
+                </div>
+            </div>  
+            <div class="layui-form-item">
+                <label class="layui-form-label">审核机构</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@Model.ToDepartmentName" class="layui-input" disabled> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">审核人员</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="@Model.ToTrueName" class="layui-input" disabled> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">关键控制</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.IsControl == 1 ? "checked" : "")) lay-skin="switch" lay-filter="isControl" lay-text="是|否" disabled>
+                    <input type="hidden" value="@Model.IsControl" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">退回类型</label>
+                <div class="layui-input-inline"> 
+                    <input type="text" value="@Model.ReturnTypeName" class="layui-input" disabled /> 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">结束审核</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.EndAudit == 1 ? "checked" : "")) lay-skin="switch" lay-filter="endAudit" lay-text="是|否" disabled>
+                    <input type="hidden" value="@Model.EndAudit" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">流程开始节点</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.BeginNode == 1 ? "checked" : "")) lay-skin="switch" lay-filter="beginNode" lay-text="是|否" disabled>
+                    <input type="hidden" value="@Model.BeginNode" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.State == 1 ? "checked" : "")) lay-skin="switch" lay-filter="state" lay-text="是|否" disabled>
+                    <input  type="hidden" value="@Model.State" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+              
+        });
+
+        $(function () {
+            // 返回事件
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisAuditRelation/Index';
+            });
+        }); 
+    </script>
+}

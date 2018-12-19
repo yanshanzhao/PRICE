@@ -1,0 +1,349 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Car/CarOrder/AddCarOrder" method="post">
+    <div class="layui-card" id="clearDivinput">
+        <div class="layui-card-header">供应商基本信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:100%;clear:none !important; float:left;">
+                <div class="layui-btn" id="btnCarSupplier" style="width:15%;" title="点击供应商基本信息">供应商基本信息</div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商代码</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierNumber" type="text" placeholder="供应商代码" name="SupplierNumber" class="layui-input" lay-verify="supplier" readonly> 
+                    <input id="hdSupplierId" type="hidden" name="SupplierId" />  
+                </div>
+            </div> 
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" placeholder="供应商名称" lay-verify="required" type="text" name="SupplierName" class="layui-input" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">添加订单记录</div>
+        <div class="layui-card-body" style="overflow:hidden;">  
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>交货单号</label>
+                <div class="layui-input-inline">
+                    <input id="txtPartNo" placeholder="交货单号" lay-verify="required" type="text" name="PartNo" class="layui-input">
+                </div>
+            </div> 
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>订单状态</label>
+                <div class="layui-input-inline">
+                    <select type="text" name="OrderState" lay-verify="required" placeholder="" class="layui-input" id="txtOrderState"> 
+                        <option value="1">加急</option>
+                        <option value="2">非加急</option> 
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">订单号</label>
+                <div class="layui-input-inline">
+                    <input id="txtOrderNumber" placeholder="订单号" lay-verify="required" type="text" name="OrderNumber" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>承运商</label>
+                <div class="layui-input-inline">
+                    <input id="txtTransportName" placeholder="承运商" lay-verify="required" type="text" name="TransportName" class="layui-input">
+                </div>
+            </div> 
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">到货日期</label>
+                <div class="layui-input-inline">
+                    <input id="txtTakeTime" placeholder="到货日期" lay-verify="required" type="text" name="TakeTime" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">取货日期</label>
+                <div class="layui-input-inline">
+                    <input id="txtReachTime" placeholder="到货日期" lay-verify="required" type="text" name="ReachTime" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">工厂代码</label>
+                <div class="layui-input-inline">
+                    <input id="txtFactoryNumber" placeholder="工厂代码" lay-verify="required" type="text" name="FactoryNumber" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label">车牌号</label>
+                <div class="layui-input-inline">
+                    <input id="txtCarNumber" placeholder="车牌号" lay-verify="required" type="text" name="CarNumber" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">工厂地址</label>
+                <div class="layui-input-block"> 
+                    <textarea id="txtFactoryAddress" placeholder="工厂地址" name="FactoryAddress" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运作要求维护明细信息</div>
+        <div class="layui-card-body">
+            <blockquote class="layui-elem-quote">
+                <div class="layui-inline">
+                    <div class="layui-form">
+                        零件名称：
+                        <div class="layui-input-inline">
+                            <input type="text" name="PartNumber" placeholder="" class="layui-input" id="txtPartNumber">
+                        </div>  
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    </div>
+                </div>
+            </blockquote>
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">零件号</th>
+                            <th>零件名称</th>
+                            <th>包装代码</th>
+                            <th>SNP</th>
+                            <th>交货数量</th>
+                            <th>箱数</th>
+                            <th>托数</th>
+                            <th>实收箱数</th>
+                            <th>实收托数</th>
+                            <th>备注</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="CarOrderDetaillist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.PartNumber}}</td>
+                        <td>{{c.PartName}}</td>
+                        <td>{{c.PackingNumber}}</td>
+                        <td>{{c.SNP}}</td>
+                        <td>{{c.PartNumber}}</td>
+                        <td>{{c.BoxNumber}}</td>
+                        <td>{{c.DragNumber}}</td>
+                        <td>{{c.ReceiptBoxNumber}}</td>
+                        <td>{{c.PackingNumber}}</td>
+                        <td>{{c.Remark}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.OrderDetailId}}">
+                                <i class="layui-icon"></i>作废
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+                <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+            <a class="layui-btn" id="btnGoBack">返回</a>
+        </div>
+    </div> 
+</form>
+@section scripts{
+    <script>  
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+             
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Car/CarOrder/AddCarOrder",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Car/CarOrder/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            }); 
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//分配id 
+                DeleteData(tId);
+            });
+
+            //点击选择按钮
+            $(document).on('click', '#btnCarSupplier', function () {
+                CarSupplier();
+            });
+        }); 
+
+        $(function () {
+
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                Choose();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            }); 
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Car/CarOrder/Index';
+            }); 
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#CarOrderDetaillist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Car/CarOrder/CarOrderDetailAmount",
+                async: false,
+                data: {
+                    partnumber: $("#txtPartNumber").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetails").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Paginations").pagination(amount, {
+                callback: PageCallbackOfCuss,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+
+        // 分页参数
+        function PageCallbackOfCuss(indexs) {
+            pageIndex = indexs;
+            InitCusTables(indexs);
+        }
+
+        // 查询数据
+        function InitCusTables(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                partnumber: $("#txtPartNumber").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Car/CarOrder/CarOrderDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#CarOrderDetaillist").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#CarOrderDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#CarOrderDetaillist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        } 
+
+        // 作废
+        function DeleteData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Car/CarOrder/InvalidDetail',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 设置供应商信息
+        function setInfo(id, supplierName, supplierNumber) {
+            $("#hdSupplierId").val(id);
+            $("#txtSupplierName").val(supplierName);
+            $("#txtSupplierNumber").val(supplierNumber);
+        }
+
+        // 供应商信息
+        function CarSupplier() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择供应商信息',
+                content: '/Car/CarPacking/SupplierDetail?url=/Car/CarOrder/Index',
+                area: ['500px', '600px'],
+            });
+        }
+         
+        // 添加订单明细
+        function Choose() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '添加订单明细',
+                content: '/Car/CarOrder/AddCarOrderDetail?url=/Car/CarOrder/Index',
+                area: ['700px', '580px'],
+            });
+        }
+    </script>
+}

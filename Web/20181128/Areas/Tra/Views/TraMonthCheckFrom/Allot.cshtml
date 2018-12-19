@@ -1,0 +1,306 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraMonthCheckFromModel
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-header">绩效考核模板信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label">自定义编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtCheckFromNumber" name="CheckFromNumber" value="@Model.CheckFromNumber" type="text" maxlength="10" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdCheckFromId" name="CheckFromId" type="hidden" value="@Model.CheckFromId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">考核类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtCheckFromType" name="CheckFromType" lay-verify="required" class="select" disabled>
+                        <option value="">请选择考核类型</option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option>
+                    </select>
+                    <input id="hdCheckFromType" type="hidden" value="@Model.CheckFromType" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" maxlength="100" class="layui-textarea" disabled>@Model.Remark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">供应商分配信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <blockquote class="layui-elem-quote">
+                <div class="layui-form">
+                    供应商名称：
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierName" style="width:180px;" type="text" value="" placeholder="供应商名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    供应商种类：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selSupplierType"></select>
+                    </div>
+                    &nbsp;&nbsp;
+                    供应商范围：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selSupplierScope"></select>
+                    </div>
+                    <div class="layui-inline" style="margin-left:10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    </div>
+                </div>
+            </blockquote>
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">机构名称</th>
+                            <th>供应商名称</th>
+                            <th>运输供应商编号</th>
+                            <th>供应商种类</th>
+                            <th>供应商范围</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="DepartmentList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="PageDepartment" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.DepartmentName}}</td>
+                        <td>{{c.SupplierName}}</td>
+                        <td>{{c.TransportNumber}}</td>
+                        <td>{{c.SupplierType}}</td>
+                        <td>{{c.SupplierScope}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnInvalid" data-id="{{c.CheckFromDeparId}}">
+                                <i class="iconfont icon-edit"></i>
+                                作废
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <div class="layui-input-block" style="width:5%;margin:0 auto !important;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraMonthCheckFrom/Index';
+            });
+        });
+
+        $(function () {
+            // 供应商种类/范围
+            GetDictionary();
+
+            // 考核类型下拉列表赋值
+            $("#txtCheckFromType").val($("#hdCheckFromType").val());
+
+            // 页面加载查询
+            SearchData();
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                GetTransportSupplier();
+            });
+
+            // 作废
+            $(document).on('click', '.btnInvalid', function () {
+                var tId = $(this).data("id");
+                InvalidData(tId);
+            });
+        });
+
+        // 供应商种类数组
+        window.SupplierType = [];
+
+        // 供应商范围数组
+        window.SupplierScope = [];
+
+        // 系统字典表中获取供应商种类,供应商范围
+        function GetDictionary() {
+
+            SupplierType.push({ id: '', name: "请选择供应商种类" });
+            SupplierScope.push({ id: '', name: "请选择供应商范围" });
+
+            $.ajax({
+                url: '/Supplier/Supplier/DictList',
+                type: 'POST',
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 1) {
+                                SupplierType.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            if (data[i].Type == 3) {
+                                SupplierScope.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#selSupplierType").html(template('temdictlist', { list: SupplierType }));
+
+            $("#selSupplierScope").html(template('temdictlist', { list: SupplierScope }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#DepartmentList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询Amount
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckFromDepar/MonthCheckFromDeparAmount",
+                async: false,
+                data: {
+                    checkFromId: $("#hdCheckFromId").val(),
+                    supplierName: $("#txtSupplierName").val(),
+                    supplierType: $("#selSupplierType").val(),
+                    supplierScope: $("#selSupplierScope").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackForComponent,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackForComponent(indexs, jq) {
+            pageIndex = indexs;
+            GetDepartmentList(indexs);
+        }
+
+        // 查询List
+        function GetDepartmentList(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checkFromId: $("#hdCheckFromId").val(),
+                supplierName: $("#txtSupplierName").val(),
+                supplierType: $("#selSupplierType").val(),
+                supplierScope: $("#selSupplierScope").val()
+            };
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckFromDepar/MonthCheckFromDeparList',
+                data: userjosn,
+                success: function (data) {
+                    $("#DepartmentList").html(template('temslist', { list: data }));
+                    $("#PageDepartment").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#PageDepartment").hide();
+                        $("#DepartmentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 作废
+        function InvalidData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraMonthCheckFromDepar/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 选择运输供应商(新增)
+        function GetTransportSupplier() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择供应商',
+                content: '/Tra/TraMonthCheckFrom/AllotDetail?url=/Tra/TraMonthCheckFrom/Index&checkFromId=' + $("#hdCheckFromId").val(),
+                area: ['900px', '600px'],
+            });
+        }
+    </script>
+}

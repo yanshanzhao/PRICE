@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Component";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-header">运输评估元件信息明细添加</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">检查项目</label>
+                <div class="layui-input-block">
+                    <input id="txtInspectProject" name="InspectProject" type="text" placeholder="检查项目" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">检查内容</label>
+                <div class="layui-input-block">
+                    <input id="txtInspectContent" name="InspectContent" type="text" placeholder="检查内容" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">评估方法</label>
+                <div class="layui-input-inline">
+                    <input id="txtAssessMethod" name="AssessMethod" type="text" placeholder="评估方法" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">关键控制点</label>
+                <div class="layui-input-inline">
+                    <input id="txtNodeValue" name="NodeValue" type="text" placeholder="关键控制点" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">标准得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtStandardScore" name="StandardScore" value="@ViewBag.score" type="text" placeholder="标准得分" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-inline">
+                    <textarea id="txtRemark" name="Remark" type="text" placeholder="排序编号" class="layui-textarea" lay-verify="required"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <div class="layui-input-block">
+                    <button class="layui-btn" id="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<input id="hdUrl" type="hidden" value="@ViewBag.url" />
+<input id="hdIds" type="hidden" value="@ViewBag.ids" />
+<input id="hdType" type="hidden" value="@ViewBag.type" />
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+
+            // 提交保存
+            $(document).on('click', '#btnSave', function () {
+
+                if ($("#hdType").val() == "add") {
+                    var project = $("#txtInspectProject").val();
+                    var content = $("#txtInspectContent").val();
+                    var method = $("#txtAssessMethod").val();
+                    var value = $("#txtNodeValue").val();
+                    var remark = $("#txtRemark").val()
+                    top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SaveComponentType(
+                        project, content, method, value, remark
+                        );
+                    top.layui.layer.close(top.window.topdialog);
+                }
+                else if ($("#hdType").val() == "edit") {
+                    // 新增到数据库
+                    $.ajax({
+                        type: "POST",
+                        url: "/Storage/StorageComponent/AddStorageComponent",
+                        data: { componentList: ids, fromId: $("#hdIds").val() },
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'success') {
+                                layui.layer.msg('新增成功！');
+                                top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SearchComponentData();
+                                top.layui.layer.close(top.window.topdialog);
+                            }
+                            if (data.flag == "fail") {
+                                layui.layer.msg('信息新增失败！');
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+
+    </script>
+}

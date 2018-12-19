@@ -1,0 +1,369 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    申请时间：
+                    <div class="layui-input-inline">
+                        <input type="text" name="ApplyTime" lay-verify="required" placeholder="" class="layui-input" id="txtApplyTime">
+                    </div>
+                    &nbsp;&nbsp;
+                    提交状态：
+                    <div class="layui-input-inline">
+                        <select name="State" lay-verify="" placeholder="" class="layui-select" id="txtState">
+                            <option></option>
+                            <option value="0">初始</option>
+                            <option value="1">提交</option>
+                            <option value="10">作废</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    审核状态：
+                    <div class="layui-input-inline">
+                        <select name="UseState" lay-verify="" placeholder="" class="layui-select" id="txtUseState">
+                            <option></option>
+                            <option value="0">初始</option>
+                            <option value="1">审核中</option>
+                            <option value="5">审核通过</option>
+                            <option value="10">驳回</option>
+                            <option value="20">已使用</option>
+                        </select>
+                    </div>
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">申请负责人</th>
+                        <th>申请时间</th>
+                        <th>提交状态</th>
+                        <th>审核状态</th>
+                        @*<th>申请备注</th>*@
+                        <th>意向供应商数量</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="StorageChooselist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.ApplyUser}}</td>
+                    <td>{{c.ApplyTime}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.UseStateName}}</td>
+                    @*<td>{{c.ApplyRemark}}</td>*@
+                    <td>{{c.SupplierCounts}}</td>
+                    <td>
+                        {{if c.State==0||c.UseState==10}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.StorageChooseId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{/if}}
+                        {{if c.State==0 || (c.State==1 && c.UseState==10)}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.StorageChooseId}}" data-supplierid="{{c.SupplierId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>
+                        {{/if}}
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.StorageChooseId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        {{if c.UseState==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnRevoke" data-id="{{c.TraChooseId}}">
+                            <i class="layui-icon"></i>撤销
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.StorageChooseId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnTrail" data-id="{{c.StorageChooseId}}">
+                            <i class="layui-icon"></i>轨迹
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证开始时间
+            laydate.render({
+                elem: '#txtApplyTime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Storage/StorageChoose/Export'
+                    , {
+                        ApplyTime: $("#txtApplyTime").val()//申请时间
+                      , State: $("#txtState").val()//提交状态
+                      , UseState: $("#txtUseState").val() //审核状态
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=仓储选择申请";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //编辑按钮
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ModifyData(tId);
+            });
+
+            //提交按钮
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                var tSupplierid = $(this).data("supplierid");
+                SubmitData(tId, tSupplierid);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                DeleteData(tId);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ShowData(tId);
+            });
+
+            // 撤销
+            $(document).on('click', '.btnRevoke', function () {
+                var tId = $(this).data("id");
+                RevokeData(tId);
+            });
+
+            // 轨迹
+            $(document).on('click', '.btnTrail', function () {
+                var tId = $(this).data("id");
+                TrailData(tId);
+            });
+        });
+
+        // 新增
+        function AddData() {
+            location.href = '/Storage/StorageChoose/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#StorageChooselist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Storage/StorageChoose/StorageChooseCount",
+                async: false,
+                data: {
+                    ApplyTime: $("#txtApplyTime").val()//申请时间
+                    , State: $("#txtState").val()//提交状态
+                    , UseState: $("#txtUseState").val() //审核状态
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                ApplyTime: $("#txtApplyTime").val()//申请时间
+                    , State: $("#txtState").val()//提交状态
+                    , UseState: $("#txtUseState").val() //审核状态
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Storage/StorageChoose/StorageChooseList',
+                data: userjosn,
+                success: function (data) {
+                    $("#StorageChooselist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#StorageChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Storage/StorageChoose/Edit?tId=' + tId;
+        }
+
+        // 提交
+        function SubmitData(tId, tSupplierid) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Storage/StorageChoose/SubmitStorageChoose',
+                    data: { tId: tId, tSupplierid: tSupplierid },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 作废
+        function DeleteData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Storage/StorageChoose/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Storage/StorageChoose/Check?tId=' + tId;
+        }
+
+        // 撤销
+        function RevokeData(tId) {
+            top.layer.confirm('您确定撤销此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/StorageChoose/RevokeData',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 轨迹
+        function TrailData(tId) {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '审核轨迹',
+                content: '/Tra/TraSupplierTransit/Trail?tId=' + tId + '&supplierAuditType=2',
+                area: ['700px', '470px'],
+            });
+        }
+    </script>
+}

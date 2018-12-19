@@ -1,0 +1,569 @@
+﻿@{
+    ViewBag.Title = "AssessView";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<style>
+    .layui-table td.tdtitle {
+        width: 110px;
+    }
+
+    .layui-table td.tdscore {
+        width: 60px;
+        padding-left: 0px;
+        padding-right: 0px;
+        text-align: center;
+        padding: 0px;
+    }
+
+        .layui-table td.tdscore input {
+            border: 1px solid #fff;
+            text-align: center;
+            padding-left: 0px;
+        }
+</style>
+@model  SRM.Web.Areas.Supplier.Controllers.SuppModels
+<form class="layui-form layui-form-pane" method="post">
+    <input type="hidden" id="hdassformid" value="@ViewBag.assessid" name="AssessFromId" />
+    <input type="hidden" id="hdtranid" value="@ViewBag.tranid" name="TransportId" />
+    <input type="hidden" id="hdturassessid" value="@ViewBag.turassessid" name="TurnoverAssessId" />
+    <div class="layui-card">
+        <div class="layui-card-header">基本信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline" style="width:520px;">
+                    <input type="text" id="iSupplierName" placeholder="" class="layui-input" style="width:512px;" value="@Model.SuppModel.SupplierName" disabled>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">服务类型</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iSupplierTypes" placeholder="" class="layui-input" value="@ViewBag.res" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">企业地址</label>
+                <div class="layui-input-inline" style="width:520px;">
+                    <input type="text" id="iEnterpriseAddresses" placeholder="" class="layui-input" style="width:512px;" value="@Model.SuppModel.EnterpriseAddresses" disabled>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">是否现场考察</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iSupplierTypes" placeholder="" class="layui-input" value="@ViewBag.coo" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系人</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iContactsName" placeholder="" class="layui-input" value="@Model.SuppModel.ContactsName" disabled>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系人职位</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="iContactsPosition" placeholder="" class="layui-input" value="@Model.SuppModel.ContactsPosition" disabled>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系人电话</label>
+                    <div class="layui-input-inline">
+                        <input type="text" placeholder="" class="layui-input" value="@Model.SuppModel.ContactsPhone" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">信息收集人</label>
+                    <div class="layui-input-inline">
+                        <input type="text" maxlength="20" placeholder="" class="layui-input" value="@Model.SuppModel.InformationUser" disabled>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">信息收集方式</label>
+
+                    <div class="layui-input-inline">
+                        <input type="text" maxlength="20" placeholder="" class="layui-input" value="@Model.SuppModel.InformationType" disabled>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">信息收集时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" maxlength="20" placeholder="" class="layui-input" id="infotime" value="@Model.SuppModel.InformationTime" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">评估表</div>
+        <div class="layui-card-body">
+            <input id="hdtotalscore" type="hidden" value="0" />
+            <table class="layui-table" style="width:950px;">
+                <tr>
+                    <td>检查项目</td>
+                    <td class="tdscore">标准分</td>
+                    <td class="tdscore">得分</td>
+                </tr>
+                @foreach (var item in Model.CompnentList)
+                {
+                    <tr style="background-color:#f2f2f2;" data-id="@item.ComponentID" data-pid="0" data-score="@item.Score" class="comscore">
+                        <td>@item.ComponentName</td>
+                        <td class="tdscore">@item.Score</td>
+                        <td class="tdscore" style="cursor:not-allowed"><span data-id="@item.ComponentID"></span></td>
+                    </tr>
+                    foreach (var items in Model.CompnentLists)
+                    {
+                        if (items.ComponentID == item.ComponentID)
+                        {
+                            <tr data-id="@items.ComponentDetailID" data-pid="@items.ComponentID" class="comscores">
+                                <td>@items.ComponentName</td>
+                                <td class="tdscore">@items.Score</td>
+                                <td class="tdscore"><input class="layui-input iScore" data-id="@items.ComponentDetailID" id="@("iscore"+items.ComponentDetailID)" data-max="@items.MaxScore" data-min="@items.MinScore" lay-verify="suppscore" value="@items.Score"/></td>
+                            </tr>
+                        }
+                    }
+                }
+                <tr>
+                    <td colspan="3" style="text-align:right;">
+                        得分总计：<span id="assessscore">0</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="layui-card-header">评估信息</div>
+        <div class="layui-card-body">
+            @*<table class="layui-table" style="width:950px;">
+                    <tr>
+                        <td class="tdtitle">发展潜力</td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <td class="tdtitle">备注</td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <td class="tdtitle">附件</td>
+                        <td colspan="2"></td>
+                    </tr>
+                </table>*@
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">发展潜力</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="Potential" maxlength="100" placeholder="" class="layui-input" style="width:840px;" value="@ViewBag.potential">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block">
+                        <textarea style="width:840px;height:100px;" class="layui-input" name="Remark">@ViewBag.remark</textarea>
+                    </div>
+                </div>
+            </div>
+            @*<div class="layui-form-item">
+                    <div style="margin-left:10px;margin-top:30px;">
+                        <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                        <a class="layui-btn" id="btnGoBack">返回</a>
+                    </div>
+                </div>*@
+        </div>
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+                <input type="hidden" id="hdfilelist" name="SuppFileList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;"> 
+                    <input id="hdTemSelectData" name="TemSelectData" type="hidden" />
+                    <script type="text/html" id="temdictlist">
+                        {{each list as c}}
+                        <option value="{{c.id}}">{{c.name}}</option>
+                        {{/each}}
+                    </script>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">线路信息</div>
+        <div class="layui-card-body">
+            <blockquote class="layui-elem-quote">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="请输入线路名称" class="layui-input" type="text" id="ikeyWord">
+                    </div>
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                </div>
+            </blockquote>
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>运输线路</th>
+                            <th>发车时间</th>
+                            <th>到达时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="LineList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.TransitLineNumber}}</td>
+                        <td>{{c.DepartureTime}}</td>
+                        <td>{{c.ArrivalTime}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:5%;margin:10px auto !important;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+            var filelist = [];
+            function initfiles() {
+                $("#filelist").html(template('temfilelist', { list: filelist }));
+                $("#hdfilelist").val(JSON.stringify(filelist));
+            }
+            function delfilelist(ids) {
+                var tem = [];
+                for (var i in filelist) {
+                    if (filelist[i].id != ids) {
+                        tem.push(filelist[i]);
+                    }
+                }
+
+                filelist = tem;
+                initfiles();
+            }
+            function setfilename(ids, names) {
+                for (var i in filelist) {
+                    if (filelist[i].id == ids) {
+                        filelist[i].filename = names;
+                    }
+                }
+                $("#hdfilelist").val(JSON.stringify(filelist));
+            }
+            function downfile(ids) {
+                for (var i in filelist) {
+                    if (filelist[i].id == ids) {
+
+                        if (filelist[i].path.lastIndexOf('.') != -1) {
+                            var lastnum = filelist[i].path.lastIndexOf('.');
+                            var exts = filelist[i].path.substring(lastnum + 1); 
+                            location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                        } 
+                    }
+                }
+            }
+
+            layui.use(['form', 'element', 'laydate', 'upload', 'layer'], function () {
+                var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+
+                form.verify({
+                    suppscore: function (value, item) { //value：表单的值、item：表单的DOM对象
+                        if (value == '') {
+                            return '请输入分数';
+                        }
+                        if(isNaN(value)) {
+                            return '请输入数字格式分数';
+                        }
+
+                        var max = $(item).data("max");
+                        var min = $(item).data("min");
+
+                        if (parseInt(value)> max|| parseInt(value)< min) {
+                            return '此项分数范围在(' + min + '-' + max + ')';
+                        }
+
+                    }, selsupp: function (value) {
+                        if (value == '') {
+                            return '请先选择供应商信息';
+                        }
+                    }
+                });
+
+
+                form.on('submit(saveuser)', function (data) {
+                    data.field.StandardScore = standscore();
+                    data.field.ScoreList = assscore();
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/supplier/SupplierTransport/AssessInfo",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                top.layui.layer.msg('评估信息保存成功');
+                                location.href = '/supplier/SupplierTransport/index';
+                            }
+                            if (data.flag == "noauth") {
+                                top.layer.msg(data.content);
+                            }
+                            if (data.flag == "fail") {
+                                top.layui.layer.msg('评估信息保存失败');
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+            //文件上传弹窗（新增）
+            function selfiles() {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/assessfiles?url=/Supplier/SupplierTransport/Index&assformid='+$("#hdassformid").val(),
+                    area: ['400px', '400px'],
+                });
+            }
+            //文件上传重复判断(新增)
+            function ishasfiles(fns) {
+                for (var i in filelist) {
+                    if (filelist[i].filename == fns) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            //添加新文件(新增)
+            function setnewfiles(filename, path) {
+                console.log(filename);
+                console.log(path);
+
+                filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+
+                console.log(JSON.stringify(filelist));
+
+                initfiles();
+            }
+
+
+            $(function () {
+
+                inits();
+
+                $(document).on('click', '#btnUpload', function () {
+                    selfiles();
+                });
+
+                $(document).on('click', '#btnGoBack', function () {
+                    location.href = '/supplier/SupplierTransport/index';
+                });
+
+                $(document).on('click', '#btnSearch', function () {
+                    inits();
+                });
+
+                $(document).on('blur', '.iScore', function () {
+                    var val = $(this).val();
+                    var max =parseInt( $(this).data("max"));
+                    var min =parseInt( $(this).data("min"));
+
+                    if (!val) {
+                        calscore();
+                        return false;
+                    }
+                    if (isNaN(val)) {
+                        layui.layer.msg('请输入数字格式分数');
+                        $(this).val("");
+                        calscore();
+                        return false;
+                    }
+
+                    if (parseInt(val) > max || parseInt(val) < min) {
+
+                        layui.layer.msg('此项分数范围在(' + min + '-' + max + ')');
+                        $(this).val("");
+                        calscore();
+                        return false;
+                    }
+                    calscore();
+
+                });
+
+                filelist = JSON.parse($("#hdfiles").val());
+                initfiles();
+
+                setscores();
+                inits();
+
+                calscore();
+            });
+
+            function setscores() {
+                $.ajax({
+                    type: "POST",
+                    url: "/supplier/SupplierTransport/AssessScore",
+                    data:{id:$("#hdturassessid").val()},
+                    async: false,
+                    dataType:"json",
+                    success: function (data) {
+                        for (var i = 0; i < data.length; i++) {
+                            $("#iscore" + data[i].id).val(data[i].score);
+                        }
+                        calscore();
+                    }
+                });
+            }
+
+            function assscore() {
+
+                var scorearr = [];
+                $(".iScore").each(function () {
+                    if ($(this).val()) {
+                        scorearr.push({ id: $(this).data("id"), score: parseInt($(this).val()) });
+                    }
+
+                });
+                return JSON.stringify(scorearr);
+            }
+
+            function standscore() {
+                var standtotal = 0;
+
+                $(".comscore").each(function () {
+                    standtotal += parseInt($(this).data("score"));
+                });
+                return standtotal;
+            }
+
+            //计算得分
+            function calscore() {
+
+                var totalscore = 0;
+                $(".comscore").each(function () {
+
+                    var that = this;
+                    var id = $(that).data("id");
+                    var temres = 0;
+                    $(".comscores").each(function () {
+
+                        var pid = $(this).data("pid");
+
+                        if (pid == id&&pid!=0) {
+
+                            var vals = $(this).find("input").eq(0).val();
+
+                            if ($.trim(vals)!= ''&&!isNaN(vals)) {
+                                temres += parseInt(vals);
+                                totalscore += parseInt(vals);
+                            }
+                        }
+
+                    });
+
+                    $(that).find("span").text(temres);
+                });
+
+                $("#hdtotalscore").val(totalscore);
+                $("#assessscore").text(totalscore);
+            }
+
+            var pageIndex = 0;
+            var pageSize = 15;
+
+            function inits() {
+                var flagCount = 0;
+                pageIndex = 0;
+                $("#LineList").html("<tr class='loadings' ><td colspan=3>数据加载中……<td></tr>");
+                $.ajax({
+                    type: "POST",
+                    url: "/supplier/SupplierTransport/subcounts",
+                    async: false,
+                    data: {
+                        suppid: $("#hdtranid").val(), name: $("#ikeyWord").val(), beginid: -1, endid: -1
+                    },
+                    success: function (data) {
+                        flagCount = data;
+                        $(".pagedetail").text("共" + flagCount + "条记录");
+                    }
+                });
+
+                $("#Pagination").pagination(flagCount, {
+                    callback: PageCallbackOfCus,
+                    prev_text: '<',       //上一页按钮里text
+                    next_text: '>',       //下一页按钮里text
+                    items_per_page: pageSize,  //显示条数
+                    num_display_entries: 6,    //连续分页主体部分分页条目数
+                    current_page: pageIndex,   //当前页索引
+                    num_edge_entries: 2        //两侧首尾分页条目数
+                });
+            }
+
+            function PageCallbackOfCus(indexs, jq) {
+                pageIndex = indexs;
+                InitCusTable(indexs);
+            }
+            function InitCusTable(pageIndexs) {
+                var userjosn = {
+                    index: (pageIndex + 1),
+                    size: pageSize,
+                    suppid: $("#hdtranid").val(),
+                    name: $("#ikeyWord").val(),
+                    beginid:-1,
+                    endid:-1
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '/supplier/SupplierTransport/sublists',
+                    data: userjosn,
+                    success: function (data) {
+                        $("#LineList").html(template('temslist', { list: data }));
+
+                        $("#pageinfos").show();
+                        if (data.length == 0) {
+                            $("#pageinfos").hide();
+                            $("#LineList").html("<div class='nodata'>暂无数据</div>")
+                        }
+                    }
+                });
+
+            }
+    </script>
+}
+
+
+
+

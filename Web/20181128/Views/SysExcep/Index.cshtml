@@ -1,0 +1,121 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-header">异常列表</div>
+    <div class="layui-card-body">
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>账号</th>
+                        <th>时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.LogId}}</td>
+                    <td>{{c.Operator}}</td>
+                    <td>{{c.Result}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-sm btnView" data-id="{{c.LogId}}"><i class="iconfont icon-edit"></i>查看</a>                    
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+        });
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '.btnView', function () {
+                var ids = $(this).data("id");
+                view(ids);
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=3>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/sysexcep/count",
+                async: false,
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/sysexcep/list',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+
+
+        function view(ids) {
+            top.window.operate = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '查看明细',
+                content: '/sysexcep/view?type=exc&ids=' + ids,
+                area: ['850px', '560px'],
+            });
+        }   
+    </script>
+}

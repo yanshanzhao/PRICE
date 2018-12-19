@@ -1,0 +1,315 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+                     
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    服务类型：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selDictionaryName"></select>
+                    </div>
+                    &nbsp;&nbsp;
+                    规模级别名称：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="规模级别名称" class="layui-input" type="text" id="txtSuppTurnoverName">
+                    </div>
+                    &nbsp;&nbsp;
+                    服务级别名称：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="服务级别名称" class="layui-input" type="text" id="txtSuppServiceName">
+                    </div>
+                    &nbsp;&nbsp;
+                    状态：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selSuppServiceState"> 
+                            <option value="0">无效</option>
+                            <option value="1" selected>有效</option>
+                        </select>
+                    </div> 
+                    <div class="layui-inline" style="margin-top:5px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">服务类型</th>
+                                <th>规模级别名称</th>
+                                <th>服务级别名称</th> 
+                                <th>年绩效限制</th>
+                                <th>年绩效上限(不含)</th>
+                                <th>年度绩效下限(含)</th>
+                                <th>状态</th>
+                                <th>培养期望</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ServiceLevelList" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.SuppKindName}}</td>
+                    <td>{{c.SuppTurnoverName}}</td>
+                    <td>{{c.SuppServiceName}}</td>
+                    <td>{{c.IsPerformanceName}}</td>
+                    <td>{{c.PerformanceMax}}</td>
+                    <td>{{c.PerformanceMin}}</td>
+                    <td>{{c.SuppServiceStateName}}</td>
+                    <td>{{c.ExpectContent}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.SuppServiceId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        @*<a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.SuppServiceId}}" data-state="{{c.SuppServiceState}}">
+                            <i class="layui-icon"></i>作废
+                        </a>*@
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.SuppServiceId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div> 
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.SuppServiceId}}">
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a> 
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.SuppServiceId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+            </div>
+        </div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 服务类型
+            GetDictionaryName();
+
+            // 查询
+            SearchData();
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Supplier/SupplierServiceLevel/Export'
+                    , { suppKindId: $("#selDictionaryName").val(), suppTurnoverName: $("#txtSuppTurnoverName").val(), suppServiceName: $("#txtSuppServiceName").val(), suppServiceState: $("#selSuppServiceState").val() }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=运输供应商服务等级表";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+
+            //$(document).on('click', '.btnDelete', function () {
+            //    var tId = $(this).data("id");
+            //    var tState = $(this).data("state");
+            //    DeleteData(tId, tState);
+            //});
+
+            // 查看
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+        });
+
+        // 获取服务类型(字典名称)
+        function GetDictionaryName() {
+            $.ajax({
+                url: '/Supplier/SupplierServiceLevel/GetDictionaryName',
+                type: 'POST',
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    if (data) {
+                        var dictionaryName = [];
+                        dictionaryName.push('<option value="" selected>请选择</option>')
+                        for (var i = 0, len = data.length; i < len; i++) {
+                            var param = data[i];
+                            dictionaryName.push('<option value="' + param.DictionaryId + '">' + param.DictionaryName + '</option>')
+                        }
+                        $("#selDictionaryName").html(dictionaryName.join(' '));
+                    }
+                }
+            });
+        }
+
+        // 新增
+        function AddData() {
+            location.href = '/Supplier/SupplierServiceLevel/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ServiceLevelList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Supplier/SupplierServiceLevel/ServiceLevelCount",
+                async: false,
+                data: { suppKindId: $("#selDictionaryName").val(), suppTurnoverName: $("#txtSuppTurnoverName").val(), suppServiceName: $("#txtSuppServiceName").val(), suppServiceState: $("#selSuppServiceState").val() },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+             
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                suppKindId: $("#selDictionaryName").val(),
+                suppTurnoverName: $("#txtSuppTurnoverName").val(),
+                suppServiceName: $("#txtSuppServiceName").val(),
+                suppServiceState: $("#selSuppServiceState").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Supplier/SupplierServiceLevel/ServiceLevelList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ServiceLevelList").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#ServiceLevelList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId) {
+            location.href = '/Supplier/SupplierServiceLevel/Edit?tId=' + tId;
+        }
+
+        // 作废
+        //function DeleteData(tId, tState) {
+        //    if (tState == '0') {
+        //        top.layer.msg('本数据为无效状态，不需重复作废！');
+        //        return;
+        //    }
+        //    top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+        //        $.ajax({
+        //            type: "POST",
+        //            url: '/Supplier/SupplierServiceLevel/ChangeState',
+        //            data: { tId: tId },
+        //            dataType: "json",
+        //            success: function (data) {
+        //                if (data.flag == "success") {
+        //                    top.layer.closeAll();
+        //                    SearchData();
+        //                }
+        //                if (data.flag == "noauth") {
+        //                    top.layer.msg(data.content);
+        //                }
+        //            }
+        //        });
+        //    }, function () { }
+        //    );
+        //}
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Supplier/SupplierServiceLevel/View?tId=' + tId;
+        } 
+    </script>
+}

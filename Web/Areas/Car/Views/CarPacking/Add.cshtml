@@ -1,0 +1,270 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-header">添加包装器具信息</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Car/CarPacking/AddCarPacking" method="post">
+            <div class="layui-form-item" style="width:12%;">
+                <div class="layui-btn" id="btnSupplier" style="width:100%;" title="点击选取供应商">供应商信息</div>
+            </div>
+            <div class="layui-form-item">
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>供应商名称</label>
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierName" type="text" lay-verify="required" class="layui-input" readonly>
+                        <input id="hdSupplierId" type="hidden" name="SupplierId" />
+                    </div>
+                </div>
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>供应商代码</label>
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierNumber" type="text" lay-verify="required" class="layui-input" readonly>
+                    </div>
+                </div>
+            </div> 
+            <div class="layui-form-item"> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>器具名称</label>
+                    <div class="layui-input-inline">
+                        <input id="txtPackingName" type="text" name="PackingName" maxlength="100" lay-verify="required" class="layui-input">
+                    </div>
+                </div> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>包装代码</label>
+                    <div class="layui-input-inline">
+                        <input id="txtPackingNumber" type="text" name="PackingNumber" maxlength="60" lay-verify="required" class="layui-input">
+                    </div>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>长度</label>
+                    <div class="layui-input-inline">
+                        <input id="txtLengths" type="text" name="Lengths" lay-verify="required" class="layui-input">
+                    </div>
+                </div> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>宽度</label>
+                    <div class="layui-input-inline">
+                        <input id="txtWidths" type="text" name="Widths" lay-verify="required" class="layui-input">
+                    </div>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>高度</label>
+                    <div class="layui-input-inline">
+                        <input id="txtHeights" type="text" name="Heights" lay-verify="required" class="layui-input">
+                    </div>
+                </div> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>体积</label>
+                    <div class="layui-input-inline">
+                        <input id="txtVolume" type="text" name="Volume" lay-verify="required" class="layui-input" readonly>
+                    </div>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>托体积系数</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDragDatio" type="text" name="DragDatio" lay-verify="required" class="layui-input">
+                    </div>
+                </div> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>托体积</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDragVolume" type="text" name="DragVolume" lay-verify="required" class="layui-input" readonly>
+                    </div>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label" style="width:135px"><em>*</em>返空体积系数</label>
+                    <div class="layui-input-inline" style="width:165px">
+                        <input id="txtReturnDatio" type="text" name="ReturnDatio" lay-verify="required" class="layui-input">
+                    </div>
+                </div> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>返空体积</label>
+                    <div class="layui-input-inline">
+                        <input id="txtReturnVolume" type="text" name="ReturnVolume" lay-verify="required" class="layui-input" readonly>
+                    </div>
+                </div>
+            </div> 
+            <div class="layui-form-item"> 
+                <div style="width:50%;clear:none !important; float:left;">
+                    <label class="layui-form-label"><em>*</em>返空单价</label>
+                    <div class="layui-input-inline">
+                        <input id="txtReturnPrices" type="text" name="ReturnPrices" lay-verify="required" class="layui-input">
+                    </div>
+                </div> 
+            </div>
+            <div class="layui-form-item" style="width:50%;margin:0 auto;">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 计算体积(长宽高失去焦点事件) 
+            $(document).on('blur', '#txtLengths', function () {
+                calculateVolume();
+            });
+            $(document).on('blur', '#txtWidths', function () {
+                calculateVolume();
+            });
+            $(document).on('blur', '#txtHeights', function () {
+                calculateVolume();
+            });
+
+            // 计算托体积(托体积系数失去焦点事件) 
+            $(document).on('blur', '#txtDragDatio', function () {
+                calculateDragVolume();
+            });
+
+            // 计算返空体积(返空体积系数失去焦点事件) 
+            $(document).on('blur', '#txtReturnDatio', function () {
+                calculateReturnVolume();
+            });
+
+            // 体积改变时(若托体积系数,返空体积系数不为空时)改变托体积,返空体积(体积改变事件) 
+            $(document).on('change', '#txtVolume', function () {
+                calculateDragVolume();
+                calculateReturnVolume();
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Car/CarPacking/AddCarPacking",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('保存成功！');
+                            location.href = '/Car/CarPacking/Index';
+                        } 
+                        if (data.flag == "fail") {
+                            layui.layer.msg('保存失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载
+        $(function () {
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Car/CarPacking/Index';
+            });
+
+            // 供应商信息
+            $(document).on('click', '#btnSupplier', function () {
+                GetSupplier();
+            });
+        });
+
+        // 设置供应商信息
+        function setInfo(id, supplierName, supplierNumber) {
+            $("#hdSupplierId").val(id);
+            $("#txtSupplierName").val(supplierName);
+            $("#txtSupplierNumber").val(supplierNumber);
+        }
+
+        // 供应商信息
+        function GetSupplier() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择供应商信息',
+                content: '/Car/CarPacking/SupplierDetail?url=/Car/CarPacking/Index',
+                area: ['500px', '600px'],
+            });
+        }
+         
+        // 计算体积
+        function calculateVolume() {
+
+            // 定义体积变量
+            var volume = 0;
+
+            // 若长宽高都不为空
+            if ($("#txtLengths").val().trim() != "" && $("#txtWidths").val().trim() != "" && $("#txtHeights").val().trim() != "") {
+
+                // 定义长宽高变量
+                var length = parseFloat($("#txtLengths").val().trim());
+                var width = parseFloat($("#txtWidths").val().trim());
+                var height = parseFloat($("#txtHeights").val().trim());
+
+                // 计算体积
+                volume = length * width * height;
+
+                // 体积赋值
+                $("#txtVolume").val(volume);
+            }
+        }
+
+        // 计算托体积
+        function calculateDragVolume() {
+
+            // 定义托体积变量
+            var dragVolume = 0;
+
+            // 若体积不为空,托体积系数不为空
+            if ($("#txtVolume").val().trim() != "" && $("#txtDragDatio").val().trim() != "") {
+
+                // 定义体积变量
+                var volume = parseFloat($("#txtVolume").val().trim());
+
+                // 定义托体积系数
+                var dragDatio = parseFloat($("#txtDragDatio").val().trim());
+
+                // 计算托体积
+                dragVolume = dragDatio * volume;
+
+                // 托体积赋值
+                $("#txtDragVolume").val(dragVolume);
+            }
+        }
+
+        // 计算返空体积
+        function calculateReturnVolume() {
+
+            // 定义返空体积变量
+            var returnVolume = 0;
+
+            // 若体积不为空,返空体积系数不为空
+            if ($("#txtVolume").val().trim() != "" && $("#txtReturnDatio").val().trim() != "") {
+
+                // 定义体积变量
+                var volume = parseFloat($("#txtVolume").val().trim());
+
+                // 定义返空体积系数
+                var returnDatio = parseFloat($("#txtReturnDatio").val().trim());
+
+                // 计算返空体积
+                returnVolume = returnDatio * volume;
+
+                // 返空体积赋值
+                $("#txtReturnVolume").val(returnVolume);
+            }
+        }
+    </script>
+}
+
+

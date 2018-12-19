@@ -1,0 +1,131 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+@model SRM.Model.Supplier.SupplierServiceLevelModel
+<style>
+    label {
+        width: 210px !important;
+    }
+
+    .layui-input-inline {
+        width: 250px !important;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">查看服务级别</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商服务级别名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppServiceName" value="@Model.SuppServiceName" maxlength="30" lay-verify="required" placeholder="" class="layui-input" disabled>
+                    <input name="SuppServiceId" type="hidden" value="@Model.SuppServiceId" />
+                    <input name="CompanyId" type="hidden" value="@Model.CompanyId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商规模级别名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppTurnoverName" value="@Model.SuppTurnoverName" maxlength="30" placeholder="" class="layui-input" disabled>
+                    <input name="SuppTurnoverId" type="hidden" value="@Model.SuppTurnoverId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商规模服务类型</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="SuppKindName" value="@Model.SuppKindName" maxlength="50" lay-verify="required" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">年限绩效</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.IsPerformance == 1 ? "checked" : "")) lay-skin="switch" lay-filter="isPerFormance" lay-text="是|否" disabled>
+                    <input id="hdIsPerformance" type="hidden" name="IsPerformance" value="@Model.IsPerformance" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">年限绩效上限（不包含）</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="PerformanceMax" value="@Model.PerformanceMax" lay-verify="required|performancemax" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">年限绩效下限（包含）</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="PerformanceMin" value="@Model.PerformanceMin" lay-verify="required|performancemin" placeholder="" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" @(Html.Raw(Model.SuppServiceState == 1 ? "checked" : "")) lay-skin="switch" lay-filter="suppServiceState" lay-text="有效|无效" disabled>
+                    <input id="hdSuppServiceState" type="hidden" name="SuppServiceState" value="@Model.SuppServiceState" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><em>*</em>培养期望</label>
+                    <div class="layui-input-block" style="margin-left:195px;width:70%;">
+                        <textarea placeholder="请输入培养期望" name="ExpectContent" maxlength="800" class="layui-textarea" disabled>@Model.ExpectContent</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">管理策略</label>
+                    <div class="layui-input-block" style="margin-left:210px;width:70%;">
+                        <textarea placeholder="请输入管理策略" name="ManageContent" maxlength="800" class="layui-textarea" disabled>@Model.ManageContent</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block" style="margin-left:210px;width:70%;">
+                        <textarea placeholder="请输入内容" name="Remark" lay-verify="required" maxlength="100" class="layui-textarea" disabled>@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        // 判断编辑/查看
+        var operate = GetQueryString("tOperate");
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#txtBeginTime'
+              , type: 'datetime'
+              , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+            laydate.render({
+                elem: '#txtEndTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            }); 
+        });
+
+        // 返回事件
+        $(function () {
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Supplier/SupplierServiceLevel/Index';
+            });
+        });
+
+        // 获取参数
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+    </script>
+}

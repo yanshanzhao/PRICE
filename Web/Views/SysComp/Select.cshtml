@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <ul class="layui-timeline" id="userlist">
+
+        </ul>
+        <script type="text/html" id="temslist">
+            {{each list as c}}
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                <div class="layui-timeline-content layui-text cominfos" data-id="{{c.CompanyId}}" data-companyname="{{c.CompanyName}}" style="cursor:pointer;">
+                    <h3 class="layui-timeline-title" >{{c.CompanyName}}</h3>
+                </div>
+            </li>
+            {{/each}}
+        </script>
+        <div id="pageinfos" class="pagebox">
+            <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+        </div>
+</div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '.cominfos', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo($(this).data("id"),$(this).data("companyname"));
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/syscomp/count",
+                async: false,
+                data: { keyword: "" },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                keyword: ""
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/syscomp/list',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                   
+                    $("#pageinfos").hide();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }      
+    </script>
+}

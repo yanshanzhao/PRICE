@@ -1,0 +1,349 @@
+﻿@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraChoiceFromModel
+<form class="layui-form layui-form-pane" action="/Tra/TraChoiceFrom/EditTraChoiceFrom" method="post">
+    <div class="layui-card" style="overflow:hidden;height:260px;">
+        <div class="layui-card-header">评分模板建立编辑</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtChoiceFromNumber" name="ChoiceFromNumber" maxlength="100" class="layui-textarea" style="height:100px;">@Model.ChoiceFromNumber</textarea>
+                    <input id="hdChoiceFromId" name="ChoiceFromId" type="hidden" value="@Model.ChoiceFromId" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">自定义元件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;"> 
+            <div class="layui-form">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">元件编号</th>
+                            <th>元件名称</th>
+                            <th>评分分类</th>
+                            <th>条件内容</th>
+                            <th>选择项目</th>
+                            <th>备注</th>
+                            <th>状态</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="ComponentList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="PageComponent" class="pagebox">
+                    <div id="PageForComponent" class="pagination"></div><div id="ComponentAmount" class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.ChoiceNumber}}</td>
+                        <td>{{c.ChoiceName}}</td>
+                        <td>{{c.ChoiceType}}</td>
+                        <td>{{c.ConditionContent}}</td>
+                        <td>{{c.ChoiceProject}}</td>
+                        <td>{{c.Remark}}</td>
+                        <td>{{c.StateName}}</td> 
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">模版附件类型信息</div>
+        <div class="layui-card-body" style="overflow:hidden;"> 
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th>附件名称</th>
+                        <th>附件唯一</th>
+                        <th>说明</th>
+                        <th>状态</th> 
+                    </tr>
+                </thead>
+                <tbody id="AdjunctTypeList" style="min-height:400px;"></tbody>
+            </table>
+            <script type="text/html" id="TempAdjunctList">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.AdjunctName}}</td>
+                    <td>{{c.AdjunctOnlyName}}</td>
+                    <td>{{c.Remark}}</td>
+                    <td>{{c.StateName}}</td> 
+                </tr>
+                {{/each}}
+            </script>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <div class="layui-input-block" style="width:14%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 新增自定义元件
+            $(document).on('click', '#btnComponent', function () {
+                GetComponent();
+            });
+
+            // 作废自定义元件
+            $(document).on('click', '.btnInvalidComponent', function () {
+                var tId = $(this).data("id");
+                var tState = $(this).data("state");
+                InvalidComponent(tId, tState);
+            });
+
+            // 新增模版附件类型
+            $(document).on('click', '#btnAdjunctType', function () {
+                GetAdjunctType();
+            });
+
+            // 作废模板附件类型
+            $(document).on('click', '.btnInvalidAdjunct', function () {
+                var tId = $(this).data("id");
+                var tState = $(this).data("state");
+                InvalidAdjunct(tId, tState);
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraChoiceFrom/EditTraChoiceFrom",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('编辑成功');
+                            location.href = '/Tra/TraChoiceFrom/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息编辑失败');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraChoiceFrom/Index';
+            });
+        });
+
+        $(function () {
+            // 查询模版明细信息TraTraChoiceFromComponent(运输月度绩效自定义元件表)
+            SearchComponentData();
+
+            // 查询模版附件类型TraTraChoiceFromAdjunct(运输月度考核表单自定义附件明细)
+            SearchAdjunctTypeData();
+
+            // 考核类型下拉列表赋值
+            $("#txtCheckFromType").val($("#hdCheckFromType").val());
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");
+                ModifyData(tId);
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询模版明细信息
+        // 查询模版明细信息Amount
+        function SearchComponentData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ComponentList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 模版明细信息Amount
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChoiceFrom/TraChoiceFromComponentAmount",
+                async: false,
+                data: {
+                    tId: $("#hdChoiceFromId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $("#ComponentAmount").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#PageForComponent").pagination(amount, {
+                callback: PageCallbackForComponent,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackForComponent(indexs,jq) {
+            pageIndex = indexs;
+            GetComponentList(indexs);
+        }
+
+        // 查询模版明细信息List
+        function GetComponentList(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tId: $("#hdChoiceFromId").val()
+            };
+
+            // 模版明细信息List
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoiceFrom/TraChoiceFromComponentList',
+                data: userjosn,
+                success: function (data) {
+                    $("#ComponentList").html(template('temslist', { list: data }));
+                    $("#PageComponent").show();
+                    if (data.length == 0) {
+                        $("#PageComponent").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 新增自定义元件
+        function GetComponent() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '自定义元件新增',
+                content: '/Tra/TraChoiceFrom/Component?url=/Tra/TraChoiceFrom/Index&tId=' + $("#hdChoiceFromId").val()+ "&tType=edit",
+                area: ['1000px', '600px'],
+            });
+        }
+
+        // 作废自定义元件
+        function InvalidComponent(tId, tState) {
+            if (tState == '0') {
+                top.layer.msg('本数据无效状态，不需重复作废！');
+                return;
+            }
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraChoiceFrom/InvalidTraChoiceFromComponent',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchComponentData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查询模版附件类型
+        // 查询模版附件类型List
+        function SearchAdjunctTypeData() {
+            var userjosn = {
+                tId: $("#hdChoiceFromId").val()
+            };
+
+            // 模版附件类型List
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoiceFrom/TraChoiceFromAdjunctList',
+                data: userjosn,
+                success: function (data) {
+                    $("#AdjunctTypeList").html(template('TempAdjunctList', { list: data }));
+                    if (data.length == 0) {
+                        $("#AdjunctTypeList").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑模版附件类型
+        function ModifyData(tId) {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '模版附件类型编辑',
+                content: '/Tra/TraChoiceFrom/AdjunctTypeDetail?url=/Tra/TraChoiceFrom/Index&tId=' + tId,
+                area: ['600px', '400px'],
+            });
+        }
+
+        // 新增模版附件类型
+        function GetAdjunctType() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '模版附件类型新增',
+                content: '/Tra/TraChoiceFrom/AdjunctType?url=/Tra/TraChoiceFrom/Index&checkFromId=' + $("#hdChoiceFromId").val() + '&type=edit',
+                area: ['600px', '400px'],
+            });
+        }
+
+        // 作废模板附件类型
+        function InvalidAdjunct(tId, tState) {
+            if (tState == '0') {
+                top.layer.msg('本数据无效状态，不需重复作废！');
+                return;
+            }
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraChoiceFrom/InvalidTraChoiceFromAdjunct',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchAdjunctTypeData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+    </script>
+}

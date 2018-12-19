@@ -1,0 +1,310 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+<form class="layui-form layui-form-pane" action="/Tra/TraWorkingOperate/AddTraWorkingOperate" method="post">
+    <div class="layui-card" id="clearDivinput">
+        <div class="layui-card-header">运输供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:100%;clear:none !important; float:left;">
+                <div class="layui-btn" id="btnTraWorkingOperate" style="width:15%;" title="点击选取运输供应商信息">运输供应商信息</div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" placeholder="供应商名称" class="layui-input" lay-verify="supplier" disabled>
+                    <input id="hdTransportId" type="hidden" name="TransportId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;">运输供应商编号</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input id="txtTransportNumber" type="text" placeholder="运输供应商编号" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">每月运营过程记录</div>
+        <div class="layui-card-body" style="overflow:hidden;height:350px;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">考核类型</label>
+                <div class="layui-input-inline">
+                    <select type="text" name="CheckType" lay-verify="required" placeholder="" class="layui-input" id="txtCheckType" lay-filter="selCheckType">
+                        <option></option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">考核年</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selYears" name="WorkingTimeYear" lay-verify="required|workingtimeyear"></select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">考核月</label>
+                <div class="layui-input-inline">
+                    <select class="select" id="selMonths" name="WorkingTimeMonth" lay-verify="required|workingtimemonth">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:40%;clear:none !important; float:left;">
+                <label class="layui-form-label">运营类型名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperateName" type="text" placeholder="运营类型名称"  class="layui-input" lay-filter="selOperateName" lay-verify="required|workingoperate" disabled>
+                    <input id="hdOperateId" type="hidden" name="OperateId" />
+                    <input id="hdCheckType" type="hidden" name="CheckType" />
+                    <input id="hdIsNumber" type="hidden" name="IsNumber" />
+                    <input id="hdIsInterval" type="hidden" name="IsInterval" />
+                    <input id="hdIntervalTpye" type="hidden" name="IntervalTpye" />
+                    <input id="hdIntervalBegin" type="hidden" name="IntervalBegin" />
+                    <input id="hdIntervalEnd" type="hidden" name="IntervalEnd" />
+                </div>
+                <div class="layui-btn" id="btnWorkingOperate" title="选择">选择</div>
+            </div>
+            <div class="layui-form-item" style="width:40%;clear:none !important; float:left;">
+                <label class="layui-form-label">运营值</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperateValue" type="text" name="OperateValue" lay-verify="required|operatevalue" placeholder="运营值" class="layui-input">
+                    <input id="hdIntervalValue" type="hidden" name="IntervalValue" />
+                </div>
+                <div class="layui-btn" id="btnOperateValue" title="选择">选择</div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-inline" style="margin-left:350px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //若下拉框改变时，清空文本框的值
+            form.on('select(selCheckType)', function (data) {
+                $("#txtOperateName").val("");
+                $("#txtOperateValue").val("");
+            });
+
+            $("#btnOperateValue").hide();
+              
+            form.verify({
+                selects: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (value == -1) {
+                        return $(item).find("option").first().text();
+                    }
+                }
+            });
+
+            form.on('select(selvalues)', function (data) {
+                initsSelect();
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                var sDate2 = $("#selYears").val();
+                var myDate = new Date();
+                var CurrentYear = myDate.getFullYear();//获取完整的年份
+                if (sDate2 > CurrentYear) {
+                    layui.layer.msg('考核年不能大于当前年！');
+                    return false;
+                }
+                var sDate2 = $("#selMonths").val();
+                var myDate = new Date();
+                var CurrentMonth = myDate.getMonth() + 1;//获取完整的月份
+                if (sDate2 > CurrentMonth) {
+                    layui.layer.msg('考核月不能大于当前月！');
+                    return false;
+                }
+                if ($("#hdIsNumber").val() == 1) {
+                    if ($("#hdIsInterval").val() == 1) {
+                        var txtoperatevalue = $("#txtOperateValue").val();
+                        if (!new RegExp("^([0-9])[0-9]*(\\.\\w*)?$").test(txtoperatevalue)) {
+                            layui.layer.msg('运营值必须输入数字！');
+                            return false;
+                        } 
+                    }  
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraWorkingOperate/AddTraWorkingOperate",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Tra/TraWorkingOperate/Index';
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content)
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+
+            //点击后退按钮，清除form表单中文本框的值
+            $("#clearDivinput input").val("");
+
+            // 考核年
+            GetYear();
+
+            // 考核月
+            var myDate = new Date();
+            var CurrentMonth = myDate.getMonth();
+            $("#selMonths").val(CurrentMonth);
+            if (CurrentMonth == 0) {
+                $("#selMonths").val(12);
+            }
+
+            // 每日异常订单记录信息
+            $(document).on('click', '#btnTraWorkingOperate', function () {
+                GetTraWorkingOperate();
+            });
+
+            // 运营类型
+            $(document).on('click', '#btnWorkingOperate', function () {
+                var type = $("#txtCheckType").val();
+                GetWorkingOperate(type);
+            });
+
+            // 运营值
+            $(document).on('click', '#btnOperateValue', function () {
+                var operateId = $("#hdOperateId").val();
+                GetOperateValue(operateId);
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraWorkingOperate/Index';
+            });
+        });
+
+        // 运输供应商信息
+        function setinfo(transportid, suppliername, transportnumber) {
+            $("#hdTransportId").val(transportid);
+            $("#txtSupplierName").val(suppliername);
+            $("#txtTransportNumber").val(transportnumber);
+        }
+
+        // 运输供应商信息
+        function GetTraWorkingOperate() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '运输供应商信息',
+                content: '/Tra/TraWorkingOperate/TraWorkingOperateSupplier?url=/Tra/TraWorkingOperate/Index',
+                area: ['1100px', '600px'],
+            });
+        }
+
+        // 运营类型信息
+        function setinfos(operateid, operatename, checktype, isnumber, isinterval) {
+            $("#hdOperateId").val(operateid);
+            $("#txtOperateName").val(operatename);
+            $("#hdCheckType").val(checktype);
+            $("#hdIsNumber").val(isnumber);
+            $("#hdIsInterval").val(isinterval); 
+            if ($("#hdIsNumber").val() == 0 || ($("#hdIsNumber").val() == 1 && $("#hdIsInterval").val() == 0)) { 
+                $("#btnOperateValue").show(); 
+            }
+            else {
+                $("#btnOperateValue").hide(); 
+            }
+        }
+
+        // 运营类型信息
+        function GetWorkingOperate(type) {
+            if (type != "") {
+                top.window.topdialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '运营类型信息',
+                    content: '/Tra/TraWorkingOperate/TraWorkingOperateType?url=/Tra/TraWorkingOperate/Index&type=' + type,
+                    area: ['1100px', '600px'],
+                });
+            }
+            else {
+                top.layer.msg('请选择考核类型！');
+                return;
+            }
+        }
+
+        // 考核年
+        function GetYear() {
+
+            // 时间
+            var myDate = new Date();
+
+            var CurrentYear = myDate.getFullYear();
+
+            // 起始年份
+            var startYear = CurrentYear - 5;
+
+            //结束年份
+            var endYear = CurrentYear + 5;
+
+            for (var i = startYear; i <= endYear; i++) {
+                $("#selYears").append(new Option(i, i));
+            }
+            $("#selYears").val(CurrentYear);
+        }
+
+        // 运营值信息
+        function setvalueinfo(operateid, intervaltpye, intervalbegin, intervalend,intervalvalue) {
+            $("#hdOperateId").val(operateid);
+            $("#hdIntervalTpye").val(intervaltpye);
+            $("#hdIntervalBegin").val(intervalbegin);
+            $("#hdIntervalEnd").val(intervalend);
+            $("#txtOperateValue").val(intervalvalue);
+        }
+
+        // 运营值信息
+        function GetOperateValue(operateId) {
+            if (operateId != "") {
+                top.window.topdialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '运营值信息',
+                    content: '/Tra/TraWorkingOperate/TraOperateValue?url=/Tra/TraWorkingOperate/Index&id=' + operateId,
+                    area: ['1100px', '600px'],
+                });
+            }
+            else {
+                top.layer.msg('请选择运营类型名称！');
+                return;
+            }
+        }
+
+    </script>
+}

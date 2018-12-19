@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraSupplierLayered/AddTraSupplierLayered" method="post">
+    <div class="layui-card" id="clearDivinput">
+        <div class="layui-card-header">运输供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:100%;clear:none !important; float:left;">
+                <div class="layui-btn" id="btnTraSupplier" style="width:15%;" title="点击选取运输供应商信息">运输供应商信息</div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" placeholder="供应商名称" class="layui-input" lay-verify="supplier" disabled>
+                    <input id="hdTransportId" type="hidden" name="TransportId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;">运输供应商编号</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input id="txtTransportNumber" type="text" placeholder="运输供应商编号" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="clearDivinputs">
+        <div class="layui-card-header">运输供应商分层</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:100%;clear:none !important; float:left;">
+                <div class="layui-btn" id="btnSupplierLayered" style="width:15%;" title="点击选取运输供应商分层">运输供应商分层</div>
+                <input id="hdLayeredId" type="hidden" name="LayeredId" /> 
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">分层名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtLayeredName" type="text" placeholder="分层名称" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div> 
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商分层变更登记信息</div>
+        <div class="layui-card-body" style="overflow:hidden;height:245px;">  
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;">分层开始时间</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input type="text" name="BeginTime" lay-verify="required" placeholder="" class="layui-input" id="txtBeginTime">
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block"> 
+                    <textarea placeholder="备注" name="Remark" maxlength="50" lay-verify="required" class="layui-textarea"></textarea>
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div class="layui-input-inline" style="margin-left:350px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证开始时间
+            laydate.render({
+                elem: '#txtBeginTime'
+             , type: 'datetime'
+            , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            form.verify({
+                supplier: function (value, item) {
+                    if (!value) {
+                        return '运输供应商信息不能为空！';
+                    }
+                }
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraSupplierLayered/AddTraSupplierLayered",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Tra/TraSupplierLayered/Index';
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content)
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+
+            //点击后退按钮，清除form表单中文本框的值
+            $("#clearDivinput input").val("");
+            
+            $("#clearDivinputs input").val("");
+
+            // 运输供应商信息
+            $(document).on('click', '#btnTraSupplier', function () {
+                GetTraSupplier();
+            });
+
+            // 运输供应商分层
+            $(document).on('click', '#btnSupplierLayered', function () {
+                GetSupplierLayered();
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraSupplierLayered/Index';
+            });
+        }); 
+
+        // 运输供应商信息
+        function setinfo(transportid, suppliername, transportnumber) {
+            $("#hdTransportId").val(transportid);
+            $("#txtSupplierName").val(suppliername);
+            $("#txtTransportNumber").val(transportnumber);
+        }
+
+        // 运输供应商信息
+        function GetTraSupplier() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '运输供应商信息',
+                content: '/Tra/TraSupplierLayered/TraSupplier?url=/Tra/TraSupplierLayered/Index',
+                area: ['1100px', '600px'],
+            });
+        }
+
+        // 运输供应商分层
+        function setinfos(layeredid, layeredname) {
+            $("#hdLayeredId").val(layeredid);
+            $("#txtLayeredName").val(layeredname);
+        }
+
+        // 运输供应商分层
+        function GetSupplierLayered() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '运输供应商分层',
+                content: '/Tra/TraSupplierLayered/SupplierLayered?url=/Tra/TraSupplierLayered/Index',
+                area: ['1100px', '600px'],
+            });
+        }
+    </script>
+}

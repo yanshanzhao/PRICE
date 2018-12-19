@@ -1,0 +1,129 @@
+﻿@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+@model SRM.Model.Tra.TraChoiceComponentModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraChoiceComponent/EditTraChoiceComponent" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">修改选择表单元件</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">元件名称</label>
+                <div class="layui-input-inline">
+                    <input id="hdChoiceId" type="hidden" name="ChoiceId" value="@Model.ChoiceId" />
+                    <input type="text" name="ChoiceName" value="@Model.ChoiceName" maxlength="30" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">评分类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtChoiceType" name="ChoiceType" lay-filter="selchoicetypes" lay-verify="required" class="select">
+                        <option></option>
+                        <option value="0">选择条件</option>
+                        <option value="1">补充条件</option>
+                    </select>
+                    <input id="hdChoiceType" type="hidden" value="@Model.ChoiceType" />
+                </div>
+                <label style="color:lightcoral;">❀若类型为选择条件时条件内容显示，类型为补充条件时选择项目显示❀</label>
+            </div>
+            <div id="divConditionContent">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">条件内容</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtConditionContent" name="ConditionContent" class="layui-textarea">@Model.ConditionContent</textarea>
+                    </div>
+                </div>
+            </div>
+            <div id="divChoiceProject">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择项目</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtChoiceProject" name="ChoiceProject" class="layui-textarea">@Model.ChoiceProject</textarea>
+                    </div>
+                </div>
+            </div>
+            <div id="divChoiceProject">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtRemark" name="Remark" class="layui-textarea">@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //初始化时让二次培训按钮隐藏
+            var recordresult = $("#txtChoiceType").val();
+            if (recordresult == 0) {
+                $("#divConditionContent").show();//选择内容
+                $("#divChoiceProject").hide();//选择项目
+            }
+            else if (recordresult == 1) {
+                $("#divChoiceProject").show();//选择项目
+                $("#divConditionContent").hide();//选择内容
+            }
+
+            //若培训达标是二次培训时，将二次培训按钮隐藏
+            form.on('select(selchoicetypes)', function (data) {
+                var recordresult = $("#txtChoiceType").val();
+                if (recordresult == 0) {
+                    $("#divConditionContent").show();//条件内容显示
+                    $("#txtConditionContent").val(""); //清空条件内容的值
+                    $("#divChoiceProject").hide();//选择项目显示
+                }
+                else if (recordresult == 1) {
+                    $("#divChoiceProject").show();//选择项目显示
+                    $("#txtChoiceProject").val(""); //清空选择项目
+                    $("#divConditionContent").hide();//条件内容显示
+                }
+                layui.form.render('select');
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraChoiceComponent/EditTraChoiceComponent",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Tra/TraChoiceComponent/Index';
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载事件
+        $(function () {
+
+            $("#txtChoiceType").val($("#hdChoiceType").val()); //评分类型
+
+            // 关闭按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraChoiceComponent/Index';
+            });
+        });
+    </script>
+}
+
+

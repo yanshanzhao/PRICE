@@ -1,0 +1,321 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input id="txtAuditUserId" type="hidden" value="@ViewBag.UserId" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    运输供应商名称：
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierName" style="width:173px;" type="text" placeholder="运输供应商名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    运作时间：
+                    <div class="layui-input-inline">
+                        <input id="txtOfficialTime" style="width:173px;" type="text" placeholder="运作时间" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    签订合同：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selSignContract">
+                            <option value="" selected>请选择</option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>                    
+                    &nbsp;&nbsp;
+                    参与培训：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selIsCultivate">
+                            <option value="" selected>请选择</option>
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>
+                    <label style="margin-left:36px;"></label>                  
+                    审核状态：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selState">
+                            <option value="" selected>请选择</option>
+                            <option value="0">未审核</option>
+                            <option value="1">审核通过</option> 
+                            <option value="4">驳回</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline" style="margin:10px 0 0 10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">运输选择编号</th>
+                                <th>申请时间</th>
+                                <th>运输供应商名称</th>
+                                <th>运输供应商编号</th>
+                                <th>运作时间</th>
+                                <th>签订合同</th>
+                                <th>合同编号</th>
+                                <th>押金金额</th>
+                                <th>参与培训</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.TraChooseNumber}}</td>
+                    <td>{{c.ApplyTime}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.TransportNumber}}</td>
+                    <td>{{c.OfficialTime}}</td>
+                    <td>{{c.SignContractName}}</td>
+                    <td>{{c.ContractNumber}}</td>
+                    <td>{{c.Deposit}}</td>
+                    <td>{{c.IsCultivateName}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>
+                        {{if isAudit(c.AuditUserId)}}
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnCheck" data-id="{{c.SupplierAuditId}}">
+                            <i class="layui-icon"></i>审核
+                        </a>                        
+                        {{/if}}
+                        {{if c.State==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnRevoke" data-id="{{c.SupplierAuditId}}">
+                            <i class="layui-icon"></i>撤销
+                        </a>
+                        {{/if}}
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.SupplierAuditId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if isAudit(c.AuditUserId)}}
+                                {{if c.State==0}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnCheck" data-id="{{c.SupplierAuditId}}">
+                                    <i class="layui-icon"></i>审核
+                                </a>
+                                {{/if}}
+                                {{if c.State==1}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnRevoke" data-id="{{c.SupplierAuditId}}">
+                                    <i class="layui-icon"></i>撤销
+                                </a>
+                                {{/if}}
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.SupplierAuditId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'laydate', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#txtOfficialTime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+
+            // 查询
+            SearchData();
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 审核
+            $(document).on('click', '.btnCheck', function () {
+                var tId = $(this).data("id");
+                CheckData(tId);
+            });
+
+            // 撤销
+            $(document).on('click', '.btnRevoke', function () {
+                var tId = $(this).data("id"); 
+                RevokeData(tId);
+            });
+
+            // 查看
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+        });
+
+        // 当前登录人==审核人?
+        template.helper('isAudit', function (auditUserId) {
+            if (auditUserId != $("#txtAuditUserId").val()) {
+                return false;
+            }
+            return true;
+        })
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraTransitAudit/TransitAuditAmount",
+                async: false,
+                data: { 
+                    supplierName: $("#txtSupplierName").val(),
+                    officialTime: $("#txtOfficialTime").val(),
+                    signContract: $("#selSignContract").val(),
+                    isCultivate: $("#selIsCultivate").val(),
+                    state: $("#selState").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val(),
+                officialTime: $("#txtOfficialTime").val(),
+                signContract: $("#selSignContract").val(),
+                isCultivate: $("#selIsCultivate").val(),
+                state: $("#selState").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraTransitAudit/TransitAuditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 审核
+        function CheckData(tId) {
+            location.href = '/Tra/TraTransitAudit/Check?tId=' + tId;
+        }
+
+        // 撤销
+        function RevokeData(tId) { 
+            top.layer.confirm('您确定撤销此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraTransitAudit/RevokeAudit',
+                    data: { tId: tId},
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraTransitAudit/View?tId=' + tId;
+        }
+    </script>
+}

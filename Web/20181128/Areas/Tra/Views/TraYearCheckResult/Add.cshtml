@@ -1,0 +1,953 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">年度考核新增</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item" style="width:12%;">
+                <div id="btnChooseTransport" class="layui-btn" style="width:100%;" title="点击选择运输供应商">选择运输供应商</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商名称</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtSupplierName" type="text" class="layui-input" lay-verify="required" disabled>
+                    <input id="hdTransportId" name="TransportId" type="hidden" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline" style="width:222px;">
+                    <input id="txtTransportNumber" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>考核年</label>
+                <div class="layui-input-inline" style="width:242px;">
+                    <select id="selYear" name="CheckYear" class="select"></select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>计算公式</label>
+                <div class="layui-input-inline" style="width:242px;">
+                    <select id="selFormulaId" name="FormulaId" lay-verify="required" lay-filter="formulaid" class="select"></select>
+                    <input id="hdCheckPercent" type="hidden"/>
+                    <input id="hdRecordPercent" type="hidden" />
+                    <input id="hdCheckYearPercent" type="hidden" />
+                    <input id="hdScore" type="hidden" name="Score" />
+                </div>
+            </div>
+            <script type="text/html" id="temdictlist">
+                {{each list as c}}
+                <option value="{{c.id}}" data-type="{{c.type}}">{{c.name}}</option>
+                {{/each}}
+            </script>
+        </div>
+    </div>
+    <div class="layui-card" id="divMonthCheckList" style="display:none">
+        <div class="layui-card-header">月绩效信息列表</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item" style="width:12%;">
+                <div id="btnChooseMonthCheck" class="layui-btn" style="width:100%;" title="点击选择月绩效信息">选择月绩效信息</div>
+            </div>
+            <div class="layui-form">
+                <input id="hdCheckId" type="hidden" name="CheckIdList" />
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">考核年</th>
+                            <th>考核月</th>
+                            <th>考核得分</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="MonthCheckList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo" class="pagebox" style="display:none;">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfMC">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.CheckYear}}</td>
+                        <td>{{c.CheckMonth}}</td>
+                        <td>{{c.Score}}<input type="hidden" class="monthCheckScore" value="{{c.Score}}"/></td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnMonthCheckDelete" data-id="{{c.CheckId}}">
+                                <i class="iconfont icon-edit"></i>
+                                删除
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="divPatrolRecordList" style="display:none">
+        <div class="layui-card-header">巡查信息列表</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item" style="width:12%;">
+                <div id="btnChoosePatrolRecord" class="layui-btn" style="width:100%;" title="点击选择巡查信息">选择巡查信息</div>
+            </div>
+            <div class="layui-form">
+                <input id="hdRecordId" type="hidden" name="RecordIdList" />
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">巡查类型</th>
+                            <th>巡查维护备注</th>
+                            <th>巡查时间</th>
+                            <th>巡查负责人</th>
+                            <th>巡查得分</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="PatrolRecordList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo1" class="pagebox" style="display:none;">
+                    <div id="Pagination1" class="pagination"></div><div class="pagedetail1">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfPR">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.PatrolTypeName}}</td>
+                        <td>{{c.RecordRemark}}</td>
+                        <td>{{c.RecordTime}}</td>
+                        <td>{{c.RecordUsers}}</td> 
+                        <td>{{c.RecordScore}}<input type="hidden" class="patrolRecordScore" value="{{c.RecordScore}}" /></td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnPatrolRecordDelete" data-id="{{c.RecordId}}">
+                                <i class="iconfont icon-edit"></i>
+                                删除
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card" id="divYearCheckList" style="display:none">
+        <div class="layui-card-header">年评估信息列表</div>
+        <div class="layui-card-body">
+            <div class="layui-form-item" style="width:12%;">
+                <div id="btnChooseYearCheck" class="layui-btn" style="width:100%;" title="点击选择年评估信息">选择年评估信息</div>
+            </div>
+            <div class="layui-form">
+                <input id="hdCheckYearId" type="hidden" name="CheckYearIdList" />
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">考核年</th>
+                            <th>考核得分</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="YearCheckList" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfo2" class="pagebox" style="display:none;">
+                    <div id="Pagination2" class="pagination"></div><div class="pagedetail2">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslistOfYC">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.CheckYear}}</td>
+                        <td>{{c.Score}}<input type="hidden" class="yearCheckScore" value="{{c.Score}}" /></td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnYearCheckDelete" data-id="{{c.CheckYearId}}">
+                                <i class="iconfont icon-edit"></i>
+                                删除
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">附件信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <input type="hidden" id="hdfilelist" name="FileList" />
+                <div class="layui-input-inline" style="width:800px;overflow:hidden;">
+                    <div class="layui-btn-group" style="float:left;overflow:hidden;">
+                        <div class="layui-inline">
+                            <div class="layui-btn layui-btn-normal" id="btnUpload">上传文件</div>
+                        </div>
+                    </div>
+                    <script type="text/html" id="temfilelists">
+                        {{each list as c}}
+                        <div class="layui-btn-group" style="margin-bottom:5px;">
+                            <div class="layui-btn layui-btn-primary">
+                                <span class="modify" data-id="{{c.id}}">{{c.filename}}</span>{{c.ext}}
+                                <em onclick="downfile('{{c.id}}')"><i class="layui-icon layui-icon-download-circle"></i></em>
+                                <em onclick="delfilelist('{{c.id}}')"><i class="layui-icon layui-icon-close-fill"></i></em>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </script>
+                </div>
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delfilelist('{{c.id}}')">删除</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        // 公式类型
+        var FormulaType = 0;
+
+        // 月绩效ID数组
+        var CheckIds = [];
+
+        // 月绩效数量
+        var SearchMonthCount = 0;
+
+        // 巡查记录ID数组
+        var RecordIds = [];
+
+        // 巡查数量 
+        var PatrolRecordCount = 0;
+         
+        // 年评估ID数组
+        var CheckYearIds = [];
+
+        // initfiles/delfilelist/setfilename/downfile 附件上传/删除/更改名称/下载
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function delfilelist(ids) {
+            var tem = [];
+            for (var i in filelist) {
+                if (filelist[i].id != ids) {
+                    tem.push(filelist[i]);
+                }
+            }
+
+            filelist = tem;
+            initfiles();
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + filelist[i].ext;
+                }
+            }
+        }
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 上传文件
+            $(document).on('click', '#btnUpload', function () {
+                top.window.filedialog = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '文件上传',
+                    content: '/supplier/SupplierTransport/files?url=/Tra/TraYearCheckResult/Index&type=result',
+                    area: ['450px', '300px'],
+                });
+            });
+
+            // 项目监听
+            form.on('select(formulaid)', function (data) {
+                if ($("#hdTransportId").val() == "") {
+                    top.layui.layer.msg('请先选择运输供应商！');
+                    $("#selFormulaId").val("");
+                    layui.form.render('select');
+                    return false;
+                } else {
+                    // 获取选中项的自定义属性值
+                    FormulaType = $("#selFormulaId").find("option:selected").attr("data-type");
+
+                    // 获取公式ID所对应的公式百分比
+                    // FormulaId
+                    var tFormulaId = $("#selFormulaId").val();
+                     
+                    // 公式类型:0-月度绩效;1-巡查;2-年评估;3-月度绩效+巡查;4-巡查+年评估;5-月度绩效+年评估6-月度绩效+巡查+年评估; 
+                    if (FormulaType == 0) {
+                        $("#divMonthCheckList").show();
+                        $("#divPatrolRecordList").hide();
+                        $("#divYearCheckList").hide();
+
+                        GetPercent(tFormulaId, 0);
+                    }
+                    else if (FormulaType == 1) {
+                        $("#divMonthCheckList").hide();
+                        $("#divPatrolRecordList").show();
+                        $("#divYearCheckList").hide();
+
+                        GetPercent(tFormulaId, 1);
+                    }
+                    else if (FormulaType == 2) {
+                        $("#divMonthCheckList").hide();
+                        $("#divPatrolRecordList").hide();
+                        $("#divYearCheckList").show();
+
+                        GetPercent(tFormulaId, 2);
+                    }
+                    else if (FormulaType == 3) {
+                        $("#divMonthCheckList").show();
+                        $("#divPatrolRecordList").show();
+                        $("#divYearCheckList").hide();
+
+                        GetPercent(tFormulaId, 0);
+                        GetPercent(tFormulaId, 1);
+                    }
+                    else if (FormulaType == 4) {
+                        $("#divMonthCheckList").hide();
+                        $("#divPatrolRecordList").show();
+                        $("#divYearCheckList").show();
+
+                        GetPercent(tFormulaId, 1);
+                        GetPercent(tFormulaId, 2);
+                    }
+                    else if (FormulaType == 5) {
+                        $("#divMonthCheckList").show();
+                        $("#divPatrolRecordList").hide();
+                        $("#divYearCheckList").show();
+
+                       GetPercent(tFormulaId, 0);
+                       GetPercent(tFormulaId, 2);
+                    }
+                    else if (FormulaType == 6) {
+                        $("#divMonthCheckList").show();
+                        $("#divPatrolRecordList").show();
+                        $("#divYearCheckList").show();
+
+                       GetPercent(tFormulaId, 0);
+                       GetPercent(tFormulaId, 1);
+                       GetPercent(tFormulaId, 2);
+                    }
+                } 
+                $("#pageinfo").hide();
+                $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>");
+                 
+                $("#pageinfo1").hide();
+                $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>");
+                 
+                $("#pageinfo2").hide();
+                $("#YearCheckList").html("<div class='nodata'>暂无数据</div>");
+
+                $("#hdCheckYearId").val('');
+                $("#hdCheckId").val('');
+                $("#hdRecordId").val('');
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                $("#btnSave").attr("display", "none");
+                TotalScore(); 
+                data.field.Score = $("#hdScore").val();
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraYearCheckResult/AddTraYearCheckResult",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            top.layui.layer.msg('年绩效信息保存成功！');
+                            location.href = '/Tra/TraYearCheckResult/Index';
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('年绩效信息保存失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+
+            // 返回事件
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraYearCheckResult/Index';
+            });
+        });
+
+        //添加新文件(新增)
+        function setnewfiles(filename, path) {
+            filelist.push({ id: new Date().getTime(), path: path, filename: filename, ext: '' });
+            initfiles();
+        }
+
+        // 页面加载
+        $(function () {
+
+            $("#totalscore").html(0);
+
+            // 考核年
+            GetYear();
+
+            // 选择运输供应商
+            $(document).on('click', '#btnChooseTransport', function () {
+                ChooseTransport();
+            });
+
+            // 选择月绩效信息列表
+            $(document).on('click', '#btnChooseMonthCheck', function () {
+                ChooseMonthCheck();
+            });
+
+            // 删除月绩效信息
+            $(document).on('click', '.btnMonthCheckDelete', function () {
+                var tId = $(this).data("id");
+                var index = CheckIds.indexOf(tId);
+                CheckIds.splice(index, 1);
+                $("#hdCheckId").val(CheckIds.join(","));
+                var ids = $("#hdCheckId").val();
+                SearchMonthCheck(ids);
+            });
+
+            // 选择巡查信息列表
+            $(document).on('click', '#btnChoosePatrolRecord', function () {
+                ChoosePatrolRecord();
+            });
+
+            // 删除巡查信息
+            $(document).on('click', '.btnPatrolRecordDelete', function () {
+                var tId = $(this).data("id");
+                var index = RecordIds.indexOf(tId);
+                RecordIds.splice(index, 1);
+                $("#hdRecordId").val(RecordIds.join(","));
+                var ids = $("#hdRecordId").val();
+                SearchPatrolRecord(ids);
+            });
+
+            // 选择年评估信息列表
+            $(document).on('click', '#btnChooseYearCheck', function () {
+                ChooseYearCheck();
+            });
+
+            // 删除年评估信息
+            $(document).on('click', '.btnYearCheckDelete', function () {
+                var tId = $(this).data("id");
+                var index = CheckYearIds.indexOf(tId);
+                CheckYearIds.splice(index, 1);
+                $("#hdCheckYearId").val(CheckYearIds.join(","));
+                var ids = $("#hdCheckYearId").val();
+                SearchYearCheck(ids);
+            });
+
+            // 获取计算公式
+            GetFormulaList();
+        });
+
+        // 考核年
+        function GetYear() {
+
+            // 时间
+            var myDate = new Date();
+
+            var CurrentYear = myDate.getFullYear();
+
+            // 起始年份
+            var startYear = CurrentYear - 5;
+
+            //结束年份
+            var endYear = CurrentYear + 5;
+
+            for (var i = startYear; i <= endYear; i++) {
+                $("#selYear").append(new Option(i, i));
+            }
+            $("#selYear").val(CurrentYear);
+        }
+
+        // 计算公式列表
+        window.FormulaList = [];
+
+        // 获取计算公式
+        function GetFormulaList() {
+
+            FormulaList.push({ id: '', name: "请选择" });
+
+            $.ajax({
+                url: '/Tra/TraYearCheckResult/FormulaList',
+                type: 'POST',
+                async: false,
+                datatype: 'json',
+                success: function (data) {
+                    if (data.length != null) {
+                        if (data) {
+                            for (var i in data) {
+                                FormulaList.push({ id: data[i].FormulaId, type: data[i].FormulaType, name: data[i].FormulaName });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#selFormulaId").html(template('temdictlist', { list: FormulaList }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        // 选择运输供应商
+        function ChooseTransport() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商',
+                content: '/Tra/TraYearCheckResult/TransportDetail?url=/Tra/TraYearCheckResult/Index',
+                area: ['550px', '550px'],
+            });
+        }
+
+        // 设置供应商信息
+        function TransportSetinfo(transportid, suppliername, transportnumber) {
+            $("#hdTransportId").val(transportid);
+            $("#txtSupplierName").val(suppliername);
+            $("#txtTransportNumber").val(transportnumber);
+
+            CheckIds = [];
+            $("#pageinfo").hide();
+            $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>");
+
+            RecordIds = [];
+            $("#pageinfo1").hide();
+            $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>");
+
+            CheckYearIds = [];
+            $("#pageinfo2").hide();
+            $("#YearCheckList").html("<div class='nodata'>暂无数据</div>");
+
+            $("#hdCheckYearId").val('');
+            $("#hdCheckId").val('');
+            $("#hdRecordId").val('');
+        }
+
+        // 获取公式百分比
+        function GetPercent(tFormulaId, tDetailType) {
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraYearCheckResult/GetPercent",
+                async: false,
+                data: {
+                    tFormulaId: tFormulaId,
+                    tDetailType: tDetailType
+                },
+                success: function (data) {
+                    if (tDetailType == 0) {
+                        $("#hdCheckPercent").val(data);
+                    }
+                    else if (tDetailType == 1) {
+                        $("#hdRecordPercent").val(data);
+                    }
+                    else if (tDetailType == 2) { 
+                        $("#hdCheckYearPercent").val(data);
+                    }
+                }
+            });
+        }
+         
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 5;
+
+        // 选择月绩效信息列表
+        function ChooseMonthCheck() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择月绩效信息列表',
+                content: '/Tra/TraYearCheckResult/MonthCheckDetail?tUrl=/Tra/TraYearCheckResult/Index&tIds=' + $("#hdCheckId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tYear=" + $("#selYear").val() + "&tType=add",
+                area: ['550px', '550px'],
+            });
+        }
+
+        // 获取月绩效信息ID
+        function MonthCheckSetinfo(ids) {
+            if ($("#hdCheckId").val() == "") {
+                $("#hdCheckId").val(ids);
+            }
+            else {
+                var tId = $("#hdCheckId").val();
+                $("#hdCheckId").val(tId + "," + ids);
+            }
+
+            var tempCheckIds = $("#hdCheckId").val().split(',');
+            CheckIds = tempCheckIds.map(function (data) {
+                return +data;
+            });
+            SearchMonthCheck($("#hdCheckId").val());
+        }
+
+        // 月绩效信息
+        // 查询总记录数
+        function SearchMonthCheck(tId) { 
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#MonthCheckList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraYearCheckResult/MonthCheckCount",
+                async: false,
+                data: {
+                    tIds: tId
+                },
+                success: function (data) {
+                    SearchMonthCount = data;
+                    $(".pagedetail").text("共" + SearchMonthCount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(SearchMonthCount, {
+                callback: PageCallbackOfMC,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfMC(indexs) {
+            pageIndex = indexs;
+            InitMCTable(indexs);
+        }
+
+        // 查询数据
+        function InitMCTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tIds: $("#hdCheckId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraYearCheckResult/MonthCheckList',
+                data: userjosn,
+                success: function (data) {
+                    $("#MonthCheckList").html(template('temslistOfMC', { list: data }));
+                    $("#pageinfo").show();
+                    if (data == null) {
+                        $("#pageinfo").hide();
+                        $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>");
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo").hide();
+                        $("#MonthCheckList").html("<div class='nodata'>暂无数据</div>");
+                    }
+                }
+            });
+        }
+
+        // 选择巡查记录列表
+        function ChoosePatrolRecord() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择巡查记录列表',
+                content: '/Tra/TraYearCheckResult/PatrolRecordDetail?tUrl=/Tra/TraYearCheckResult/Index&tIds=' + $("#hdRecordId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tType=add",
+                area: ['900px', '550px'],
+            });
+        }
+
+        // 获取巡查记录信息ID
+        function PatrolRecordSetinfo(ids) {
+            if ($("#hdRecordId").val() == "") {
+                $("#hdRecordId").val(ids);
+            }
+            else {
+                var tId = $("#hdRecordId").val();
+                $("#hdRecordId").val(tId + "," + ids);
+            }
+
+            var tempRecordId = $("#hdRecordId").val().split(',');
+            RecordIds = tempRecordId.map(function (data) {
+                return +data;
+            });
+            SearchPatrolRecord($("#hdRecordId").val());
+        }
+
+        // 巡查记录信息
+        // 查询总记录数
+        function SearchPatrolRecord(tId) {
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#PatrolRecordList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraYearCheckResult/PatrolRecordCount",
+                async: false,
+                data: {
+                    tIds: tId
+                },
+                success: function (data) {
+                    PatrolRecordCount = data;
+                    $(".pagedetail1").text("共" + PatrolRecordCount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination1").pagination(PatrolRecordCount, {
+                callback: PageCallbackOfPR,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfPR(indexs) {
+            pageIndex = indexs;
+            InitPRTable(indexs);
+        }
+
+        // 查询数据
+        function InitPRTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tIds: $("#hdRecordId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraYearCheckResult/PatrolRecordList',
+                data: userjosn,
+                success: function (data) {
+                    $("#PatrolRecordList").html(template('temslistOfPR', { list: data }));
+                    $("#pageinfo1").show();
+                    if (data == null) {
+                        $("#pageinfo1").hide();
+                        $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>");
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo1").hide();
+                        $("#PatrolRecordList").html("<div class='nodata'>暂无数据</div>");
+                    }
+                }
+            });
+        }
+
+        // 选择年评估信息
+        function ChooseYearCheck() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择年评估信息',
+                content: '/Tra/TraYearCheckResult/YearCheckDetail?tUrl=/Tra/TraYearCheckResult/Index&tIds=' + $("#hdCheckYearId").val() + "&tTransportId=" + $("#hdTransportId").val() + "&tYear=" + $("#selYear").val() + "&tType=add",
+                area: ['550px', '550px'],
+            });
+        }
+
+        // 获取年评估信息ID
+        function YearCheckSetinfo(ids) {
+            if ($("#hdCheckYearId").val() == "") {
+                $("#hdCheckYearId").val(ids);
+            }
+            else {
+                var tId = $("#hdCheckYearId").val();
+                $("#hdCheckYearId").val(tId + "," + ids);
+            }
+
+            var tempCheckYearId = $("#hdCheckYearId").val().split(',');
+            CheckYearIds = tempCheckYearId.map(function (data) {
+                return +data;
+            });
+            SearchYearCheck($("#hdCheckYearId").val());
+        }
+
+        // 年评估信息
+        // 查询总记录数
+        function SearchYearCheck(tId) {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#YearCheckList").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraYearCheckResult/YearCheckCount",
+                async: false,
+                data: {
+                    tIds: tId
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail2").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination2").pagination(amount, {
+                callback: PageCallbackOfYC,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfYC(indexs) {
+            pageIndex = indexs;
+            InitYCTable(indexs);
+        }
+
+        // 查询数据
+        function InitYCTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                tIds: $("#hdCheckYearId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraYearCheckResult/YearCheckList',
+                data: userjosn,
+                success: function (data) {
+                    if (data == null) {
+                        $("#pageinfo2").hide();
+                        $("#YearCheckList").html("<div class='nodata'>暂无数据</div>");
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfo2").hide();
+                        $("#YearCheckList").html("<div class='nodata'>暂无数据</div>");
+                    }
+
+                    $("#YearCheckList").html(template('temslistOfYC', { list: data }));
+                    $("#pageinfo2").show();
+                }
+            });
+        }
+         
+        // 计算总得分
+        function TotalScore() {
+
+            // 总得分
+            var totalScore = 0;
+
+            // 月绩效总得分
+            var MonthCheckScore = 0;
+            $(".monthCheckScore").each(function () {
+                if (!isNaN(parseFloat($(this).val()))) {
+                    MonthCheckScore += parseFloat($(this).val());
+                }
+            }); 
+
+            // 巡查总得分
+            var PatrolRecordScore = 0;
+            $(".patrolRecordScore").each(function () {
+                if (!isNaN(parseFloat($(this).val()))) {
+                    PatrolRecordScore += parseFloat($(this).val());
+                }
+            }); 
+
+            // 年评估总得分
+            var YearCheckScore = 0;
+            $(".yearCheckScore").each(function () {
+                if (!isNaN(parseFloat($(this).val()))) {
+                    YearCheckScore += parseFloat($(this).val());
+                }
+            });
+             
+            // 月绩效实际得分
+            if (MonthCheckScore != 0) {
+                MonthCheckScore = MonthCheckScore / SearchMonthCount * ($("#hdCheckPercent").val() / 100);
+            }
+
+            // 巡查实际得分
+            if (PatrolRecordScore != 0) {
+                PatrolRecordScore = PatrolRecordScore / PatrolRecordCount * ($("#hdRecordPercent").val() / 100);
+            }
+
+            // 年评估实际得分
+            if (YearCheckScore != 0) {
+                YearCheckScore = YearCheckScore * ($("#hdCheckYearPercent").val() / 100);
+            }
+             
+            if (FormulaType == 0) {
+                totalScore = MonthCheckScore;
+            }
+            else if (FormulaType == 1) { 
+                totalScore = PatrolRecordScore;
+            }
+            else if (FormulaType == 2) { 
+                totalScore = YearCheckScore;
+            }
+            else if (FormulaType == 3) { 
+                totalScore = MonthCheckScore + PatrolRecordScore; 
+            }
+            else if (FormulaType == 4) {
+                totalScore = PatrolRecordScore + YearCheckScore;
+            }
+            else if (FormulaType == 5) {
+                totalScore = MonthCheckScore + YearCheckScore;
+            }
+            else if (FormulaType == 6) {
+                totalScore = MonthCheckScore + PatrolRecordScore + YearCheckScore;
+            }
+
+            $("#hdScore").val(totalScore); 
+        }
+    </script>
+}

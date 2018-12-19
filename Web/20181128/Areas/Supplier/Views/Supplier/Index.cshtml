@@ -1,0 +1,510 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input placeholder="请输入供应商名称" class="layui-input" type="text" id="iSuppName">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="comSuppType" class="select" lay-filter="supptype"></select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="comEnterpriseType" class="select" lay-filter="enterprisetype"></select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comState" class="select" lay-filter="state">
+                                <option value="-1">请选择状态</option>
+                                <option value="0">初始</option>
+                                <option value="1">提交</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                </div>
+            </div>
+            <input type="hidden" id="hddepid" value="@ViewBag.depid" />
+        </blockquote>
+
+
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table" id="tablelist">
+                        <thead>
+                            <tr>
+                                <th>供应商名称</th>
+                                <th>供应商编号</th>
+                                <th>供应商类别</th>
+                                <th>企业性质</th>
+                                <th>证件类型</th>
+                                <th>证件号码</th>
+                                <th>企业地址</th>
+                                <th>联系人</th>
+                                <th>联系人职位</th>
+                                <th>联系电话</th>
+                                <th>信息收集负责人</th>
+                                <th>信息收集方式</th>
+                                <th>信息收集时间</th>
+                                <th>状态</th>
+                                <th>使用方式</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+
+                </div>
+
+                <div class="forzentable">
+
+                </div>
+            </div>
+
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.SupplierName}} {{if c.EmployType==1}}<span class="layui-badge-dot" title="公共供应商"></span> {{/if}}</td>
+                    <td>{{c.SupplierNumber}}</td>
+                    <td>{{type1(c.SupplierType)}}</td>
+                    <td>{{type2(c.EnterpriseType)}}</td>
+                    <td>{{type3(c.PapersType)}}</td>
+                    <td>{{c.PapersNumber}}</td>
+                    <td>{{c.EnterpriseAddresses}}</td>
+                    <td>{{c.ContactsName}}</td>
+                    <td>{{c.ContactsPosition}}</td>
+                    <td>{{c.ContactsPhone}}</td>
+                    <td>{{c.InformationUser}}</td>
+                    <td>{{c.InformationType}}</td>
+                    <td>{{c.InformationTime}}</td>
+                    <td>{{c.State==0?"初始":"提交"}}</td>
+                    <td>{{c.EmployType==1?"公有":"私有"}}</td>
+                    <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnView " data-id="{{c.SupplierId}}"><i class="layui-icon"></i>查看</a>
+                        {{if c.State==0||c.State==1}}
+                        <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-sm btnEdit" data-id="{{c.SupplierId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                        {{/if}}
+                        {{if c.State==0}}
+                        <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-sm btnSubmit" data-id="{{c.SupplierId}}"><i class="iconfont icon-edit"></i>提交</a>
+                        {{/if}}
+                        {{if c.State==1}}
+                        <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-sm btnBlacklisted" data-id="{{c.SupplierId}}"><i class="iconfont icon-edit"></i>拉黑</a>
+                        {{/if}}
+                        {{if c.State==0}}
+                        <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-danger layui-btn-sm btnDel" data-id="{{c.SupplierId}}"><i class="layui-icon"></i>作废</a>
+                        {{/if}}
+                        <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-danger layui-btn-sm btnMaintain" data-id="{{c.SupplierId}}"><i class="layui-icon"></i>维护</a>
+
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>使用方式</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td>{{c.EmployType==1?"公有":"私有"}}</td>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnView " data-id="{{c.SupplierId}}"><i class="layui-icon"></i>查看</a>
+                                {{if c.State==0||c.State==1}}
+                                <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-sm btnEdit" data-id="{{c.SupplierId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                                {{/if}}
+                                {{if c.State==0}}
+                                <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-sm btnSubmit" data-id="{{c.SupplierId}}"><i class="iconfont icon-edit"></i>提交</a>
+                                {{/if}}
+                                {{if c.State==1}}
+                                <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-sm btnBlacklisted" data-id="{{c.SupplierId}}"><i class="iconfont icon-edit"></i>拉黑</a>
+                                {{/if}}
+                                {{if c.State==0}}
+                                <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-danger layui-btn-sm btnDel" data-id="{{c.SupplierId}}"><i class="layui-icon"></i>作废</a>
+                                {{/if}}
+                                <a class="layui-btn {{limit(c.CreateDepartmentId)}} layui-btn-danger layui-btn-sm btnMaintain" data-id="{{c.SupplierId}}"><i class="layui-icon"></i>维护</a>
+
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+
+
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        function changestate(state, uid) {
+            $.ajax({
+                type: "POST",
+                url: '/sysuser/changestate',
+                data: { state: data.elem.checked ? 1 : 0, uid: $(data.elem).data("val") },
+                success: function (data) {
+                    location.href = '/sysuser/index';
+                }
+            });
+        }
+
+
+        $(function () {
+            dictinits();
+            inits();
+            $(document).on('click', '#btnAdd', function () {
+                addinfo();
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+
+            $(document).on('click', '.btnEdit', function () {
+                var ids = $(this).data("id");
+                if ($(this).hasClass("layui-btn-disabled")) {
+                    return false;
+                }
+                modify(ids);
+            });
+
+            // 拉黑
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");
+                if ($(this).hasClass("layui-btn-disabled")) {
+                    return false;
+                }
+                SubmitData(tId);
+            });
+            // 拉黑
+            $(document).on('click', '.btnBlacklisted', function () {
+                var tId = $(this).data("id");
+                if ($(this).hasClass("layui-btn-disabled")) {
+                    return false;
+                }
+                BlacklistedData(tId);
+            });
+
+            $(document).on('click', '.btnDel', function () {
+                var ids = $(this).data("id");
+                if ($(this).hasClass("layui-btn-disabled")) {
+                    return false;
+                }
+                del(ids);
+            });
+
+            $(document).on('click', '.btnMaintain', function () {
+                var ids = $(this).data("id");
+                if ($(this).hasClass("layui-btn-disabled")) {
+                    return false;
+                }
+                location.href = '/supplier/supplier/maintain?ids=' + ids;
+            });
+
+            $(document).on('click', '.btnView', function () {
+                var ids = $(this).data("id");
+
+                location.href = '/supplier/supplier/views?ids=' + ids;
+            });
+        });
+
+        window.Dict_0 = [];
+        window.Dict_6 = []
+        window.Dict_9 = [];
+        function dictinits() {
+
+            Dict_0.push({ id: -1, name: "请选择供应商类型" });
+            Dict_9.push({ id: -1, name: "请选择企业性质" });
+            Dict_6.push({ id: -1, name: "请选择证件类型" });
+
+            $.ajax({
+                type: "POST",
+                url: '/supplier/supplier/dictlist',
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 0) {
+                                Dict_0.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 6) {
+                                Dict_6.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 9) {
+                                Dict_9.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                        }
+                    }
+                }
+            });
+
+            $("#comSuppType").html(template('temdictlist', { list: Dict_0 }));
+            $("#comEnterpriseType").html(template('temdictlist', { list: Dict_9 }));
+
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=15>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/supplier/supplier/count",
+                async: false,
+                data: {
+                    name: $("#iSuppName").val(),
+                    type1: $("#comSuppType").val(),
+                    type2: $("#comEnterpriseType").val(),
+                    state: $("#comState").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                name: $("#iSuppName").val(),
+                type1: $("#comSuppType").val(),
+                type2: $("#comEnterpriseType").val(),
+                state: $("#comState").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/supplier/supplier/list',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+
+                    //layui.use('table', function () {
+                    //    var table = layui.table;
+
+                    //    table.render({
+                    //        elem: '#tablelist'
+                    //    });
+                    //});
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }
+        function addinfo() {
+            top.window.operate = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '添加供应商',
+                content: '/supplier/supplier/add',
+                area: ['695px', '590px'],
+            });
+        }
+        function modify(ids) {
+            top.window.operate = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '修改供应商',
+                content: '/supplier/supplier/edit?ids=' + ids,
+                area: ['695px', '590px'],
+            });
+        }
+
+        // 提交
+        function SubmitData(tId) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Supplier/supplier/Submitsupplier',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            inits();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 拉黑
+        function BlacklistedData(tId) {
+            top.layer.confirm('您确定拉黑此供应商吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Supplier/supplier/BlacklistedState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            inits();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        function del(ids) {
+
+            top.layer.confirm('您确定作废此记录吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/supplier/supplier/delete',
+                    data: { ids: ids },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "ok") {
+                            top.layer.closeAll();
+                            inits();
+                        }
+                        if (data.flag == "no") {
+                            top.layer.msg("此记录不符合作废条件");
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "use") {
+                            top.layer.msg("此记录在使用中，请确认");
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg("此记录作废失败");
+                        }
+                    }
+                });
+            }, function () {
+
+            });
+        }
+
+        function maintain(ids) {
+
+        }
+
+        template.helper('type1', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_0) {
+                if (Dict_0[i].id == j) {
+                    return Dict_0[i].name;
+                }
+            }
+            return '无';
+        });
+
+        template.helper('type2', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_9) {
+                if (Dict_9[i].id == j) {
+                    return Dict_9[i].name;
+                }
+            }
+            return '无';
+        });
+
+        template.helper('type3', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_6) {
+                if (Dict_6[i].id == j) {
+                    return Dict_6[i].name;
+                }
+            }
+            return '无';
+        });
+
+        template.helper('limit', function (j) {
+            if (j != $("#hddepid").val()) {
+                return 'layui-btn-disabled';
+            }
+            return ''
+        });
+    </script>
+}

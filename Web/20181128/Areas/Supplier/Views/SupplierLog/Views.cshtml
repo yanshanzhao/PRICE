@@ -1,0 +1,26 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+
+@if(ViewBag.type=="log")
+{
+<link href="~/assets/js/jsonview/jquery.jsonview.min.css" rel="stylesheet" /> 
+}
+<div class="layui-card">
+    <div class="layui-card-header">日志明细</div>
+    <div class="layui-card-body" style="word-wrap: break-word;" id="jsonDatas">
+        @ViewBag.msg
+    </div>
+</div>
+
+@if (ViewBag.type == "log")
+{  
+   @section scripts{ 
+<script src="~/assets/js/jsonview/jquery.jsonview.min.js"></script>
+ <script>
+         $(function () {
+             $("#jsonDatas").JSONView($("#jsonDatas").text());
+         });  
+ </script>
+             }
+}

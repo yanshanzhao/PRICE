@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+ 
+<div class="layui-card">
+    <div class="layui-card-header">添加审核流程</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Basis/BasisAuditRelation/AddKeyNode" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>类型名称</label>
+                <div class="layui-input-inline">
+                    <select name="AuditRelationType" lay-verify="required" class="select" id="txtAuditRelationType">
+                        <option value="">请选择类型名称</option>
+                        <option value="1">仓储开发审核</option>
+                        <option value="2">仓储选择审核</option>
+                        <option value="3">运输开发审核</option>
+                        <option value="4">运输选择审核</option>
+                        <option value="5">运输选择评分审核</option>
+                        <option value="6">运输运作准备审核</option> 
+                        <option value="7">配送人员审核</option> 
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:120px"><em>*</em>流程操作名称</label>
+                <div class="layui-input-inline" style="width:180px"> 
+                    <select name="AuditRelationName" lay-verify="required" class="select" id="txtAuditRelationName">
+                        <option value="">请选择流程操作名称</option>
+                        <option>中心经理审核</option>
+                        <option>总部供应链规划经理审核</option>
+                        <option>总监审批</option>
+                        <option>总监审核</option>
+                        <option>总经理审批</option>
+                    </select> 
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div class="layui-btn" id="btnInitiator" title="点击选择提起人信息">提起人信息</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>提起机构</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input" type="text" id="txtDepartmentName" disabled>
+                    <input id="hdDepartmentId" type="hidden" name="DepartmentId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>提起人员</label>
+                <div class="layui-input-inline"> 
+                    <input class="layui-input" type="text" id="txtTrueName" disabled>
+                    <input id="hdUserId" type="hidden" name="UserId" />
+                </div>
+            </div> 
+            <div class="layui-form-item">
+                <div class="layui-btn" id="btnAuditor" title="点击选择审核人信息">审核人信息</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>审核机构</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input" type="text" id="txtToDepartmentName" disabled>
+                    <input id="hdToDepartmentId" type="hidden" name="ToDepartmentId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>审核人员</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input" type="text" id="txtToTrueName" disabled>
+                    <input id="hdToUserId" type="hidden" name="ToUserId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>关键控制</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="isControl" lay-text="是|否">
+                    <input id="hdIsControl" type="hidden" name="IsControl" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+        // 提起/审核
+        var name = "";
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            form.on('switch(isControl)', function (data) {
+                $("#hdIsControl").val(this.checked ? "1" : "0");
+            });
+
+            // 提交
+            form.on('submit(btnSave)', function (data) { 
+                $.ajax({
+                    type: "POST",
+                    url: "/Basis/BasisAuditRelation/AddAuditRelation?tOperate=Add",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功');
+                            location.href = '/Basis/BasisAuditRelation/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            // 发起人及所在机构
+            $(document).on('click', '#btnInitiator', function () { 
+                name = "initiate";
+                GetData();
+            });
+
+            // 审核人及所在机构
+            $(document).on('click', '#btnAuditor', function () {
+                name = "audit";
+                GetData();
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisAuditRelation/Index';
+            });
+        });
+
+        // 获取数据
+        function setinfo(departmentId, departmentName, trueName, userId) {
+            // 提起/审核
+            if (name == "initiate") {
+                $("#txtDepartmentName").val(departmentName);
+                $("#hdDepartmentId").val(departmentId);
+                $("#txtTrueName").val(trueName);
+                $("#hdUserId").val(userId);
+            }
+            else if (name == "audit") {
+                $("#txtToDepartmentName").val(departmentName);
+                $("#hdToDepartmentId").val(departmentId);
+                $("#txtToTrueName").val(trueName);
+                $("#hdToUserId").val(userId);
+            }
+        }
+
+        // 获取机构及人员数据
+        function GetData() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '机构及人员数据',
+                content: '/SysDep/DepPersonnel?url=/Basis/BasisAuditRelation/Index',
+                area: ['500px', '550px'],
+            });
+        } 
+    </script>
+}

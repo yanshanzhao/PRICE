@@ -1,0 +1,79 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">按钮名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="OperateName" lay-verify="required" placeholder="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">按钮代码</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="Code" placeholder="" lay-verify="required" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                    <label class="layui-form-label">排序</label>
+                    <div class="layui-input-inline">
+                    <input type="text" name="State" lay-verify="number" placeholder="" class="layui-input" value="100">
+                </div>
+                <div class="layui-input-inline">数字越小越靠前</div>
+                </div>
+            <div class="layui-form-item">
+                @*<div class="layui-input-block">*@
+                <div style="margin-left:70px;margin-top:30px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn"><em onclick="goback()">关闭</em></a>
+                </div>
+                @*</div>*@
+            </div>
+
+        </form>
+    </div>
+    </div>
+    @section scripts{
+        <script>
+            layui.use(['form', 'element', ], function () {
+                var form = layui.form, ele = layui.element;
+
+                //form.on('switch(state)', function (data) {
+                //    $("#hdstate").val(this.checked ? "1" : "0");
+                //});
+
+                form.on('submit(saveuser)', function (data) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/sysoperate/addoper",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                top.layui.layer.msg('添加成功');
+                                top.$.find('iframe[src="/sysoperate/index"]')[0].contentWindow.inits();
+                                top.layui.layer.close(top.window.operate);
+                            }
+                            if (data.flag == "exist") {
+                                top.layui.layer.msg('已存在此按钮');
+                            }
+                            if (data.flag == "fail") {
+                                top.layui.layer.msg('按钮添加失败');
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+            function goback() {
+                top.layui.layer.close(top.window.operate);
+            }
+
+
+
+        </script>
+    }

@@ -1,0 +1,132 @@
+﻿@{
+    ViewBag.Title = "TraSupplierDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                供应商名称：
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" value="" placeholder="供应商名称" class="layui-input">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table" id="cominfos">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">供应商名称</th>
+                        <th>供应商编号</th>
+                        <th>供应商种类</th> 
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr data-supplierid="{{c.SupplierId}}" 
+                    data-transportid="{{c.TransportId}}"
+                    data-suppliername="{{c.SupplierName}}"
+                    data-suppliernumber="{{c.SupplierNumber}}"
+                    data-transportkindname="{{c.TransportKindName}}" >
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.SupplierNumber}}</td>
+                    <td>{{c.TransportKindName}}</td> 
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setsupplierinfo(
+                    $(this).data("supplierid"),
+                    $(this).data("transportid"),
+                    $(this).data("suppliername"),
+                    $(this).data("suppliernumber"),
+                    $(this).data("transportkindname")
+                    );
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                inits();
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraSupperMatching/SupperDetailCount",
+                async: false,
+                data: { supplierName: $("#txtSupplierName").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraSupperMatching/SupperDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

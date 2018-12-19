@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+    List<SRM.Model.Tra.TraDistributorAdjustDetailModel> Model;
+}
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-card-header">运输供应商信息</div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline" style="width:440px;">
+                    <input id="txtSupplierName" type="text" class="layui-input" lay-verify="supplier" value="@ViewBag.SupplierName" disabled>
+                </div>
+                <label class="layui-form-label">配送范围</label>
+                <div class="layui-input-inline" style="width:150PX;clear:none !important; float:left;">
+                    <input id="txtDistributionScopeName" type="text" class="layui-input" lay-verify="supplier" value="@ViewBag.DistributionScopeName" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">线路名称</label>
+                <div class="layui-input-inline" style="width:440px;">
+                    <input id="txtLineName" type="text" class="layui-input" value="@ViewBag.LineName" lay-verify="supplier" disabled>
+                    <input id="adjustId" type="hidden" value="@ViewBag.auditId" name="auditId" placeholder="供应商审核Id" />
+                    <input id="presentId" type="hidden" value="@ViewBag.presentId" name="presentId" placeholder="配送人员变更id" />
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-card-header">调整信息</div>
+            <div class="layui-form">
+                <div class="forzenbox">
+                    <div class="normaltable">
+                        <table class="layui-table" id="tablelist">
+                            <thead>
+                                <tr>
+                                    <th>调整项目</th>
+                                    <th>调整前</th>
+                                    <th>调整后</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userlist" style="min-height:200px;"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.AdjustName}}</td>
+                        <td>{{c.BeforeShowValue}}</td>
+                        <td>{{c.AfterShowValue}}</td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-item">
+                <label class="layui-form-label">审核意见</label>
+                <div class="layui-input-block">
+                    <textarea id="txtAuditRemark" placeholder="审核意见" name="AuditRemark" lay-verify="required" maxlength="400" class="layui-textarea">@ViewBag.AuditRemark</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="width:30%;margin:0 auto !important;"> 
+                <a class="layui-btn" id="btnGoBack">关闭</a>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate; 
+        });
+
+        $(function () { 
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraDistributorAdjustExamine/Index';
+            });
+            SearchData();
+        });
+        function SearchData()
+        {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraDistributorAdjustExamine/TraDistributorAdjustDetailModelList',
+                data: {
+                    presentId: $("#presentId").val()
+                },
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                }
+            });
+        }
+
+    </script>
+
+}

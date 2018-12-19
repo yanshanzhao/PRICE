@@ -1,0 +1,399 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<input id="hdExcelNumber" type="hidden" value="@ViewBag.ImportNumber" />
+<input id="hdExcelName" type="hidden" value="@ViewBag.ModuleName" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <!-- 查询条件  -->
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <label>上传时间</label>
+                    <div class="layui-input-inline">
+                        <input placeholder="开始时间" class="layui-input startTime" type="text" id="iStartTime">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input placeholder="结束时间" class="layui-input seltimes" type="text" id="iEndtime">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comState" class="select" lay-filter="state">
+                                <option value="-1">请选择状态</option>
+                                <option value="0">初始</option>
+                                <option value="1">验证异常</option>
+                                <option value="5">验证成功</option>
+                                <option value="10">导入成功</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- 操作按钮 -->
+                <div class="layui-inline">
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-normal " id="btnUpload">上传</a>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn " id="btnExport">导出</a>
+                </div>
+                <h3 style="color:lightcoral;">温馨提示：导入行数小于十万行</h3>  
+                @*<div class="layui-inline">
+                    <a id="btnDown" style="cursor:pointer;margin-left:20px;">导入模板下载</a>
+                </div>*@
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable">
+                    <table class="layui-table" id="tablelist">
+                        <thead>
+                            <tr>
+                                <th>导入文件</th>
+                                <th>导入状态</th>
+                                <th>上传时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.ExcelName}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnView " data-excelid="{{c.ExcelId}}" data-importnumber="{{c.ImportNumber}}"><i class="layui-icon"></i>查看</a>
+                        {{if c.State==0}}
+                        <a class="layui-btn layui-btn-sm btnValidated" data-excelid="{{c.ExcelId}}" data-importnumber="{{c.ImportNumber}}" data-state="{{c.State}}"><i class="iconfont icon-edit"></i>验证</a>
+                        {{/if}}
+                        {{if c.State==5}}
+                        <a class="layui-btn layui-btn-sm btnImport" data-excelid="{{c.ExcelId}}" data-importnumber="{{c.ImportNumber}}" data-state="{{c.State}}" data-times="{{c.CreateTime}}"><i class="iconfont icon-icon"></i>导入</a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-sm btnInvalid" data-excelid="{{c.ExcelId}}"><i class="iconfont icon-edit"></i>作废</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+@section scripts{
+
+    <script>
+        layui.use(['form', 'element', 'table', 'layer', 'laydate', 'jquery', 'upload'], function () {
+        var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate, $ = layui.jquery;
+        $('.seltimes').each(function () {
+            laydate.render({
+                elem: this,
+                type: 'date',
+            });
+        });
+        $('.startTime').each(function () {
+            laydate.render({
+                elem: this
+               , type: 'date'
+                , value: getDate()
+                , isInitValue: true
+            });
+        });
+
+        //导入按钮
+        layui.upload.render({
+            elem: '#btnUpload'
+               , url: '/index/upload?type=Excel'
+               , accept: 'file'
+               , auto: true
+               , done: function (res) {
+                   if (res.flag == "ok") {
+                       var path = res.path;//获取文件存放地址
+                       var filename = res.filename;//原文件名称 
+                       var importNumber = $("#hdExcelNumber").val();
+                       var index;
+                       $.ajax({
+                           type: "POST",
+                           url: "/SysImport/ImportInfo",
+                           async: true,
+                           cache: false,
+                           beforeSend: function () {
+                               index = showLoad();
+                           },
+                           data: { path: path, filename: filename, importNumber: importNumber },
+                           dataType: 'json',
+                           success: function (data) {
+                               if (data.flag == 'ok') {
+                                   top.layui.layer.msg(data.content);
+                                   //showSuccess(data.content);
+                                   search();
+                               }else {
+                                   top.layui.layer.msg(data.content);
+                               }
+                               layui.layer.close(index);
+                           }
+                       });
+                   } else
+                   {
+                       top.layui.layer.msg("上传文件异常！");
+                   }
+                   //return false;
+               }
+        });
+        });
+        // 设置默认日期
+        function getDate() {
+            var date = new Date();
+            var year = date.getFullYear() + "";
+            var month = (date.getMonth() + 1) + "";
+            if (month < 10)
+                month = "0" + month;
+            var day = date.getDate();
+            if (day < 10)
+                day = "0" + day;
+            // 获取当前日期
+            var begin = year + "-" + month + "-" + day;
+            return begin;
+        }
+    var pageIndex = 0;//页码编号 首页
+    var pageSize = 15;//每页行数 15行
+    var types = 0;//是否首次查询
+    //
+    $(function ()//页面加载
+    {
+        inits();
+        $(document).on('click', '#btnSearch', function () {//查询事件
+            types = 1;
+            search();
+        });
+        // 导出
+        $(document).on('click', '#btnExport', function () {
+            top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+            $.post('/SysImport/Export'
+                , {
+                    starttime: $("#iStartTime").val(),//开始上传时间
+                    endtime: $("#iEndtime").val(),//结束上传时间
+                    state: $("#comState").val(),//状态
+                    importNumber: $("#hdExcelNumber").val()//导入编号
+                }
+                , function (data) {
+                    if (data.flag == 'fail') {
+                        top.layui.layer.close(top.window.export);
+                        top.layui.layer.msg(data.content);
+                    }
+                    if (data.flag == 'ok') {
+                        location.href = '/excel/down?guid=' + data.guid + "&name=" + $("#hdExcelName").val();
+                        top.layui.layer.close(top.window.export);
+                    }
+                }, 'json');
+        });
+        //$(document).on('click', '#btnDown', function () {
+        //    location.href = '/excel/downtemplate?name=distributor&displayname='+ $("#hdExcelName").val();
+        //});
+        $(document).on('click', '.btnValidated', function () { // 验证
+            var excelid = $(this).data("excelid");
+            var importnumber = $(this).data("importnumber");
+            var state = $(this).data("state");
+            Validated(excelid, importnumber, state);
+        });
+        $(document).on('click', '.btnInvalid', function () { // 作废
+            var excelid = $(this).data("excelid");
+            Invalid(excelid);
+        });
+        $(document).on('click', '.btnImport', function () { // 导入
+            var excelid = $(this).data("excelid");
+            var importnumber = $(this).data("importnumber");
+            var state = $(this).data("state");
+            var tiems = $(this).data("times");
+            Import(excelid, importnumber, state, tiems);
+        });
+        $(document).on('click', '.btnView', function () { // 查看
+            var excelid = $(this).data("excelid");
+            var importnumber = $(this).data("importnumber");
+            var moduleName =  $("#hdExcelName").val(); 
+            View(excelid, importnumber, moduleName);
+        });
+    }
+    )
+    function showLoad() {
+        return layer.msg('拼命执行中...', { icon: 16, shade: [0.5, '#f5f5f5'], scrollbar: false, offset: 'auto', time: 100000 });
+    }
+    //function showSuccess(ts) {
+    //    layer.msg(ts, { time: 1000, offset: 'auto' });
+    //}
+    function inits() {//inits方法
+        var startTimes = "";
+        if (types == 0) //types=0  页面首次加载
+            startTimes = getDate();
+        else
+            startTimes = $("#iStartTime").val();
+        var flagCount = 0;//总行数
+        pageIndex = 0;//第*页
+        $("#userlist").html("<tr class='loadings' ><td colspan=15>数据加载中……<td></tr>");
+        /* 处理多少条记录 */
+        $.ajax({
+            type: "POST",
+            url: "/SysImport/RowCount",
+            async: false,
+            data: {
+                "starttime": startTimes,//开始上传时间
+                "endtime": $("#iEndtime").val(),//结束上传时间
+                "state": $("#comState").val(),//状态
+                "importNumber": $("#hdExcelNumber").val()//导入编号
+            },
+            success: function (data) {
+                flagCount = data;
+                $(".pagedetail").text("共" + flagCount + "条记录");//赋值（共**页）
+            }
+        });
+        $("#Pagination").pagination(flagCount, {
+            callback: PageCallbackOfCus,
+            prev_text: '<',       //上一页按钮里text
+            next_text: '>',       //下一页按钮里text
+            items_per_page: pageSize,  //显示条数
+            num_display_entries: 6,    //连续分页主体部分分页条目数
+            current_page: pageIndex,   //当前页索引
+            num_edge_entries: 2        //两侧首尾分页条目数
+        });
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var startTimes = "";
+            if (types == 0) //types=0  页面首次加载
+                startTimes = getDate();
+            else
+                startTimes = $("#iStartTime").val();
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                "starttime": startTimes,//开始上传时间
+                "endtime": $("#iEndtime").val(),//结束上传时间
+                "state": $("#comState").val(),//状态
+                "importNumber": $("#hdExcelNumber").val()//导入编号
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/SysImport/ImportList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    } else {
+                        if (data.length == 0) {
+                            $("#pageinfos").hide();
+                            $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    //查询
+    function search() {//查询具体执行代码
+        inits();
+    }
+    // 查看
+    function View(excelid, importnumber, moduleName)
+    {
+        location.href = '/SysImport/ExcelView?ExcelId=' + excelid + "&ModuleName=" + moduleName + "&ImportNumber=" + importnumber;
+    }
+
+    //作废
+    function Invalid(excelid) {
+        top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+            $.ajax({
+                type: "POST",
+                url: '/SysImport/Invalid',
+                data: { excelid: excelid   },
+                dataType: "json",
+                success: function (data) {
+                    if (data.flag == "ok") {
+                        top.layer.msg(data.content);
+                        inits();
+                    } else {
+                        top.layer.msg(data.content);
+                    }
+                }
+            });
+        }, function () { }
+       );
+
+    }
+    //验证
+    function Validated(excelid, importnumber, state)
+    {
+        if (state != '0') {
+            top.layer.msg('本数据非初始状态，不允许验证！');
+            return;
+        }
+        top.layer.confirm('您确定验证此数据吗？', ['确定', '取消'], function () {
+            $.ajax({
+                type: "POST",
+                url: '/SysImport/Validated',
+                data: { excelid: excelid, importnumber: importnumber, state: state },
+                dataType: "json",
+                success: function (data) {
+                    if (data.flag == "ok") {
+                        top.layer.msg(data.content);
+                        inits();
+                    }else
+                    {
+                        top.layer.msg(data.content);
+                    }
+                }
+            });
+        }, function () { }
+       );
+
+    }
+
+    // 导入
+    function Import(excelid, importnumber, state, tiems) {
+        if (state != '5') {
+            top.layer.msg('本数据非验证通过状态，不允许导入！');
+            return;
+        }
+        top.layer.confirm('您确定导入此数据吗？', ['确定', '取消'], function () {
+            $.ajax({
+                type: "POST",
+                url: '/SysImport/ImportExcel',
+                data: { excelid: excelid, importnumber: importnumber, state: state, tiems: tiems },
+                dataType: "json",
+                success: function (data) {
+                    if (data.flag == "ok") {
+                        top.layer.msg(data.content);
+                        inits();
+                    }
+                    else {
+                        top.layer.msg(data.content);
+                    }
+                }
+            });
+        }, function () { }
+       );
+
+    }
+
+    </script>
+}

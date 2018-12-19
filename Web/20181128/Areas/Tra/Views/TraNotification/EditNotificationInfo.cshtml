@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "EditNotificationInfo";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraNotificationModel
+
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<form class="layui-form layui-form-pane" action="/Tra/TraNotification/EditTraNotificationInfo" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">录入招标通知时间及负责人</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">录入通知时间</label>
+                <div class="layui-input-block">
+                    <input id="txtNotificationTime" name="NotificationTime" type="text" value="@Model.NotificationTime" class="layui-input">
+                    <input id="hdNotificationId" type="hidden" name="NotificationId" value="@Model.NotificationId" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">通知负责人</label>
+                <div class="layui-input-block">
+                    <input id="txtNotificationUser" name="NotificationUser" type="text" value="@Model.NotificationUser" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:180px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section scripts{
+    <script>
+
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证通知时间
+            laydate.render({
+                elem: '#txtNotificationTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+            });
+
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraNotification/EditTraNotificationInfo",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.SearchData();
+                            top.layui.layer.close(top.window.operate);
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载事件
+        $(function () {
+            // 关闭按钮
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.operate);
+            });
+        });
+    </script>
+}

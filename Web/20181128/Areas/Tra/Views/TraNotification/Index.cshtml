@@ -1,0 +1,478 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    申请编号：
+                    <div class="layui-input-inline">
+                        <input type="text" name="TraChooseNumber" lay-verify="required" placeholder="" class="layui-input" id="txtTraChooseNumber">
+                    </div>
+                    &nbsp;&nbsp;
+                    申请机构：
+                    <div class="layui-input-inline">
+                        <input value="" placeholder="申请机构" class="layui-input" type="text" id="txtCreateDepartmentName" readonly>
+                        <input id="hdCreateDepartmentId" type="hidden" />
+                    </div>
+                    <i class="layui-icon layui-icon-delete clearDepartmentName"></i>
+                    &nbsp;&nbsp;
+                    申请时间：
+                    <div class="layui-input-inline">
+                        <input type="text" name="ApplyTime" lay-verify="required" placeholder="" class="layui-input" id="txtApplyTime">
+                    </div>
+                    &nbsp;&nbsp;
+                    招标线路：
+                    <div class="layui-input-inline">
+                        <input type="text" name="NotificationLines" lay-verify="required" placeholder="" class="layui-input" id="txtNotificationLines">
+                    </div>
+                    <br />
+                    <br />
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                    <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                    <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">申请编号</th>
+                                <th>申请机构</th>
+                                <th>申请负责人</th>
+                                <th>申请时间</th>
+                                <th>通知编号</th>
+                                <th>暨邀请函名称</th>
+                                <th>招标线路</th>
+                                <th>招标开始时间</th>
+                                <th>招标结束时间</th>
+                                <th>招标备注</th>
+                                <th>招标状态</th>
+                                <th>招标新增时间</th>
+                                <th>通知状态</th>
+                                <th>通知负责人</th>
+                                <th>通知时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TraNotificationlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.TraChooseNumber}}</td>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.ApplyUser}}</td>
+                    <td>{{c.ApplyTime}}</td>
+                    <td>{{c.NotificationNumber}}</td>
+                    <td>{{c.InvitationName}}</td>
+                    <td>{{c.NotificationLines}}</td>
+                    <td>{{c.NotificationBeginTime}}</td>
+                    <td>{{c.NotificationEndTime}}</td>
+                    <td>{{c.NotificationRemark}}</td>
+                    <td>{{c.NotificationStateName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td>{{c.NotifyStateName}}</td>
+                    <td>{{c.NotificationUser}}</td>
+                    <td>{{c.NotificationTimes}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.NotificationId}}" data-state="{{c.NotificationState}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        {{if c.NotificationState==0}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.NotificationId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>
+                        {{/if}}
+                        {{if c.NotifyState==0}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnNotice" data-id="{{c.NotificationId}}">
+                            <i class="layui-icon"></i>通知
+                        </a>
+                        {{/if}}
+                        {{if c.NotificationState==0 && c.NotifyState==1}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnEnd" data-id="{{c.NotificationId}}">
+                            <i class="layui-icon"></i>结束
+                        </a>
+                        {{/if}}
+                        {{if c.NotificationState==0}}
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.NotificationId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.NotificationId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.NotificationId}}" data-state="{{c.NotificationState}}">
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a>
+                                {{if c.NotificationState==0}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.NotificationId}}">
+                                    <i class="layui-icon"></i>提交
+                                </a>
+                                {{/if}}
+                                {{if c.NotifyState==0}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnNotice" data-id="{{c.NotificationId}}">
+                                    <i class="layui-icon"></i>通知
+                                </a>
+                                {{/if}}
+                                {{if c.NotificationState==0 && c.NotifyState==1}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnEnd" data-id="{{c.NotificationId}}">
+                                    <i class="layui-icon"></i>结束
+                                </a>
+                                {{/if}}
+                                {{if c.NotificationState==0}}
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnDelete" data-id="{{c.NotificationId}}" >
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.NotificationId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证申请时间
+            laydate.render({
+                elem: '#txtApplyTime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+            // 查询
+            SearchData();
+
+            // 清除条件(提起机构)
+            $(document).on('click', '.clearDepartmentName', function () {
+                $("#txtCreateDepartmentName").val("");
+                $("#hdCreateDepartmentId").val("");
+            });
+
+            // 提起机构(发起人所在机构)
+            $(document).on('click', '#txtCreateDepartmentName', function () {
+                GetDepartmentName();
+            });
+
+            //新增按钮
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            //查询按钮
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            //导出按钮
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraNotification/Export'
+                    , {
+                        traChooseNumber: $("#txtTraChooseNumber").val()//运输选择编号
+                      , createDepartmentId: $("#hdCreateDepartmentId").val()//申请机构id
+                      , applyTime: $("#txtApplyTime").val() //申请时间
+                      , notificationLines: $("#txtNotificationLines").val() //招标路线
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=招标通知表";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            //编辑按钮
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                var tState = $(this).data("state");//信息状态
+                ModifyData(tId, tState);
+            });
+
+            //提交按钮
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                SubmitData(tId);
+            });
+
+            //通知按钮
+            $(document).on('click', '.btnNotice', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                NoticeData(tId);
+            });
+
+            //结束按钮
+            $(document).on('click', '.btnEnd', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                EndData(tId);
+            });
+
+            //作废按钮
+            $(document).on('click', '.btnDelete', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                DeleteData(tId);
+            });
+
+            //查看按钮
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");//仓储供应商选择id
+                ShowData(tId);
+            });
+        });
+
+        // 新增
+        function AddData() {
+            location.href = '/Tra/TraNotification/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraNotificationlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraNotification/TraNotificationCount",
+                async: false,
+                data: {
+                    traChooseNumber: $("#txtTraChooseNumber").val()//运输选择编号
+                      , createDepartmentId: $("#hdCreateDepartmentId").val()//申请机构id
+                      , applyTime: $("#txtApplyTime").val() //申请时间
+                      , notificationLines: $("#txtNotificationLines").val() //招标路线
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;//页面索引
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                traChooseNumber: $("#txtTraChooseNumber").val()//运输选择编号
+                      , createDepartmentId: $("#hdCreateDepartmentId").val()//申请机构id
+                      , applyTime: $("#txtApplyTime").val() //申请时间
+                      , notificationLines: $("#txtNotificationLines").val() //招标路线
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraNotification/TraNotificationList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraNotificationlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraNotificationlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId, tState) {
+            if (tState != '0') {
+                top.layer.msg('本数据非初始状态，不能编辑！');
+                return;
+            }
+            location.href = '/Tra/TraNotification/Edit?tId=' + tId;
+        }
+
+        // 提交按钮
+        function SubmitData(tId) {
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraNotification/SubmitTraNotification',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 通知按钮
+        function NoticeData(tId) {
+            top.window.operate = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '修改招标通知信息',
+                content: '/Tra/TraNotification/EditNotificationInfo?url=/Tra/TraNotification/Index&tId=' + tId,
+                area: ['695px', '590px'],
+            });
+        }
+
+        // 作废
+        function DeleteData(tId) {
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraNotification/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraNotification/Check?tId=' + tId;
+        }
+
+        // 结束按钮
+        function EndData(tId) {
+            top.layer.confirm('您确定结束此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraNotification/EndTraNotification',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+
+        // 设置部门
+        function setinfo(ids, names) {
+            $("#hdCreateDepartmentId").val(ids);
+            $("#txtCreateDepartmentName").val(names);
+        }
+
+        // 获取机构名称
+        function GetDepartmentName() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择机构',
+                content: '/sysdep/tree?url=/Tra/TraNotification/Index',
+                area: ['300px', '450px'],
+            });
+        }
+    </script>
+}

@@ -1,0 +1,87 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">角色名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="RoleName" maxlength="50" lay-verify="required" placeholder="" value="@ViewBag.rolename" class="layui-input">
+                    <input  type="hidden" name="RoleId" value="@ViewBag.id" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    @if (ViewBag.state == 1)
+                    {
+                        <input type="checkbox" checked lay-skin="switch" lay-filter="state" lay-text="启用|禁用">
+                        <input id="hdstate" type="hidden" name="State" value="1" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" lay-skin="switch" lay-filter="state" lay-text="启用|禁用">
+                        <input id="hdstate" type="hidden" name="State" value="0" />
+                    } 
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">描述</label> 
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入描述" class="layui-textarea" name="Remark" maxlength="400"  style="height:275px;">@ViewBag.remark</textarea>
+                </div> 
+            </div>
+            <div class="layui-form-item">
+                <div style="margin-left:110px;margin-top:30px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                    <a class="layui-btn" id="btnGoBack">关闭</a>
+                </div>
+                @*</div>*@
+            </div> 
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script>
+            layui.use(['form', 'element', ], function () {
+                var form = layui.form, ele = layui.element;
+
+                form.on('switch(state)', function (data) {
+                    $("#hdstate").val(this.checked ? "1" : "0");
+                });
+
+                form.on('submit(saveuser)', function (data) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/sysrole/editrole",
+                        data: data.field,
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'ok') {
+                                top.layui.layer.msg('修改成功');
+                                top.$.find('iframe[src="/sysrole/index"]')[0].contentWindow.inits();
+                                top.layui.layer.close(top.window.operate);
+                            }
+                            if (data.flag == "exist") {
+                                top.layui.layer.msg('已存在此角色');
+                            }
+                            if (data.flag == "fail") {
+                                top.layui.layer.msg('添加失败');
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+            $(function () {
+                $(document).on('click', '#btnGoBack', function () {
+                    top.layui.layer.close(top.window.operate);
+                });
+            });
+
+
+    </script>
+}

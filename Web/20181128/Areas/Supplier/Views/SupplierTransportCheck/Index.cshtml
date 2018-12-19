@@ -1,0 +1,582 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+
+<input id="txtAuditUserId" type="hidden" value="@ViewBag.UserId" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote searchbox">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input placeholder="请输入供应商编号" class="layui-input" type="text" id="iSuppNum">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input placeholder="请输入供应商名称" class="layui-input" type="text" id="iSuppName">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline" style="display:none">
+                        <input placeholder="请输入运输线路" class="layui-input" type="text" id="iSuppLines">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input placeholder="请选择提交机构" class="layui-input" type="text" id="iSuppDep">
+                        <input type="hidden" id="hdSuppDepid" value="-1" />
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="comSuppClass" class="select" lay-filter="suppclass"></select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="comSuppScope" class="select" lay-filter="suppscope"></select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="comSuppLevel" class="select" lay-filter="supplevel">
+                            <option value="-1">请选供应商级别</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="comSuppState" class="select" lay-filter="suppstate"></select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div class="layui-input-inline">
+                            <select id="comState" class="select" lay-filter="state">
+                                <option value="-1">请选择审核状态</option>
+                                <option value="0">未审核</option>
+                                <option value="1">审核通过</option>
+                                <option value="3">审核未通过</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label>提交时间</label>
+                    <div class="layui-input-inline">
+                        <input placeholder="开始时间" class="layui-input seltimes" type="text" id="iStartTime">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input placeholder="结束时间" class="layui-input seltimes" type="text" id="iEndtime">
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-normal " id="btnExport">导出</a>
+                </div>
+            </div>
+            <input type="hidden" id="hddepid" value="@ViewBag.depid" />
+        </blockquote>
+
+
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table" id="tablelist">
+                        <thead>
+                            <tr>
+                                <th>运输供应商编号</th>
+                                <th>供应商名称</th>
+                                <th>企业性质</th>
+                                <th>证件类型</th>
+                                <th>证件号码</th>
+                                <th>供应商种类</th>
+                                <th>供应商范围</th>
+                                <th>运输供应商层级</th>
+                                <th>合作意愿</th>
+                                @*<th>运输线路</th>
+                                    <th>发车时间</th>
+                                    <th>到达时间</th>
+                                    <th>营业时间</th>
+                                    <th>运作时间</th>*@
+                                <th>现场考察</th>
+                                <th>评估分数</th>
+                                <th>评价结果</th>
+                                <th>提交机构</th>
+                                <th>提交时间</th>
+                                <th>审核状态</th>
+                                <th>审核时间</th>
+                                <th>审核意见</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+
+                </div>
+
+                <div class="forzentable">
+
+                </div>
+            </div>
+
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.TransportNumber}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{type2(c.EnterpriseType)}}</td>
+                    <td>{{type3(c.PapersType)}}</td>
+                    <td>{{c.PapersNumber}}</td>
+                    <td>{{type4(c.TransportKind)}}</td>
+                    <td>{{type5(c.DistributionScope)}}</td>
+                    <td>{{type6(c.SupplierLevel)}}</td>
+                    <td>{{c.CooperationType=="0"?"否":"是"}}</td>
+                    @*<td>{{c.TransitLines}}</td>
+                        <td>{{c.DepartureTimes}}</td>
+                        <td>{{c.ArrivalTimes}}</td>
+                        <td>{{c.BusinessHours}}</td>
+                        <td>{{c.OperationTime}}</td>*@
+                    <td>{{c.IsAssess=="0"?"否":"是"}}</td>
+                    <td>{{c.AssessScore}}</td>
+                    <td>{{result(c.AssessResult)}}</td>
+                    <td>{{c.PresentDepartmentName}}</td>
+                    <td>{{c.PresentTime}}</td>
+                    <td>{{state(c.State)}}</td>
+                    <td>{{c.AuditTime}}</td>
+                    <td>{{c.AuditRemark}}</td>
+                    <td>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnView " data-id="{{c.SupplierAuditId}}"><i class="layui-icon"></i>查看</a>
+                        {{if isAudit(c.AuditUserId)}}
+                        {{if c.State==1}}
+                        <a class="layui-btn  layui-btn-danger layui-btn-sm btnRevoke" data-id="{{c.SupplierAuditId}}" data-state="{{c.State}}"><i class="layui-icon"></i>撤销</a>
+                        {{/if}}
+                        {{if c.State!=1}}
+                        <a class="layui-btn  layui-btn-danger layui-btn-sm btnCheck" data-id="{{c.SupplierAuditId}}" data-state="{{c.State}}"><i class="layui-icon"></i>审核</a>
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnView " data-id="{{c.SupplierAuditId}}"><i class="layui-icon"></i>查看</a>
+                                {{if isAudit(c.AuditUserId)}}
+                                {{if c.State==1}}
+                                <a class="layui-btn  layui-btn-danger layui-btn-sm btnRevoke" data-id="{{c.SupplierAuditId}}" data-state="{{c.State}}"><i class="layui-icon"></i>撤销</a>
+                                {{/if}}
+                                {{if c.State!=1}}
+                                <a class="layui-btn  layui-btn-danger layui-btn-sm btnCheck" data-id="{{c.SupplierAuditId}}" data-state="{{c.State}}"><i class="layui-icon"></i>审核</a>
+                                {{/if}}
+                                {{/if}}
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+
+        <script type="text/html" id="temdictlist">
+            {{each list as c}}
+            <option value="{{c.id}}">{{c.name}}</option>
+            {{/each}}
+        </script>
+
+
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer', 'laydate', 'jquery'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate, $ = layui.jquery;
+
+            $('.seltimes').each(function () {
+                laydate.render({
+                    elem: this,
+                    type: 'date',
+                });
+            });
+        });
+
+        // 当前登录人==审核人?
+        template.helper('isAudit', function (auditUserId) {
+            if (auditUserId != $("#txtAuditUserId").val()) {
+                return false;
+            }
+            return true;
+        })
+
+        // 设置部门
+        function setinfo(ids, names) {
+            $("#hdSuppDepid").val(ids);
+            $("#iSuppDep").val(names);
+        }
+
+        // 获取机构名称
+        function GetDepartmentName() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择机构',
+                content: '/sysdep/tree?url=/Supplier/SupplierTransportCheck/Index',
+                area: ['300px', '450px'],
+            });
+        }
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            dictinits();
+            inits();
+
+            $(document).on('click', '#iSuppDep', function () {
+                GetDepartmentName();
+            });
+
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/supplier/SupplierTransportcheck/export', {
+                    num: $("#iSuppNum").val(),
+                    name: $("#iSuppName").val(),
+                    line: $("#iSuppLines").val(),
+                    suppclass: $("#comSuppClass").val(),
+                    suppscope: $("#comSuppScope").val(),
+                    supplevel: $("#comSuppLevel").val(),
+                    suppstate: $("#comSuppState").val(),
+                    state: $("#comState").val(),
+                    starttime: $("#iStartTime").val(),
+                    endtime: $("#iEndtime").val(),
+                    depid: $("#hdSuppDepid").val()
+                }, function (data) {
+                    if (data.flag == 'noauth') {
+                        top.layui.layer.close(top.window.export);
+                        top.layui.layer.msg(data.content);
+                    }
+                    if (data.flag == 'ok') {
+                        location.href = '/excel/down?guid=' + data.guid + "&name=运输供应商审核信息";
+                        top.layui.layer.close(top.window.export);
+                    }
+                }, 'json');
+            });
+
+
+            $(document).on('click', '.btnCheck', function () {
+                var ids = $(this).data("id");
+                var states = $(this).data("state");
+
+                if (states != 0) {
+                    layui.layer.msg("数据已审核，请确认");
+                    return false;
+                }
+
+                location.href = '/supplier/SupplierTransportCheck/check?ids=' + ids;
+
+            });
+
+            $(document).on('click', '.btnView', function () {
+                var ids = $(this).data("id");
+
+                location.href = '/supplier/SupplierTransportCheck/views?ids=' + ids;
+            });
+
+            $(document).on('click', '.btnRevoke', function () {
+                var ids = $(this).data("id");
+                top.layer.confirm('您确定撤销此数据吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/supplier/SupplierTransportCheck/revoke',
+                        data: { id: ids },
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.flag == "ok") {
+                                top.layer.closeAll();
+                                top.layer.msg("数据撤销成功");
+                                inits();
+                            }
+                            if (data.flag == "noauth") {
+                                top.layer.msg(data.content);
+                            }
+
+                            if (data.flag == "fail") {
+                                top.layer.msg("数据撤销失败");
+                            }
+                        }
+                    });
+                }, function () { }
+            );
+            });
+        });
+
+        window.Dict_1 = [];
+        window.Dict_2 = [];
+        window.Dict_3 = [];
+        window.Dict_4 = [];
+        window.Dict_6 = []
+        window.Dict_9 = [];
+        //   window.Dict_11 = [];
+        function dictinits() {
+
+            Dict_1.push({ id: -1, name: "请选择供应商种类" });
+            Dict_2.push({ id: -1, name: "请选择供应商层级" });
+            Dict_3.push({ id: -1, name: "请选择供应商范围" });
+            Dict_4.push({ id: -1, name: "请选择供应商状态" });
+            Dict_9.push({ id: -1, name: "请选择企业性质" });
+            Dict_6.push({ id: -1, name: "请选择证件类型" });
+            //     Dict_11.push({ id: -1, name: "请选择配送供应商范围" });
+            $.ajax({
+                type: "POST",
+                url: '/supplier/SupplierTransport/dictlist',
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        for (var i in data) {
+                            if (data[i].Type == 1) {
+                                Dict_1.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 2) {
+                                Dict_2.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 3) {
+                                Dict_3.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 6) {
+                                Dict_6.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 9) {
+                                Dict_9.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            else if (data[i].Type == 4) {
+                                Dict_4.push({ id: data[i].Id, name: data[i].Name });
+                            }
+                            //else if (data[i].Type == 11) {
+                            //    Dict_11.push({ id: data[i].Id, name: data[i].Name });
+                            //}
+                        }
+                    }
+                }
+            });
+
+            $("#comSuppClass").html(template('temdictlist', { list: Dict_1 }));
+            $("#comSuppScope").html(template('temdictlist', { list: Dict_3 }));
+            $("#comSuppLevel").html(template('temdictlist', { list: Dict_2 }));
+            $("#comEnterpriseType").html(template('temdictlist', { list: Dict_9 }));
+            //  $("#comSuppScope").html(template('temdictlist', { list: Dict_11 }));
+            $("#comSuppState").html(template('temdictlist', { list: Dict_4 }));
+            layui.use('form', function () {
+                layui.form.render("select");
+            });
+        }
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=15>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/supplier/SupplierTransportCheck/count",
+                async: false,
+                data: {
+                    "num": $("#iSuppNum").val(),
+                    "name": $("#iSuppName").val(),
+                    "line": $("#iSuppLines").val(),
+                    "starttime": $("#iStartTime").val(),
+                    "endtime": $("#iEndtime").val(),
+                    "suppclass": $("#comSuppClass").val(),
+                    "suppscope": $("#comSuppScope").val(),
+                    "supplevel": $("#comSuppLevel").val(),
+                    "suppstate": $("#comSuppState").val(),
+                    "state": $("#comState").val(),
+                    "depid": $("#hdSuppDepid").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                num: $("#iSuppNum").val(),
+                name: $("#iSuppName").val(),
+                line: $("#iSuppLines").val(),
+                suppclass: $("#comSuppClass").val(),
+                suppscope: $("#comSuppScope").val(),
+                supplevel: $("#comSuppLevel").val(),
+                suppstate: $("#comSuppState").val(),
+                state: $("#comState").val(),
+                starttime: $("#iStartTime").val(),
+                endtime: $("#iEndtime").val(),
+                depid: $("#hdSuppDepid").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/supplier/SupplierTransportCheck/list',
+                data: userjosn,
+                success: function (data) {
+
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }
+        function maintain(ids) {
+
+        }
+
+        template.helper('type4', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_1) {
+                if (Dict_1[i].id == j) {
+                    return Dict_1[i].name;
+                }
+            }
+            return '无';
+        });
+        template.helper('type5', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_3) {
+                if (Dict_3[i].id == j) {
+                    return Dict_3[i].name;
+                }
+            }
+            return '无';
+        });
+        template.helper('type6', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_2) {
+                if (Dict_2[i].id == j) {
+                    return Dict_2[i].name;
+                }
+            }
+            return '无';
+        });
+        template.helper('type7', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_4) {
+                if (Dict_4[i].id == j) {
+                    return Dict_4[i].name;
+                }
+            }
+            return '无';
+        });
+        template.helper('type2', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_9) {
+                if (Dict_9[i].id == j) {
+                    return Dict_9[i].name;
+                }
+            }
+            return '无';
+        });
+
+        template.helper('type3', function (j) {
+            if (j == -1) return '无';
+            for (var i in Dict_6) {
+                if (Dict_6[i].id == j) {
+                    return Dict_6[i].name;
+                }
+            }
+            return '无';
+        });
+
+        template.helper('limit', function (j) {
+            if (j != $("#hddepid").val()) {
+                return 'layui-btn-disabled';
+            }
+            return ''
+        });
+
+        template.helper('result', function (j) {
+            if (j == "0") {
+                return '未评分';
+            }
+            if (j == "1") {
+                return '合格';
+            }
+            return '不合格';
+        });
+
+        template.helper('state', function (j) {
+            if (j == "0") {
+                return '未审核';
+            }
+            if (j == "1") {
+                return '审核通过';
+            }
+            if (j == "3") {
+                return '审核未通过';
+            }
+            if (j == "2") {
+                return '审核退回';
+            }
+
+            if (j == '4') {
+                return '驳回';
+            }
+
+            return '撤销处理';
+
+        });
+    </script>
+}

@@ -1,0 +1,154 @@
+﻿@{
+    ViewBag.Title = "TraPatrolRecordDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<input id="hdpagetype" type="hidden" value="@ViewBag.url" />
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-form">
+                    巡查类型：
+                    <div class="layui-input-inline">
+                        <select name="PatrolType" lay-verify="" placeholder="" class="layui-select" id="txtPatrolType">
+                            <option></option>
+                            <option value="0">定期</option>
+                            <option value="1">专项</option>
+                            <option value="2">其他</option>
+                        </select>
+                    </div>
+                    <a class="layui-btn" id="btnSearch">查询</a>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table" id="cominfos">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">巡查编号</th>
+                        <th>供应商名称</th>
+                        <th>供应商编号</th>
+                        <th>巡查类型</th>
+                        <th>巡查内容</th>
+                        <th>巡查备注</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr data-id="{{c.id}}"
+                    data-patrolallotid="{{c.PatrolAllotId}}"
+                    data-patrolnumber="{{c.PatrolNumber}}"
+                    data-suppliername="{{c.SupplierName}}"
+                    data-suppliernumber="{{c.SupplierNumber}}"
+                    data-patroltype="{{c.PatrolTypeName}}"
+                    data-patrolcontent="{{c.PatrolContent}}"
+                    data-patrolremark="{{c.PatrolRemark}}">
+                    <td>{{c.PatrolNumber}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.SupplierNumber}}</td>
+                    <td>{{c.PatrolTypeName}}</td>
+                    <td>{{c.PatrolContent}}</td>
+                    <td>{{c.PatrolRemark}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+
+            $(document).on('click', 'tr', function () {
+                top.$.find('iframe[src="' + $("#hdpagetype").val() + '"]')[0].contentWindow.setinfo(
+                    $(this).data("id"),
+                    $(this).data("patrolallotid"),
+                    $(this).data("patrolnumber"),
+                    $(this).data("suppliername"),
+                    $(this).data("suppliernumber"),
+                    $(this).data("patroltype"),
+                    $(this).data("patrolcontent"),
+                    $(this).data("patrolremark")
+                    );
+                top.layui.layer.close(top.window.topdialog);
+            });
+
+            $(document).on('click', '#btnSearch', function () {
+                inits();
+            });
+
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("数据加载中……");
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraPatrolRecord/TraPatrolRecordDetailCount",
+                async: false,
+                data: { patrolType: $("#txtPatrolType").val() },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                patrolType: $("#txtPatrolType").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraPatrolRecord/TraPatrolRecordDetailList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}
+

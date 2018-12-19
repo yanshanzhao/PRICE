@@ -1,0 +1,248 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    供应商名称：
+                    <div class="layui-input-inline">
+                        <input id="txtSupplierName" type="text" value="" placeholder="供应商名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp; 
+                    考核类型：
+                    <div class="layui-input-inline"> 
+                        <select type="text" name="CheckFromType" lay-verify="required" placeholder="" class="layui-input" id="txtCheckFromType">
+                            <option></option>
+                            <option value="0">调拨</option>
+                            <option value="1">配送(干线)</option>
+                            <option value="2">配送(终端)</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    考核年：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selYears"></select>
+                    </div>
+                    &nbsp;&nbsp;
+                    考核月：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selMonths">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline" style="margin-left:10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">序号</th>
+                        <th>供应商名称</th>
+                        <th>供应商编号</th>
+                        <th>RDC</th>
+                        <th>考核类型</th>
+                        <th>基本项</th>
+                        <th>减分项</th>
+                        <th>加分项</th>
+                        <th>其他项</th>
+                        <th>本月得分</th>
+                        <th>本月排名</th>
+                        <th>上月得分</th>
+                    </tr>
+                </thead>
+                <tbody id="userlist" style="min-height:400px;"></tbody>
+            </table>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.Number}}</td>
+                    <td>{{c.SupplierName}}</td>
+                    <td>{{c.TransportNumber}}</td>
+                    <td>{{c.DepartmentName}}</td>
+                    <td>{{c.CheckFromTypeName}}</td>
+                    <td>{{c.Basicitems}}</td>
+                    <td>{{c.Reductionitems}}</td>
+                    <td>{{c.Additems}}</td>
+                    <td>{{c.Otheritems}}</td>
+                    <td>{{c.MonthScore}}</td>
+                    <td>{{c.MonthRank}}</td>
+                    <td>{{c.BeforeScore}}</td>
+                    {{/each}}
+            </script>
+        </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+
+            // 考核年
+            GetYear();
+
+            // 考核月
+            var myDate = new Date();
+            var CurrentMonth = myDate.getMonth(); 
+            $("#selMonths").val(CurrentMonth);
+
+            // 查询
+            SearchData();
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/SupplierQuery/TraSuppMonthCheck/TraSuppMonthCheckExport'
+                    , {
+                        supplierName: $("#txtSupplierName").val(),
+                        checkFromType: $("#txtCheckFromType").val(),
+                        years: $("#selYears").val(),
+                        months: $("#selMonths").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=运输供应商月度查询";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+        });
+
+        // 考核年
+        function GetYear() {
+
+            // 时间
+            var myDate = new Date();
+
+            var CurrentYear = myDate.getFullYear();
+
+            // 起始年份
+            var startYear = CurrentYear - 5;
+
+            //结束年份
+            var endYear = CurrentYear + 5;
+
+            for (var i = startYear; i <= endYear; i++) {
+                $("#selYears").append(new Option(i, i));
+            }
+            $("#selYears").val(CurrentYear);
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/SupplierQuery/TraSuppMonthCheck/TraSuppMonthCheckAmount",
+                async: false,
+                data: {
+                    supplierName: $("#txtSupplierName").val(),
+                    checkFromType: $("#txtCheckFromType").val(),
+                    years: $("#selYears").val(),
+                    months: $("#selMonths").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                supplierName: $("#txtSupplierName").val(),
+                checkFromType: $("#txtCheckFromType").val(),
+                years: $("#selYears").val(),
+                months: $("#selMonths").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/SupplierQuery/TraSuppMonthCheck/TraSuppMonthCheckList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+    </script>
+}

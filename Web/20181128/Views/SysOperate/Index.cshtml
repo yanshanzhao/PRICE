@@ -1,0 +1,98 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+
+        <blockquote class="layui-elem-quote">
+            温馨提示：请谨慎操作按钮编码，按钮编码已固定集成。
+        </blockquote>
+
+        <div id="userlist"></div>
+
+        <script type="text/html" id="temslist">
+            {{each list as c}}
+            <div class="layui-btn-group" style="margin-bottom:5px;">
+                <div class="layui-btn layui-btn-primary">
+                    {{c.OperateName}}({{c.Code}})
+                    <em onclick="modify('{{c.OperateId}}')"><i class="layui-icon"></i></em>
+                    <em onclick="del('{{c.OperateId}}')"><i class="layui-icon"></i></em>
+                </div>
+            </div>
+            {{/each}}
+
+            <div class="layui-btn-group">
+                <div class="layui-btn layui-btn-primary"><em onclick="adds()"><i class="layui-icon"></i>添加按钮</em></div>
+            </div>
+        </script>
+    </div>
+    </div>
+    @section scripts{
+        <script>
+
+            $(function () {
+                inits();
+            });
+
+            function inits() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '/sysoperate/operatelist',
+                    success: function (data) {
+                        $("#userlist").html(template('temslist', { list: data }));
+
+                        //if (data.length == 0) {
+                        //    $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                        //}
+                    }
+                });
+            }
+
+            function modify(ids) {
+                top.window.operate = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '修改按钮',
+                    content: '/sysoperate/edit?ids='+ids,
+                    area: ['350px', '360px'],
+                });
+            }
+
+            function adds() {
+                top.window.operate = top.layui.layer.open({
+                    type: 2,
+                    shade: 0.2,
+                    title: '添加按钮',
+                    content: '/sysoperate/add',
+                    area: ['350px', '360px'],
+                });
+            }
+
+            function del(ids) {
+                top.layer.confirm('您确定删除此按钮吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/sysoperate/delete',
+                        data: { id: ids },
+                        dataType:"json",
+                        success: function (data) {
+                            if (data.flag== "ok") {
+                                top.layer.closeAll();
+                                inits();
+                            }
+                            if (data.flag == "exist") {
+                                top.layer.msg("请先解除菜单与此按钮关联,然后再删除");
+                            }
+                            if (data.flag == "fail") {
+                                top.layer.msg("删除失败");
+                            }
+                        }
+                    });
+                }, function () {
+
+                });
+            }
+
+        </script>
+    }

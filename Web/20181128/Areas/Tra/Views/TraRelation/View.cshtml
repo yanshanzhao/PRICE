@@ -1,0 +1,83 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraRelationModel
+<form class="layui-form layui-form-pane">
+    <div class="layui-card">
+        <div class="layui-card-header">维护关系信息编辑</div>
+        <div class="layui-card-body">
+            <input id="hdRelationId" value="@Model.RelationId" type="hidden" /> 
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" value="@Model.SupplierName" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">运输供应商编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtTransportNumber" value="@Model.TransportNumber" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">考核年</label>
+                <div class="layui-input-inline">
+                    <input id="txtYear" value="@Model.CheckYear" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">服务等级名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSuppServiceName" value="@Model.SuppServiceName" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">得分</label>
+                <div class="layui-input-inline">
+                    <input id="txtScore" value="@Model.Score" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">培养期望</label>
+                <div class="layui-input-inline">
+                    <input id="txtCultureContent" name="CultureContent" value="@Model.CultureContent" type="text" class="layui-input" lay-verify="required" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;">管理策略</label>
+                <div class="layui-input-block">
+                    <textarea id="txtManageContent" name="ManageContent" lay-verify="required" class="layui-textarea" style="width:95%;" disabled>@Model.ManageContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width:12%;">备注</label>
+                    <div class="layui-input-block">
+                        <textarea id="txtRemark" name="Remark" lay-verify="required" maxlength="200" class="layui-textarea" style="width:95%;" disabled>@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:45%;margin:0 auto !important;"> 
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+             
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraRelation/Index';
+            });
+        });
+
+        $(function () { 
+        }); 
+    </script>
+}

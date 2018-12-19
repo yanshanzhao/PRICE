@@ -1,0 +1,329 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<form class="layui-form layui-form-pane" action="/Tra/TraSupplierTransit/AddSupplierTransit" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商选择信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <div class="layui-btn" id="btnChooseSupplier" title="点击选取供应商">运输供应商信息</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>运输选择编号</label>
+                <div class="layui-input-inline" style="width:205px;">
+                    <input id="txtChooseNumber" type="text" class="layui-input" lay-verify="supplier" disabled>
+                    <input id="hdChooseId" name="ChooseId" type="hidden" placeholder="运输选择ID" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:130px;"><em>*</em>申请时间</label>
+                <div class="layui-input-inline" style="width:205px;">
+                    <input id="txtApplyTime" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商名称</label>
+                <div class="layui-input-inline" style="width:22%;">
+                    <input id="txtSupplierName" type="text" class="layui-input" lay-verify="supplier" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:12%;"><em>*</em>运输供应商编号</label>
+                <div class="layui-input-inline" style="width:22%;">
+                    <input id="txtTransportNumber" type="text" class="layui-input" lay-verify="supplier" disabled>
+                    <input id="hdTransportId" name="TransportId" type="hidden" placeholder="运输供应商ID" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">供应商运作信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:13%;">SCM供应商编号</label>
+                <div class="layui-input-inline" style="width:53%;">
+                    <input id="txtSCMNumber" name="SCMNumber" type="text" maxlength="160" class="layui-input">
+                </div>
+                <label style="color:lightcoral;">❀多个时需用英文逗号隔开❀</label>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width:13%;">采购系统供应商编号</label>
+                <div class="layui-input-inline" style="width:53%;">
+                    <input id="txtProcurementNumber" name="procurementnumber" type="text" maxlength="200" class="layui-input">
+                </div>
+                <label style="color:lightcoral;">❀多个时需用英文逗号隔开❀</label>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">运作时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtOfficialTime" name="OfficialTime" type="text" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>签订合同</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="signContract" lay-text="是|否">
+                    <input id="hdSignContract" name="SignContract" type="hidden" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item divSignContract" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>合同编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractNumber" name="ContractNumber" type="text" maxlength="60" class="layui-input" lay-verify="Contract">
+                </div>
+            </div>
+            @*<div class="layui-form-item divSignContract" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合同开始时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractBeginTime" name="ContractBeginTime" type="text" placeholder="" class="layui-input" lay-verify="Contract">
+                </div>
+            </div>
+            <div class="layui-form-item divSignContract" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">合同结束时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtContractEndTime" name="ContractEndTime" type="text" placeholder="" class="layui-input" lay-verify="Contract">
+                </div>
+            </div>*@
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>结账周期</label>
+                <div class="layui-input-inline">
+                    <input id="txtAccountsPeriod" name="AccountsPeriod" lay-verify="required" type="text" maxlength="60" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>押金金额</label>
+                <div class="layui-input-inline">
+                    <input id="txtDeposit" name="Deposit" value="0" type="text" maxlength="200" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>参与培训</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked lay-skin="switch" lay-filter="isCultivate" lay-text="是|否">
+                    <input id="hdIsCultivate" name="IsCultivate" type="hidden" value="1" />
+                </div>
+            </div>
+            <div class="layui-form-item divOperationNumber" style="width:50%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>培训编号</label>
+                <div class="layui-input-inline">
+                    <input id="txtOperationNumber" type="text" maxlength="60" class="layui-input" lay-verify="Cultivate" disabled>
+                    <input id="hdOperationClaimId" name="OperationClaimId" type="hidden" placeholder="运作要求ID" />
+                </div> 
+                <div class="layui-btn" id="btnChoose">选择</div>
+            </div>
+            <div class="layui-form-item divCultivateIntro">
+                <label class="layui-form-label"><em>*</em>培训简介</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCultivateIntro" name="CultivateIntro" maxlength="600" class="layui-textarea" lay-verify="Cultivate"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">合作事项说明</label>
+                <div class="layui-input-block">
+                    <textarea id="txtCooperationRemark" name="CooperationRemark" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtApplyTime'
+              , type: 'datetime'
+              , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+            laydate.render({
+                elem: '#txtOfficialTime'
+              , type: 'datetime'
+              , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+
+            //// 开始日期
+            //var insStart = laydate.render({
+            //    elem: '#txtContractBeginTime',  
+            //    format: 'yyyy-MM-dd HH:mm:ss',
+            //    done: function (value, date) {
+            //        // 更新结束日期的最小日期
+            //        insEnd.config.min = lay.extend({}, date, {
+            //            month: date.month - 1
+            //        });
+
+            //        // 自动弹出结束日期的选择器
+            //        insEnd.config.elem[0].focus();
+            //    }
+            //});
+
+            //// 结束日期
+            //var insEnd = laydate.render({
+            //    elem: '#txtContractEndTime',
+            //    format: 'yyyy-MM-dd HH:mm:ss', 
+            //    btns: ['clear', 'confirm'],
+            //    done: function (value, date) {
+            //        //更新开始日期的最大日期
+            //        insStart.config.max = lay.extend({}, date, {
+            //            month: date.month - 1
+            //        });
+            //    }
+            //}); 
+
+            // 开关
+            form.on('switch(signContract)', function (data) {
+                $("#hdSignContract").val(this.checked ? "1" : "0");
+
+                if ($("#hdSignContract").val() == 1) {
+                    $(".divSignContract").show();
+                } else if ($("#hdSignContract").val() == 0) {
+                    $(".divSignContract").hide();
+
+                    // 合同编号
+                    $("#txtContractNumber").val("");
+
+                    //// 合同开始时间
+                    //$("#txtContractBeginTime").val("");
+
+                    //// 合同结束时间
+                    //$("#txtContractEndTime").val("");
+                }
+            });
+            form.on('switch(isCultivate)', function (data) {
+                $("#hdIsCultivate").val(this.checked ? "1" : "0");
+
+                if ($("#hdIsCultivate").val() == 1) {
+                    $(".divCultivateIntro").show();
+                    $(".divOperationNumber").show();
+                } else if ($("#hdIsCultivate").val() == 0) {
+                    $(".divCultivateIntro").hide();
+                    $(".divOperationNumber").hide();
+
+                    // 培训简介
+                    $("#txtCultivateIntro").val("");
+                    $("#txtOperationNumber").val("");
+                    $("#hdOperationClaimId").val("0");
+                }
+            });
+
+            // 验证
+            form.verify({
+                supplier: function (value, item) {
+                    if (!value) {
+                        return '运输供应商信息不能为空！';
+                    }
+                },
+                Contract: function (value, item) {
+                    if ($("#hdSignContract").val() == 1) {
+                        if (!value) {
+                            return '合同信息不能为空！';
+                        }
+                    }
+                },
+                Cultivate: function (value, item) {
+                    if ($("#hdIsCultivate").val() == 1) {
+                        if (!value) {
+                            return '培训同信息不能为空！';
+                        }
+                    }
+                }
+            });
+
+            // 提交保存
+            form.on('submit(btnSave)', function (data) {
+                // 押金金额
+                if ($("#txtDeposit").val() == "") {
+                    $("#txtDeposit").val(0);
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraSupplierTransit/AddSupplierTransit",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功！');
+                            location.href = '/Tra/TraSupplierTransit/Index';
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraSupplierTransit/Index';
+            });
+
+            // 运输供应商信息
+            $(document).on('click', '#btnChooseSupplier', function () {
+
+                // 运输供应商信息
+                GetSupplier();
+            });
+             
+            // 选择培训编号
+            $(document).on('click', '#btnChoose', function () {
+
+                // 培训信息
+                GetOperation();
+            }); 
+        });
+
+        // 设置运输供应商信息 (运输选择ID,运输选择编号,申请时间,供应商名称,运输供应商ID,运输供应商编号)
+        function setinfo(chooseId, chooseNumber, applyTime, suppliername, transportId, transportNumber) {
+            $("#hdChooseId").val(chooseId);
+            $("#txtChooseNumber").val(chooseNumber);
+            $("#txtApplyTime").val(applyTime);
+            $("#txtSupplierName").val(suppliername);
+            $("#hdTransportId").val(transportId);
+            $("#txtTransportNumber").val(transportNumber);
+        }
+
+        // 运输供应商信息
+        function GetSupplier() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择运输供应商信息',
+                content: '/Tra/TraSupplierTransit/ChooseSupplier?url=/Tra/TraSupplierTransit/Index',
+                area: ['700px', '470px'],
+            });
+        }
+
+        // 设置培训信息 (运作要求ID,运作编号)
+        function OperationSetInfo(operationClaimId, operationNumber) {
+            $("#hdOperationClaimId").val(operationClaimId);
+            $("#txtOperationNumber").val(operationNumber);
+        }
+
+        // 培训信息
+        function GetOperation() { 
+            if ($("#hdTransportId").val() == "") {
+                layui.layer.msg('请先选择运输供应商！');
+                return false;
+            } 
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择培训信息',
+                content: '/Tra/TraSupplierTransit/ChooseOperation?url=/Tra/TraSupplierTransit/Index&tTransportId='+$("#hdTransportId").val(),
+                area: ['700px', '470px'],
+            });
+        }
+    </script>
+}

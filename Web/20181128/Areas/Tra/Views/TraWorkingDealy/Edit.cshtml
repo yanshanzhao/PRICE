@@ -1,0 +1,273 @@
+﻿@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+@model SRM.Model.Tra.TraWorkingDealyModel
+
+<form class="layui-form layui-form-pane" action="/Tra/TraWorkingDealy/EditTraWorkingDealy" method="post">
+    <div class="layui-card" id="clearDivinput">
+        <div class="layui-card-header">运输供应商信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">供应商名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtSupplierName" type="text" value="@Model.SupplierName" lay-verify="supplier" class="layui-input" disabled>
+                    <input id="hdTransportId" type="hidden" name="TransportId" value="@Model.TransportId" />
+                    <input id="hdDelayId" type="hidden" name="DelayId" value="@Model.DelayId" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label" style="width:130px;">运输供应商编号</label>
+                <div class="layui-input-inline" style="width:170px;">
+                    <input id="txtTransportNumber" name="TransportNumber" type="text" value="@Model.TransportNumber" lay-verify="supplier" class="layui-input" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运作数据信息</div>
+        <div class="layui-card-body" style="overflow:hidden;height:245px;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>责任环节</label>
+                <div class="layui-input-inline">
+                    <select id="txtCheckType" name="CheckType" lay-verify="required" class="select">
+                        <option></option>
+                        <option value="0">调拨</option>
+                        <option value="1">配送(干线)</option>
+                        <option value="2">配送(终端)</option>
+                    </select>
+                    <input id="hdCheckType" type="hidden" value="@Model.CheckType" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>迟到类型</label>
+                <div class="layui-input-inline">
+                    <select id="txtWorkingType" name="WorkingType" lay-verify="required" class="select">
+                        <option></option>
+                        <option value="0">到货</option>
+                        <option value="1">到车</option>
+                        <option value="2">发货</option>
+                        <option value="3">其他</option>
+                    </select>
+                    <input id="hdWorkingType" type="hidden" value="@Model.WorkingType" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label"><em>*</em>发货日期</label>
+                <div class="layui-input-inline">
+                    <input id="txtWorkingTime" name="WorkingTime" type="text" lay-verify="required|workingtime" value="@Model.WorkingTime" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">客户ID</label>
+                <div class="layui-input-inline">
+                    <input id="txtCustomerId" type="text" name="CustomerId" value="@Model.CustomerId" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">物流单号</label>
+                <div class="layui-input-inline">
+                    <input id="txtLogisticsNumber" type="text" name="LogisticsNumber" value="@Model.LogisticsNumber" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">异常客户姓名</label>
+                <div class="layui-input-inline">
+                    <input id="txtAbnormalCustomer" type="text" name="AbnormalCustomer" value="@Model.AbnormalCustomer" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">到达站</label>
+                <div class="layui-input-inline">
+                    <input id="txtArrivalSite" type="text" name="ArrivalSite" value="@Model.ArrivalSite" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">异常类型</label>
+                <div class="layui-input-inline">
+                    <input id="txtNormName" type="text" name="NormName" value="@Model.NormName" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">预计到货时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtPlanTime" type="text" name="PlanTime" value="@Model.PlanTime" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">实际到货时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtActualTime" type="text" name="ActualTime" value="@Model.ActualTime" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">迟到原因</label>
+                <div class="layui-input-inline">
+                    <input id="txtDelayRemark" type="text" name="DelayRemark" value="@Model.DelayRemark" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-inline" style="margin-left:350px;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证运作时间
+            laydate.render({
+                elem: '#txtWorkingTime'
+
+            });
+
+            //验证运作时间
+            laydate.render({
+                elem: '#txtActualTime'
+                , type: 'datetime'
+                , format: 'yyyy/MM/dd HH:mm:ss'
+
+            });
+
+            //验证运作时间
+            laydate.render({
+                elem: '#txtPlanTime'
+                , type: 'datetime'
+                , format: 'yyyy/MM/dd HH:mm:ss'
+
+            });
+            form.verify({
+                supplier: function (value, item) {
+                    if (!value) {
+                        return '运输供应商信息不能为空！';
+                    }
+                },
+                carrynumber: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if ($("#txtCarryNumber").val() == 0) {
+                        return '运载数量不能为0！';
+                    }
+                },
+                transportcount: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if ($("#txtWorkingType").val() == 3) {
+                        if ($("#txtTransportCount").val() == 0) {
+                            return '运输次数不能为0！';
+                        }
+                    }
+                },
+                workingtime: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    var date = new Date();
+                    var seperator1 = "/";
+                    var year = date.getFullYear();
+                    var month = date.getMonth() + 1;
+                    var strDate = date.getDate();
+                    if (month >= 1 && month <= 9) {
+                        month = "0" + month;
+                    }
+                    if (strDate >= 0 && strDate <= 9) {
+                        strDate = "0" + strDate;
+                    }
+                    var sDate1 = year + seperator1 + month + seperator1 + strDate;
+                    var sDate2 = $("#txtWorkingTime").val();
+                    var aDate, oDate1, oDate2, iDays;
+                    aDate = sDate1.split("-");
+                    oDate1 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);  //转换为yyyy-MM-dd格式
+                    aDate = sDate2.split("-");
+                    oDate2 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);
+                    iDays = parseInt((oDate1 - oDate2) / 1000 / 60 / 60 / 24); //把相差的毫秒数转换为天数
+                    if (iDays < 0) {
+                        return '当前时间必须大于运作时间！';
+                    }
+                    //else if (iDays > 3) {
+                    //    return '当前时间和运作时间不能超过3天限制！';
+                    //}
+                }
+            });
+            // 保存
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraWorkingDealy/EditTraWorkingDealy",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Tra/TraWorkingDealy/Index';
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content)
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+              
+            $("#txtWorkingType").val($("#hdWorkingType").val()); //运作类型
+
+            $("#txtCheckType").val($("#hdCheckType").val()); //考核类型
+
+            // 运作数据信息
+            $(document).on('click', '#btnTraWorkingDealy', function () {
+                GetTraWorkingDealy();
+            });
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraWorkingDealy/Index';
+            });
+        });
+
+        //判断两个日期之间的天数差
+        function DateDifference(Date1, Date2) { //Date1和Date2是2017-07-10格式
+            var sDate, newDate1, newDate2, Days
+            aDate = Date1.split("-");
+            newDate1 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]); //转换为07-10-2017格式
+            aDate = Date2.split("-");
+            newDate2 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);
+            Days = parseInt(Math.abs(newDate1 - newDate2) / 1000 / 60 / 60 / 24); //把差的毫秒数转换为天数
+            return Days;
+        }
+
+        //计算两个日期天数差的函数，通用
+        function dateDiff(sDate2) {
+            var sDate1 = new Date().pattern("yyyy-MM-dd");
+            var sDate2 = new Date().pattern("yyyy-MM-dd");
+            var aDate, oDate1, oDate2, iDays;
+            aDate = sDate1.split("-");
+            oDate1 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);  //转换为yyyy-MM-dd格式
+            aDate = sDate2.split("-");
+            oDate2 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);
+            iDays = parseInt((oDate1 - oDate2) / 1000 / 60 / 60 / 24); //把相差的毫秒数转换为天数
+            return iDays;  //返回相差天数
+        }
+
+        // 运输供应商信息
+        function setinfo(transportid, suppliername, transportnumber) {
+            $("#hdTransportId").val(transportid);
+            $("#txtSupplierName").val(suppliername);
+            $("#txtTransportNumber").val(transportnumber);
+        }
+
+        // 运输供应商信息
+        function GetTraWorkingDealy() {
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '运输供应商信息',
+                content: '/Tra/TraWorkingDealy/TraWorkingSupplier?url=/Tra/TraWorkingDealy/Index',
+                area: ['1100px', '600px'],
+            });
+        }
+    </script>
+}
+
+

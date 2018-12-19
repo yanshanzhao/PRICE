@@ -1,0 +1,395 @@
+﻿@{
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    元件编号：
+                    <div class="layui-input-inline">
+                        <input id="txtCheckComponentNumber" style="width:173px;" type="text" value="" placeholder="元件编号" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    元件名称：
+                    <div class="layui-input-inline">
+                        <input id="txtCheckComponentName" style="width:173px;" type="text" value="" placeholder="元件名称" class="layui-input">
+                    </div>
+                    &nbsp;&nbsp;
+                    考核类型：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selCheckComponentType">
+                            <option value="">请选择</option>
+                            <option value="0">调拨</option>
+                            <option value="1">运输(干线)</option>
+                            <option value="2">运输(配送)</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    项目：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selProject">
+                            <option value="">请选择</option>
+                            <option value="0">基础项</option>
+                            <option value="1">加分项</option>
+                            <option value="2">扣分项</option>
+                            <option value="3">其他项</option>
+                        </select>
+                    </div>                    
+                    <br />
+                    公式计算：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selIsFormula">
+                            <option value="">请选择</option>
+                            <option value="0">否</option>
+                            <option value="1">是</option> 
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;<label style="margin-left:25px;"></label>
+                    状态：
+                    <div class="layui-input-inline">
+                        <select class="select" id="selState">
+                            <option value="" selected>请选择</option>
+                            <option value="1">创建</option>
+                            <option value="5">提交</option>
+                            <option value="20">作废</option>
+                        </select>
+                    </div>
+                    &nbsp;&nbsp; 
+                    创建时间：
+                    <div class="layui-input-inline">
+                        <input id="txtCreateTime" style="width:173px;" type="text" placeholder="创建时间" class="layui-input">
+                    </div>
+                    <div class="layui-inline" style="margin:10px 0 0 10px;">
+                        <a class="layui-btn" id="btnSearch">查询</a>
+                        <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+                        <a class="layui-btn layui-btn-primary " id="btnExport">导出</a>
+                    </div>
+                </div>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">元件编号</th>
+                                <th>元件名称</th>
+                                <th>考核类型</th>
+                                <th>项目</th>
+                                <th>考核指标</th>
+                                <th>权重</th>
+                                <th>考核标准</th>
+                                <th>公式计算</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td>{{c.CheckComponentNumber}}</td>
+                    <td>{{c.CheckComponentName}}</td>
+                    <td>{{c.TypeName}}</td>
+                    <td>{{c.ProjectName}}</td>
+                    <td>{{c.CheckIndex}}</td>
+                    <td>{{c.Weight}}</td>
+                    <td>{{c.CheckStandard}}</td>
+                    <td>{{c.IsFormulaName}}</td>
+                    <td>{{c.StateName}}</td>
+                    <td>{{c.CreateTime}}</td>
+                    <td>
+                        {{if c.State==1}}
+                        <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.CheckComponentId}}">
+                            <i class="iconfont icon-edit"></i>编辑
+                        </a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.CheckComponentId}}">
+                            <i class="layui-icon"></i>提交
+                        </a>
+                        <a class="layui-btn layui-btn-danger layui-btn-sm btnInvalid" data-id="{{c.CheckComponentId}}">
+                            <i class="layui-icon"></i>作废
+                        </a>
+                        {{/if}}
+                        <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.CheckComponentId}}">
+                            <i class="layui-icon"></i>查看
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <script type="text/html" id="temslists">
+            <div class="layui-table-fixed layui-table-fixed-r">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody style="min-height:400px;">
+                        {{each list as c}}
+                        <tr>
+                            <td lay-data="{width:80, sort: true, fixed: 'right'}">
+                                {{if c.State==1}}
+                                <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.CheckComponentId}}">
+                                    <i class="iconfont icon-edit"></i>编辑
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnSubmit" data-id="{{c.CheckComponentId}}">
+                                    <i class="layui-icon"></i>提交
+                                </a>
+                                <a class="layui-btn layui-btn-danger layui-btn-sm btnInvalid" data-id="{{c.CheckComponentId}}">
+                                    <i class="layui-icon"></i>作废
+                                </a>
+                                {{/if}}
+                                <a class="layui-btn layui-btn-normal layui-btn-sm btnView" data-id="{{c.CheckComponentId}}">
+                                    <i class="layui-icon"></i>查看
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script> 
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'laydate', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table, laydate = layui.laydate;
+
+            // 时间样式
+            laydate.render({
+                elem: '#txtCreateTime'
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 绑定事件
+        $(function () {
+             
+            // 查询
+            SearchData();
+
+            // 新增
+            $(document).on('click', '#btnAdd', function () {
+                AddData();
+            });
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+
+            // 导出
+            $(document).on('click', '#btnExport', function () {
+                top.window.export = top.layui.layer.load(1, { shade: [0.3, '#000'] });
+                $.post('/Tra/TraMonthCheckComponent/Export'
+                    , {
+                        checkComponentNumber: $("#txtCheckComponentNumber").val(),
+                        checkComponentName: $("#txtCheckComponentName").val(),
+                        checkComponentType: $("#selCheckComponentType").val(),
+                        project: $("#selProject").val(),
+                        isFormula: $("#selIsFormula").val(),
+                        state: $("#selState").val(),
+                        createTime: $("#txtCreateTime").val()
+                    }
+                    , function (data) {
+                        if (data.flag == 'noauth') {
+                            top.layui.layer.close(top.window.export);
+                            top.layui.layer.msg(data.content);
+                        }
+                        if (data.flag == 'success') {
+                            location.href = '/excel/down?guid=' + data.guid + "&name=绩效考核元件";
+                            top.layui.layer.close(top.window.export);
+                        }
+                    }, 'json');
+            });
+
+            // 编辑
+            $(document).on('click', '.btnEdit', function () {
+                var tId = $(this).data("id"); 
+                ModifyData(tId);
+            });
+
+            // 提交
+            $(document).on('click', '.btnSubmit', function () {
+                var tId = $(this).data("id"); 
+                SubmitData(tId);
+            });
+
+            // 作废
+            $(document).on('click', '.btnInvalid', function () {
+                var tId = $(this).data("id"); 
+                InvalidData(tId);
+            });
+
+            // 查看
+            $(document).on('click', '.btnView', function () {
+                var tId = $(this).data("id");
+                ShowData(tId);
+            });
+        });
+         
+        // 新增
+        function AddData() {
+            location.href = '/Tra/TraMonthCheckComponent/Add';
+        }
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#userlist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraMonthCheckComponent/MonthCheckComponentAmount",
+                async: false,
+                data: {
+                    checkComponentNumber: $("#txtCheckComponentNumber").val(),
+                    checkComponentName: $("#txtCheckComponentName").val(),
+                    checkComponentType: $("#selCheckComponentType").val(),
+                    project: $("#selProject").val(),
+                    isFormula: $("#selIsFormula").val(),
+                    state: $("#selState").val(),
+                    createTime: $("#txtCreateTime").val() 
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) { 
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checkComponentNumber: $("#txtCheckComponentNumber").val(),
+                checkComponentName: $("#txtCheckComponentName").val(),
+                checkComponentType: $("#selCheckComponentType").val(),
+                project: $("#selProject").val(),
+                isFormula: $("#selIsFormula").val(),
+                state: $("#selState").val(),
+                createTime: $("#txtCreateTime").val() 
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraMonthCheckComponent/MonthCheckComponentList',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+                    $(".forzentable").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 编辑
+        function ModifyData(tId, tState) { 
+            location.href = '/Tra/TraMonthCheckComponent/Edit?tId=' + tId;
+        }
+
+        // 提交
+        function SubmitData(tId) { 
+            top.layer.confirm('您确定提交此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraMonthCheckComponent/SubmitState',
+                    data: { tId: tId},
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            top.layer.msg(data.content);
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        } 
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 作废
+        function InvalidData(tId) { 
+            top.layer.confirm('您确定作废此数据吗？', ['确定', '取消'], function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Tra/TraMonthCheckComponent/InvalidState',
+                    data: { tId: tId },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.flag == "success") {
+                            top.layer.closeAll();
+                            SearchData();
+                        }
+                        if (data.flag == "noauth") {
+                            top.layer.msg(data.content);
+                        }
+                        if (data.flag == "fail") {
+                            top.layer.msg(data.content);
+                        }
+                    }
+                });
+            }, function () { }
+            );
+        }
+
+        // 查看
+        function ShowData(tId) {
+            location.href = '/Tra/TraMonthCheckComponent/View?tId=' + tId;
+        }
+    </script>
+}

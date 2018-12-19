@@ -1,0 +1,330 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input value="" placeholder="请输入线路名称" class="layui-input" type="text" id="ikeyWord">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="TransitBeginName" maxlength="50"  placeholder="请选择开始位置" id="iTransitBeginName" class="layui-input" readonly>
+                    <input type="hidden" name="TransitBeginId" id="hdbegin" value="-1" />
+                </div>
+                <i class="layui-icon layui-icon-delete clearBeginName"></i>
+                <div class="layui-input-inline">
+                    <input type="text" name="TransitEndName" maxlength="50"  placeholder="请选择结束位置" class="layui-input" id="iTransitEndName" readonly>
+                    <input type="hidden" name="TransitEndId" id="hdend" value="-1" />
+                </div>
+                <i class="layui-icon layui-icon-delete clearEndName"></i>
+              
+                <a class="layui-btn" id="btnSearch">查询</a>
+            
+            </div>
+
+
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-normal " id="btnAdd">添加</a>
+             
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-normal " id="btnImport">导入</a>
+
+            </div>
+            <div class="layui-inline">
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+            <div class="layui-inline">
+                <a id="btnDown" style="cursor:pointer;margin-left:20px;">导入模板下载</a>
+            </div>
+        </blockquote>
+
+        <input type="hidden" id="hdsuppid" value="@ViewBag.suppid" />
+        <div class="layui-form">
+
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th>运输线路</th>
+                                <th>开始位置</th>
+                                <th>结束位置</th>
+                                <th>发车时间</th>
+                                <th>到达时间</th>
+                                <th>营业时间</th>
+                                <th>运作时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userlist" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+            
+            </div> 
+                   <div id="pageinfos" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr>
+                        <td style="overflow:hidden;">{{c.TransitLineNumber}}</td>
+                        <td>{{c.TransitBeginName}}</td>
+                        <td>{{c.TransitEndName}}</td>
+                        <td>{{c.DepartureTime}}</td>
+                        <td>{{c.ArrivalTime}}</td>
+                        <td>{{c.BusinessHours}}</td>
+                        <td>{{c.OperationTime}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnEdit" data-id="{{c.TransitLineId}}"><i class="iconfont icon-edit"></i>编辑</a>
+                            <a class="layui-btn layui-btn-danger layui-btn-sm  btnDel" data-id="{{c.TransitLineId}}"><i class="layui-icon"></i><em onclick="del('{{c.TransitLineId}}')">作废</em></a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+
+            </div>
+        <div style="height:0px;position:relative;width:0px;overflow:hidden;">
+            <input id="resetDialog" type="text" style="margin:30px 15px 10px 15px;height:30px;width:180px;" />
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer','upload'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+            layui.upload.render({
+                elem: '#btnImport'
+                     , url: '/index/upload?type=tra'
+                     , accept: 'file'
+                     , auto: true
+                     , done: function (res) {
+                         if (res.flag == "ok") {
+                             var path = res.path;
+                             var index = layer.load(1, {
+                                 shade: [0.3, '#000'] //0.1透明度的白色背景
+                             });
+                             $.ajax({
+                                 type: "POST",
+                                 url: "/supplier/SupplierTransport/ImportInfo",
+                                 async: false,
+                                 data: { path: path, suppid: $("#hdsuppid").val() },
+                                 dataType: 'json',
+                                 success: function (data) {
+                                     if (data.flag == 'ok') {
+
+                                         // 提示内容
+                                         var content = "";
+
+                                         if (data.failcount != 0) {
+                                             content = '上传成功' + data.successcount + '条记录,上传失败' + data.failcount + '条记录<br>' + data.content + '上传失败!';
+                                         }
+                                         else {
+                                             content = '上传成功' + data.successcount + '条记录！';
+                                         }
+                                         top.layui.layer.msg(content);
+                                         inits();
+                                     }
+                                     if (data.flag == 'fail') {
+                                          
+                                         top.layui.layer.msg(content); 
+                                     }
+                                     layui.layer.close(index);
+                                 }
+                             });
+
+                         }
+                         return false;
+                     }
+            });
+        });
+
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            inits();
+
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/supplier/SupplierTransport/Index';
+            });
+
+            $(document).on('click', '#btnAdd', function () {
+                add();
+            });
+            $(document).on('click', '#btnDown', function () {
+                location.href = '/excel/downtemplate?name=line&displayname=运输供应商线路模板';
+            });
+            
+
+            $(document).on('click', '#btnSearch', function () {
+                search();
+            });
+
+            // 清除条件(起迄位置)
+            $(document).on('click', '.clearBeginName', function () {
+                $("#iTransitBeginName").val("");
+                $("#hdbegin").val("-1");
+            });
+            $(document).on('click', '.clearEndName', function () {
+                $("#iTransitEndName").val("");
+                $("#hdend").val("-1");
+            });
+             
+            $(document).on('click', '#iTransitBeginName', function () {
+                GetAreaName("Begin");
+            });
+            $(document).on('click', '#iTransitEndName', function () { 
+                GetAreaName("End");
+            });
+
+            $(document).on('click', '.btnEdit', function () {
+                var ids = $(this).data("id");
+                modify(ids);
+            });
+
+            $(document).on('click', '.btnDel', function () {
+                var ids = $(this).data("id");
+                del(ids);
+            });
+        });
+
+        function inits() {
+            var flagCount = 0;
+            pageIndex = 0;
+            $("#userlist").html("<tr class='loadings' ><td colspan=7>数据加载中……<td></tr>");
+            $.ajax({
+                type: "POST",
+                url: "/supplier/SupplierTransport/subcounts",
+                async: false,
+                data: {
+                    suppid: $("#hdsuppid").val(), name: $("#ikeyWord").val(), beginid: $("#hdbegin").val(), endid: $("#hdend").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条记录");
+                }
+            });
+
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                suppid:$("#hdsuppid").val(), 
+                name: $("#ikeyWord").val(),
+                beginid: $("#hdbegin").val(),
+                endid:$("#hdend").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/supplier/SupplierTransport/sublists',
+                data: userjosn,
+                success: function (data) {
+                    $("#userlist").html(template('temslist', { list: data }));
+
+                    $("#pageinfos").show();
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#userlist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+
+        }
+
+        function search() {
+            inits();
+        }
+         
+        // 标识
+        var flag = "";
+
+        // 设置起始/结束位置
+        function setinfo(tAreaId, tAreaName) {
+            if (flag == "Begin") { 
+                $("#hdbegin").val(tAreaId);
+                $("#iTransitBeginName").val(tAreaName);
+            }
+            else if (flag == "End") {
+                $("#hdend").val(tAreaId);
+                $("#iTransitEndName").val(tAreaName); 
+            }
+        }
+
+        // 获取位置
+        function GetAreaName(type) {
+            flag = type;
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择区域',
+                content: '/Basis/BasisLine/Areas?url=/Supplier/SupplierTransport/Index',
+                area: ['800px', '500px'],
+            });
+        }
+
+        //文件上传弹窗（新增） 
+        function add() {
+            //top.window.operate = top.layui.layer.open({
+            //    type: 2,
+            //    shade: 0.2,
+            //    title: '添加线路',
+            //    content: '/supplier/SupplierTransport/subadd',
+            //    area: ['505px', '590px'],
+            //});
+
+            location.href = '/supplier/SupplierTransport/subadd?suppid='+$("#hdsuppid").val();
+        }
+        function modify(ids) {
+            location.href = '/supplier/SupplierTransport/subedit?ids=' + ids+'&suppid='+$("#hdsuppid").val();
+        }
+        function del(ids) {
+
+                top.layer.confirm('您确定作废此线路吗？', ['确定', '取消'], function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '/supplier/SupplierTransport/delsubinfo',
+                        data: { ids: ids },
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.flag == "ok") {
+                                top.layer.closeAll();
+                                inits();
+                            }
+                            if (data.flag == "noauth") {
+                                top.layer.msg(data.content);
+                            }
+                            if (data.flag == 'fail') {
+                                top.layer.msg('信息作废失败');
+                            }
+                            if (data.flag == 'use') {
+                                top.layer.msg('此线路正在使用，不能作废');
+                            }
+                        }
+                    });
+                }, function () {
+
+                });         
+        }
+
+    </script>
+}

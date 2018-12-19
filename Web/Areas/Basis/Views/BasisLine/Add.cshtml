@@ -1,0 +1,123 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-header">添加线路维护</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="/Basis/BasisLine/AddKeyNode" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>起始位置</label>
+                <div class="layui-input-inline">
+                    <input id="txtBeginName" type="text" lay-verify="required" class="layui-input" style="width:220px;" readonly>
+                    <input id="hdBeginId" type="hidden" name="BeginId"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>结束位置</label>
+                <div class="layui-input-inline">
+                    <input id="txtEndName" type="text" lay-verify="required" class="layui-input" style="width:220px;" readonly>
+                    <input id="hdEndId" type="hidden" name="EndId"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><em>*</em>线路名称</label>
+                <div class="layui-input-inline">
+                    <input id="txtLineName" type="text" name="LineName" maxlength="200" lay-verify="required" class="layui-input" style="width:400px;" readonly>
+                </div>
+            </div>  
+            @*<div class="layui-input-inline" style="margin-top:3px;">
+                <a class="layui-btn layui-btn-sm">
+                    <em onclick="seltree()">选择</em>
+                </a>
+            </div>*@
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    <script> 
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            // 起始位置
+            $(document).on('click', '#txtBeginName', function () {
+                GetAreaName("Begin");
+            });
+
+            // 结束位置
+            $(document).on('click', '#txtEndName', function () { 
+                if ($("#txtBeginName").val() == "") {
+                    layui.layer.msg('请先选择起始位置！');
+                    $("#txtBeginName").focus();
+                    return false;
+                }
+                GetAreaName("End"); 
+            });
+             
+            // 提交
+            form.on('submit(btnSave)', function (data) { 
+                $.ajax({
+                    type: "POST",
+                    url: "/Basis/BasisLine/AddLine",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('添加成功！');
+                            location.href = '/Basis/BasisLine/Index';
+                        }
+                        if (data.flag == "exist") {
+                            layui.layer.msg('已存在相同起始/结束位置的数据！');
+                        }
+                        if (data.flag == "fail") {
+                            layui.layer.msg('信息添加失败！');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 页面加载
+        $(function () { 
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Basis/BasisLine/Index';
+            });
+        });
+
+        // 标识
+        var flag = "";
+
+        // 设置起始/结束位置
+        function setinfo(tAreaId, tAreaName) {
+            if (flag == "Begin") {
+                $("#hdBeginId").val(tAreaId);
+                $("#txtBeginName").val(tAreaName);
+            }
+            else if (flag == "End") {
+                $("#hdEndId").val(tAreaId);
+                $("#txtEndName").val(tAreaName);
+                $("#txtLineName").val($("#txtBeginName").val() + "-" + $("#txtEndName").val());
+            } 
+        }
+
+        // 获取位置
+        function GetAreaName(type) {
+            flag = type;
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择区域',
+                content: '/Basis/BasisLine/Areas?url=/Basis/BasisLine/Index',
+                area: ['800px', '500px'],
+            });
+        }
+    </script>
+}

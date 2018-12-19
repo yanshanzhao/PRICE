@@ -1,0 +1,410 @@
+﻿@{
+    ViewBag.Title = "Check";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<style>
+    .pagedetails {
+        position: absolute;
+        right: 60px;
+        font-size: 14px;
+        color: #333;
+        top: 5px;
+    }
+</style>
+@model SRM.Model.Tra.TraChooseModel
+<form class="layui-form layui-form-pane" action="/Tra/TraChoose/EditTraChoose" method="post">
+    <div class="layui-card"> 
+        <div class="layui-card-body" style="overflow:hidden;">
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请负责人</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyUser" type="text" name="ApplyUser" value="@Model.ApplyUser" class="layui-input" disabled>
+                    <input id="hdTraChooseId" name="TraChooseId" type="hidden" value="@Model.TraChooseId" />
+                    <input id="hdSupplierCounts" name="SupplierCounts" type="hidden" value="@Model.SupplierCounts" />
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-inline">
+                    <input id="txtApplyTime" type="text" name="ApplyTime" value="@Model.ApplyTime" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item" style="width:33%;clear:none !important; float:left;">
+                <label class="layui-form-label">月转运成本</label>
+                <div class="layui-input-inline">
+                    <input id="txtMonthCost" type="text" name="MonthCost" value="@Model.MonthCost" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请原因</label>
+                <div class="layui-input-block">
+                    <textarea id="txtApplyContent" name="ApplyContent" lay-verify="required" class="layui-textarea"disabled>@Model.ApplyContent</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtApplyRemark" name="ApplyRemark" class="layui-textarea"disabled>@Model.ApplyRemark</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">申请线路信息</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+         
+            <div class="layui-form">
+                <table class="layui-table" id="cominfos">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">线路名称</th>
+                            <th>始发地</th>
+                            <th>终到地</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TraChooseLinelist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfos" class="pagebox">
+                    <div id="Paginations" class="pagination"></div><div class="pagedetails">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslists">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.LineName}}</td>
+                        <td>{{c.BeginName}}</td>
+                        <td>{{c.EndName}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnInvalids" data-id="{{c.ChooseLineId}}">
+                                <i class="iconfont icon-edit"></i>
+                                作废
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">运输供应商信息明细</div>
+        <div class="layui-card-body" style="overflow:hidden;">
+           
+            <div class="layui-form">
+                <table class="layui-table" id="cominfos">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">运输供应商编号</th>
+                            <th>供应商名称</th>
+                            <th>评估得分</th>
+                            <th>运输供应商类型</th>
+                            <th>配送供应商范围</th>
+                            <th>合作意愿</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TraChooselist" style="min-height:400px;"></tbody>
+                </table>
+                <div id="pageinfoss" class="pagebox">
+                    <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+                </div>
+                <script type="text/html" id="temslist">
+                    {{each list as c}}
+                    <tr data-id="{{c.StorageId}}" data-type="{{c.SupplierName}}">
+                        <td>{{c.TransportNumber}}</td>
+                        <td>{{c.SupplierName}}</td>
+                        <td>{{c.AssessScore}}</td>
+                        <td>{{c.TransportKindName}}</td>
+                        <td>{{c.DistributionScopeName}}</td>
+                        <td>{{c.CooperationTypeName}}</td>
+                        <td>
+                            <a class="layui-btn layui-btn-sm btnInvalid" data-id="{{c.TraChooseDetailId}}" data-state="{{c.DetailState}}">
+                                <i class="iconfont icon-edit"></i>
+                                作废
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">集团采购信息 </div>
+        <div class="layui-card-body" style="overflow:hidden;">
+            @*<label style="color:lightcoral">温馨提示：单击文件名修改名称❀</label>*@
+            <div class="layui-form-item" style="margin-top:10px;">
+                <input type="hidden" id="hdfiles" value="@ViewBag.files" />
+                <input type="hidden" id="hdoldfiles" value="@ViewBag.oldfiles" name="SuppOldFileList" />
+                <input type="hidden" id="hdfilelist" name="TraChooseBeginAdjunct" />
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>文件类型</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist"></tbody>
+                </table>
+                <script type="text/html" id="temfilelist">
+                    {{each list as c}}
+                    <tr>
+                        <td>{{c.filename}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a class="layui-btn layui-btn-danger layui-btn-sm" onclick="downfile('{{c.id}}')">下载</a></td>
+                    </tr>
+                    {{/each}}
+                </script>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:180px;">
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script> // initfiles/setfilename/downfile 附件上传/更改名称/下载
+        var filelist = [];
+        function initfiles() {
+            $("#filelist").html(template('temfilelist', { list: filelist }));
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function setfilename(ids, names) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    filelist[i].filename = names;
+                }
+            }
+            $("#hdfilelist").val(JSON.stringify(filelist));
+        }
+        function downfile(ids) {
+            for (var i in filelist) {
+                if (filelist[i].id == ids) {
+                    if (filelist[i].path.lastIndexOf('.') != -1) {
+                        var lastnum = filelist[i].path.lastIndexOf('.');
+                        var exts = filelist[i].path.substring(lastnum + 1);
+                        location.href = '/index/down?url=' + filelist[i].path + "&name=" + filelist[i].filename + "&ext=" + exts;
+                    }
+                }
+            }
+        }
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+
+            //验证开始时间
+            laydate.render({
+                elem: '#txtApplyTime'
+               , type: 'datetime'
+                , format: 'yyyy-MM-dd HH:mm:ss'
+            });
+
+            // 保存按钮
+            form.on('submit(btnSave)', function (data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Tra/TraChoose/EditTraChoose",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'success') {
+                            layui.layer.msg('修改成功');
+                            location.href = '/Tra/TraChoose/Index';
+                        }
+                    }
+                });
+                return false;
+            }); 
+
+            // 返回按钮
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/Tra/TraChoose/Index';
+            });
+             
+        });
+
+        $(function () {
+
+            SearchData();
+
+            SearchDatas();
+
+            //修改上传文件名称
+            $(document).on('click', '.modify', function () {
+                var td = $(this);
+                var txt = $.trim(td.text());
+                var input = td.data("type") == "area" ? $("<textarea>" + $.trim(td.html().replace(/<br>/g, "\n")) + "</textarea>") : $("<input type='text'value='" + txt + "'/>");
+                input.width(td.width() + 10).height(td.height() + 10);
+                td.html(input);
+                input.click(function () { return false; });
+                input.trigger("focus");
+                input.blur(function () {
+                    var str = input.val().replace(/\n/g, '<br>')
+                    if (!str) {
+                        layui.layer.msg('文件名称不能为空');
+                        td.html(txt);
+                        return;
+                    }
+                    td.html(str);
+                    setfilename(td.data("id"), str);
+                });
+
+                return false;
+            });
+            filelist = JSON.parse($("#hdfiles").val());
+            initfiles();
+        });
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChooselist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChoose/TraChoosedetaileditAmount",
+                async: false,
+                data: {
+                    checktraChooseId: $("#hdTraChooseId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetail").text("共" + amount + "条");
+                    $("#hdSupplierCounts").val(amount);
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(amount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                checktraChooseId: $("#hdTraChooseId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoose/TraChoosedetaileditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraChooselist").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#TraChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChooselist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        }
+
+        // 查询总记录数
+        function SearchDatas() {
+
+            // 总记录数
+            var amount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#TraChooseLinelist").html("<tr class='loadings' ><td colspan=8>数据加载中……<td></tr>");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraChoose/TraChooseeditAmount",
+                async: false,
+                data: {
+                    traChooseId: $("#hdTraChooseId").val()
+                },
+                success: function (data) {
+                    amount = data;
+                    $(".pagedetails").text("共" + amount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Paginations").pagination(amount, {
+                callback: PageCallbackOfCuss,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCuss(indexs) {
+            pageIndex = indexs;
+            InitCusTables(indexs);
+        }
+
+        // 查询数据
+        function InitCusTables(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                traChooseId: $("#hdTraChooseId").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraChoose/TraChooseeditList',
+                data: userjosn,
+                success: function (data) {
+                    $("#TraChooseLinelist").html(template('temslists', { list: data }));
+                    $("#pageinfos").show();
+                    if (data == null) {
+                        $("#pageinfos").hide();
+                        $("#TraChooseLinelist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#TraChooseLinelist").html("<div class='nodata'>暂无数据</div>")
+                    }
+                }
+            });
+        } 
+    </script>
+}

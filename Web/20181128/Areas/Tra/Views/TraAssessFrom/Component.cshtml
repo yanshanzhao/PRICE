@@ -1,0 +1,216 @@
+﻿@{
+    ViewBag.Title = "Component";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            <div class="layui-inline">
+                元件名称：
+                <div class="layui-input-inline">
+                    <input id="txtComponentName" style="width:173px;" type="text" value="" placeholder="元件名称" class="layui-input">
+                </div>
+                <a class="layui-btn" id="btnSearch">查询</a>
+            </div>
+        </blockquote>
+        <div class="layui-form">
+            <div class="forzenbox">
+                <div class="normaltable ">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th><input lay-filter="allChoose" id="allChoose" type="checkbox" lay-skin="primary"></th>
+                                <th style="text-align:left;">元件编号</th>
+                                <th>元件名称</th>
+                                <th>评估分类</th>
+                                <th>基本类型</th>
+                                <th>标准得分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ComponentList" style="min-height:400px;"></tbody>
+                    </table>
+                </div>
+                <div class="forzentable"></div>
+            </div>
+            <div id="pageinfos" class="pagebox">
+                <div id="Pagination" class="pagination"></div><div class="pagedetail">共0条记录</div>
+            </div>
+            <script type="text/html" id="temslist">
+                {{each list as c}}
+                <tr>
+                    <td><input name="checked" lay-skin="primary" lay-filter="choose" type="checkbox" class="cksel" subid="ck{{c.ComponentId}}" data-id="{{c.ComponentId}}"></td>
+                    <td>{{c.ComponentNumber}}</td>
+                    <td>{{c.ComponentName}}</td>
+                    <td>{{c.AssessTypeName}}</td>
+                    <td>{{c.IsBasic}}</td>
+                    <td>{{c.StandardScore}}</td>
+                </tr>
+                {{/each}}
+            </script>
+        </div>
+        <div class="layui-form-item" style="margin-top:10px;">
+            <div class="layui-input-block" style="width:16%;margin:0 auto !important;">
+                <button class="layui-btn" id="btnSave">保存</button>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="hdUrl" type="hidden" value="@ViewBag.url" />
+<input id="hdIds" type="hidden" value="@ViewBag.ids" />
+<input id="hdAssessFromType" type="hidden" value="@ViewBag.AssessFromType" />
+<input id="hdType" type="hidden" value="@ViewBag.type" />
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+            form.render(); //更新全部
+            // 全选
+            form.on('checkbox(allChoose)', function (data) {
+                var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]:not([name="show"])');
+                child.each(function (index, item) {
+                    item.checked = data.elem.checked;
+                });
+                form.render('checkbox');
+            });
+
+            // 提交保存
+            $(document).on('click', '#btnSave', function () {
+                var temlist = [];
+                $(".cksel").each(function () {
+                    if ($(this).attr("checked")) {
+                        temlist.push($(this).data("id"));
+                    }
+                });
+                var ids = temlist.join(",");
+
+                if ($("#hdType").val() == "add") {
+                    top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.ComponentSetinfo(ids);
+                    top.layui.layer.close(top.window.topdialog);
+                }
+                else if ($("#hdType").val() == "edit") {
+                    //alert($("#hdIds").val());
+                    // 新增到数据库
+                    $.ajax({
+                        type: "POST",
+                        url: "/Tra/TraAssessFrom/AddComponentList",
+                        data: { componentList: ids, checkFromId: $("#hdIds").val()},
+                        async: false,
+                        success: function (data) {
+                            if (data.flag == 'success') {
+                                layui.layer.msg('新增成功！');
+                                top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SearchComponentData();
+                                top.layui.layer.close(top.window.topdialog);
+                            }
+                            if (data.flag == "fail") {
+                                layui.layer.msg('信息新增失败！');
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+        // 定义页面索引及显示条数
+        var pageIndex = 0;
+        var pageSize = 15;
+
+        $(function () {
+            InitCusTable();
+            // 查询
+            SearchData();
+
+            // 查询
+            $(document).on('click', '#btnSearch', function () {
+                SearchData();
+            });
+        });
+
+        // 查询总记录数
+        function SearchData() {
+
+            // 总记录数
+            var flagCount = 0;
+
+            // 页面索引
+            pageIndex = 0;
+
+            // 等待时显示
+            $("#ComponentList").html("数据加载中……");
+
+            // 查询总记录数
+            $.ajax({
+                type: "POST",
+                url: "/Tra/TraComponent/TraComponentAmount",
+                async: false,
+                data: {
+                    ComponentName: $("#txtComponentName").val(),
+                    ids: $("#hdIds").val(),
+                    AssessTypeName: $("#hdAssessFromType").val(),
+                    type: $("#hdType").val()
+                },
+                success: function (data) {
+                    flagCount = data;
+                    $(".pagedetail").text("共" + flagCount + "条");
+                }
+            });
+
+            // 分页配置
+            $("#Pagination").pagination(flagCount, {
+                callback: PageCallbackOfCus,
+                prev_text: '<',       //上一页按钮里text
+                next_text: '>',       //下一页按钮里text
+                items_per_page: pageSize,  //显示条数
+                num_display_entries: 6,    //连续分页主体部分分页条目数
+                current_page: pageIndex,   //当前页索引
+                num_edge_entries: 2        //两侧首尾分页条目数
+            });
+        }
+
+        // 分页参数
+        function PageCallbackOfCus(indexs, jq) {
+            pageIndex = indexs;
+            InitCusTable(indexs);
+        }
+
+        // 查询数据
+        function InitCusTable(pageIndexs) {
+            var userjosn = {
+                index: (pageIndex + 1),
+                size: pageSize,
+                ComponentName: $("#txtComponentName").val(),
+                ids: $("#hdIds").val(),
+                AssessTypeName: $("#hdAssessFromType").val(),
+                type: $("#hdType").val()
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Tra/TraComponent/Index',
+                data: userjosn,
+                success: function (data) {
+                    $("#ComponentList").html(template('temslist', { list: data }));
+                    $("#pageinfos").show();
+                    $("#btnSave").show();
+
+                    layui.use('form', function () {
+                        layui.form.render('checkbox');
+                    });
+
+                    if (data.length == 0) {
+                        $("#pageinfos").hide();
+                        $("#ComponentList").html("<div class='nodata'>暂无数据</div>")
+                        $("#btnSave").hide();
+                    }
+                }
+            });
+        }
+    </script>
+}

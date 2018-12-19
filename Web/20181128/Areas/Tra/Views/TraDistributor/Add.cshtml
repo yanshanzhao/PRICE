@@ -1,0 +1,192 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+<form class="layui-form layui-form-pane" action="/Tra/TraDistributor/AddDistributor" method="post"> 
+        <div class="layui-card">
+            <div class="layui-card-header">运输供应商信息</div>
+            <div class="layui-card-body" style="overflow:hidden;">
+                <div class="layui-form-item">
+                    <div class="layui-btn" id="btnSupplier" title="点击选取运输供应商">运输供应商信息</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">运输供应商</label>
+                    <div class="layui-input-inline" style="width:440px;">
+                        <input id="txtSupplierName" type="text" class="layui-input"  lay-verify="supplier" disabled>
+                        <input id="hdTransportId" type="hidden" name="TransportId" placeholder="运输供应商ID" />
+                        <input id="hdSupplierId" type="hidden" name="SupplierId" placeholder="供应商ID" />
+                    </div> 
+                    <label class="layui-form-label">配送范围</label>
+                    <div class="layui-input-inline" style="width:150PX;clear:none !important; float:left;">
+                        <input id="txtDistributionScopeName" type="text" class="layui-input" lay-verify="supplier" disabled>
+                    </div>
+                </div> 
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">配送人员信息</div>
+            <div class="layui-card-body" style="overflow:hidden;">
+                <div class="layui-form-item">
+                    @*<label class="layui-form-label"><em>*</em>配送人员ID</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDistributorNumber" type="text" name="DistributorNumber" placeholder="输入配送人员ID" lay-verify="required" maxlength="50" class="layui-input">
+                    </div>*@ 
+                    <label class="layui-form-label"><em>*</em>联系电话</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDistributorContact" type="text" name="DistributorContact" placeholder="输入联系电话" lay-verify="required" maxlength="50" class="layui-input"  >
+                    </div>
+                    <label class="layui-form-label"><em>*</em>姓名</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDistributorName" type="text" name="DistributorName" placeholder="输入姓名" lay-verify="required" maxlength="50" class="layui-input"  >
+                    </div>
+                </div>
+                <div class="layui-form-item">                    
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDistributorSex" type="text" name="DistributorSex" placeholder="输入性别"   maxlength="10" class="layui-input">
+                    </div>
+                    <label class="layui-form-label">年龄</label>
+                    <div class="layui-input-inline">
+                        <input id="txtDistributorAge" type="text" name="DistributorAge" placeholder="输入年龄" maxlength="4" class="layui-input" >
+                    </div> 
+                </div>
+                <div class="layui-form-item"> 
+                    <label class="layui-form-label">当前星级</label>
+                    <div class="layui-input-inline">
+                        <input id="txtGradee"   type="text" name="Grade" placeholder="输入当前星级"    maxlength="4" class="layui-input" >
+                    </div>   
+                    <label class="layui-form-label">卸货地址</label>
+                    <div class="layui-input-inline">
+                        <input id="txtUnloading" type="text" name="Unloading" placeholder="输入卸货地址" maxlength="50" class="layui-input">
+                    </div>
+                </div> 
+                <div class="layui-form-item">                    
+                    <label class="layui-form-label">路由地点</label>
+                    <div class="layui-input-inline">
+                        <input id="txtRoute" type="text" name="Route" placeholder="输入路由地点"   maxlength="50" class="layui-input">
+                    </div>
+                    <label class="layui-form-label">提货方式</label>
+                    <div class="layui-input-inline">
+                        <input id="txtExtractType" type="text" name="ExtractType" placeholder="输入提货方式" maxlength="20" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">                   
+                    <label class="layui-form-label">配送发料</label>
+                    <div class="layui-input-inline">
+                        <input id="txtStoreIssue" type="text" name="StoreIssue" placeholder="输入配送发料"  maxlength="20" class="layui-input">
+                    </div>
+                    <label class="layui-form-label"><em>*</em>运作开始时间</label>
+                    <div class="layui-input-inline">
+                        <input id="txtSubmitTime" type="text" name="SubmitTime" placeholder="请选择运作开始时间" lay-verify="required" class="layui-input">
+                    </div> 
+                </div>
+                @*<div class="layui-form-item"> 
+                </div>*@
+                @*<div class="layui-form-item">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">性格</label>
+                        <div class="layui-input-block">
+                            <textarea id="txtDistributorCharacter" name="DistributorCharacter" lay-verify="required" maxlength="100" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>*@
+                <div class="layui-form-item">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">备注</label>
+                        <div class="layui-input-block">
+                            <textarea id="txtDistributorRemark" name="DistributorRemark"   maxlength="200" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="width:20%;margin:0 auto !important;">
+                    <button class="layui-btn" lay-submit="" lay-filter="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </div>
+    </form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'laydate', 'upload'], function () {
+            var form = layui.form, ele = layui.element, laydate = layui.laydate;
+            //验证开始时间
+            laydate.render({
+                elem: '#txtSubmitTime'
+               , type: 'datetime'
+               , format: 'yyyy/MM/dd HH:mm:ss'
+               , min: minDate()
+            });
+            // 设置最小可选的日期
+            function minDate() {
+                var date = new Date();
+                var year = date.getFullYear() + "";
+                var month = (date.getMonth() + 1) + "";
+                if (month < 10)
+                    month = "0" + month;
+                // 本月第一天日期
+                var begin = year + "-" + month + "-01";
+                return begin;
+            }
+            form.verify({
+                supplier: function (value) {
+                    if (value == '') {
+                        return '请先选择运输供应商信息';
+                    }
+                }
+            });
+
+           // 提交
+            form.on('submit(btnSave)', function (data) {                
+                $.ajax({
+                type: "POST",
+                url: "/Tra/TraDistributor/AddDistributor",
+                data: data.field,
+                async: false,
+                success: function (data) { 
+                    top.layer.msg(data.content);
+                    if (data.flag == 'success') {
+                        location.href = '/Tra/TraDistributor/Index'; 
+                    }
+                }
+            });
+            return false;
+        });
+
+    })
+
+    $(function () {
+        // 返回
+        $(document).on('click', '#btnGoBack', function () {
+            location.href = '/Tra/TraDistributor/Index';
+        }); 
+        // 运输供应商线路信息
+        $(document).on('click', '#btnSupplier', function () {
+
+            // 返回运输供应商线路信息
+         GetSupplier();
+        }); 
+    }) 
+        // 设置运输供应商信息 (运输供应商ID,运输供应商名称,,运输供应商类型[配送供应商范围DistributionScope]，供应商ID)
+    function setinfo(id, suppname, supptype, suppid) {
+        $("#hdTransportId").val(id);
+        $("#txtSupplierName").val(suppname); 
+        $("#txtDistributionScopeName").val(supptype); 
+        $("#hdSupplierId").val(suppid);
+    }
+        //返回运输供应商线路信息
+    function GetSupplier()
+    {
+        top.window.topdialog = top.layui.layer.open({
+            type: 2,
+            shade: 0.2,
+            title: '选择运输供应商信息',
+            content: '/Tra/TraDistributor/TraSupplier?url=/Tra/TraDistributor/Index',
+            area: ['1100px', '400px']
+        });
+    }
+    
+    </script>
+}

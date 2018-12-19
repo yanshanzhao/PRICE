@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "AddComponentDetail";
+    Layout = "~/Views/Shared/_Home.cshtml";
+}
+
+<div class="layui-card">
+    <div class="layui-card-header">运输评估元件信息明细添加</div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">检查项目</label>
+                <div class="layui-input-block">
+                    <input id="txtInspectProject" name="InspectProject" type="text" placeholder="检查项目" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">标准分</label>
+                <div class="layui-input-block">
+                    <input id="txtStandardScore" name="StandardScore" value="@ViewBag.score" type="text" placeholder="标准分" class="layui-input" lay-verify="required"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">得分最大值</label>
+                <div class="layui-input-inline">
+                    <input id="txtMaxScore" name="MaxScore" type="text" placeholder="得分最大值" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">得分最小值</label>
+                <div class="layui-input-inline">
+                    <input id="txtMinScore" name="MinScore" type="text" placeholder="得分最小值" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-input-inline">
+                    <input id="txtSort" name="Sort" type="text" placeholder="排序" class="layui-input" lay-verify="required" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea id="txtRemark" name="Remark" type="text" placeholder="备注" class="layui-textarea" lay-verify="required"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-top:10px;">
+                <div class="layui-input-block">
+                    <button class="layui-btn" id="btnSave">保存</button>
+                    <a class="layui-btn" id="btnGoBack">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<input id="hdUrl" type="hidden" value="@ViewBag.url" />
+
+@section scripts{
+    <script>
+        layui.use(['form', 'element', 'table', 'layer'], function () {
+            var form = layui.form, ele = layui.element, table = layui.table;
+
+
+            // 提交保存
+            $(document).on('click', '#btnSave', function () {
+
+                    var project = $("#txtInspectProject").val();
+                    var standardScore = $("#txtStandardScore").val();
+                    var maxScore = $("#txtMaxScore").val();
+                    var minScore = $("#txtMinScore").val();
+                    var sort = $("#txtSort").val();
+                    var remark = $("#txtRemark").val()
+                    top.$.find('iframe[src="' + $("#hdUrl").val() + '"]')[0].contentWindow.SaveComponentType(
+                        project, standardScore, maxScore, minScore, sort,remark
+                        );
+                    top.layui.layer.close(top.window.topdialog);
+                
+            });
+
+            // 返回
+            $(document).on('click', '#btnGoBack', function () {
+                top.layui.layer.close(top.window.topdialog);
+            });
+        });
+
+
+    </script>
+}

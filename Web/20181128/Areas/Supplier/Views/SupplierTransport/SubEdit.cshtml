@@ -1,0 +1,169 @@
+﻿@{
+    Layout = "~/Views/Shared/_home.cshtml";
+}
+@model  SRM.Model.Supplier.SupplierTransportLineModel
+<form class="layui-form layui-form-pane" method="post">
+    <div class="layui-card">
+        <div class="layui-card-header">修改信息</div>
+        <div class="layui-card-body">
+            <input type="hidden" name="TransportId" id="hdsuppid" value="@ViewBag.suppid" />
+            <input type="hidden" name="TransitLineId" value="@Model.TransitLineId" />
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">运输线路<em>*</em></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="TransitLineNumber" maxlength="50" placeholder="" class="layui-input" lay-verify="required" value="@Model.TransitLineNumber">
+
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">开始位置<em>*</em></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="TransitBeginName" maxlength="50" placeholder="" lay-verify="required"  readonly id="iTransitBeginName" class="layui-input" value="@Model.TransitBeginName">
+                    </div>
+                    <div class="layui-input-inline" style="margin-left:5px;">
+                        <a class="layui-btn" id="btnSel" style="float:left;">选择</a>
+                        <input type="hidden" name="TransitBeginId" id="hdbegin" value="@Model.TransitBeginId" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束位置<em>*</em></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="TransitEndName" maxlength="50" placeholder="" lay-verify="required"  readonly class="layui-input" id="iTransitEndName" value="@Model.TransitEndName">
+                    </div>
+                    <div class="layui-input-inline" style="margin-left:5px;">
+                        <a class="layui-btn" id="btnSels" style="float:left;">选择</a>
+                        <input type="hidden" name="TransitEndId" id="hdend" value="@Model.TransitEndId" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">发车时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="DepartureTime" maxlength="50" placeholder="" class="layui-input" value="@Model.DepartureTime">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">到达时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ArrivalTime" maxlength="50" placeholder="" class="layui-input" value="@Model.ArrivalTime">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">营业时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="BusinessHours" maxlength="50" placeholder="" class="layui-input" value="@Model.BusinessHours">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">运作时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="OperationTime" maxlength="50" placeholder="" class="layui-input" value="@Model.OperationTime">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-left:110px;margin-top:30px;">
+                <button class="layui-btn" lay-submit="" lay-filter="saveuser">保存</button>
+                <a class="layui-btn" id="btnGoBack">返回</a>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        layui.use(['form', 'element', ], function () {
+            var form = layui.form, ele = layui.element;
+
+            form.on('switch(state)', function (data) {
+                $("#hdstate").val(this.checked ? "1" : "0");
+            });
+
+            form.on('submit(saveuser)', function (data) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/supplier/SupplierTransport/subeditinfo",
+                    data: data.field,
+                    async: false,
+                    success: function (data) {
+                        if (data.flag == 'ok') {
+                            top.layui.layer.msg('修改成功');
+                            location.href = '/supplier/SupplierTransport/sublist?suppid=' + $("#hdsuppid").val();
+                        }
+
+                        if (data.flag == "fail") {
+                            top.layui.layer.msg('修改失败');
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+
+
+        $(function () {
+            $(document).on('click', '#btnGoBack', function () {
+                location.href = '/supplier/SupplierTransport/sublist?suppid=' + $("#hdsuppid").val();
+            });
+
+            $(document).on('click', '#btnSel', function () {
+                seltree();
+            });
+            $(document).on('click', '#btnSels', function () {
+                seltrees();
+            });
+        });
+        //弹窗选择回调赋值
+        function setinfo(ids, names) {
+            if (window.dilogtype == 1) {
+                $("#hdbegin").val(ids);
+                $("#iTransitBeginName").val(names);
+            }
+            else {
+                $("#hdend").val(ids);
+                $("#iTransitEndName").val(names);
+            }
+
+        }
+
+        window.dilogtype = 1;
+        //弹窗选择区域(type 1:开始 2:结束)
+        function seltree() {
+            window.dilogtype = 1;
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择区域',
+                content: '/sysareas/tree?url=/Supplier/SupplierTransport/Index',
+                area: ['300px', '480px'],
+            });
+        }
+
+        //弹出选择区域
+        function seltrees() {
+            window.dilogtype = 2;
+            top.window.topdialog = top.layui.layer.open({
+                type: 2,
+                shade: 0.2,
+                title: '选择区域',
+                content: '/sysareas/tree?url=/Supplier/SupplierTransport/Index',
+                area: ['300px', '480px'],
+            });
+        }
+        //文件上传弹窗（新增）
+
+    </script>
+}
