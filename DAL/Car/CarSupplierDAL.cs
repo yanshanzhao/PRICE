@@ -617,5 +617,8 @@ namespace DAL.Car
         }
         #endregion
 
+        #region MyRegion
+
+        #endregion
     }
 }
