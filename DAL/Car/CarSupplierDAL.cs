@@ -617,11 +617,5 @@ namespace DAL.Car
         }
         #endregion
 
-        #region 测试
-        public void Test()
-        {
-            
-        }
-        #endregion 测试
     }
 }
